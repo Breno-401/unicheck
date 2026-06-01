@@ -1,0 +1,147 @@
+/* ==========================
+   DASHBOARD LAYOUT CORRIGIDO
+   ========================== */
+
+.dashboard-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* ==========================
+   MAIN CONTENT CORRIGIDO
+   ========================== */
+
+.main-content {
+  flex: 1; /* Crescer para ocupar espaço disponível */
+  margin-left: 280px;
+  transition: margin-left var(--transition-normal);
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-padding-large);
+  min-height: 0; /* ESSENCIAL para flexbox funcionar corretamente */
+}
+
+.main-content.expanded {
+  margin-left: 80px;
+}
+
+/* ==========================
+   LAYOUT SEM FOOTER - MELHORADO
+   ========================== */
+
+/* Estrutura de conteúdo interno para garantir layout correto SEM FOOTER */
+.page-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* Permite que o conteúdo cresça corretamente */
+  padding-bottom: var(--spacing-2xl); /* Espaçamento adequado no final */
+}
+
+/* Footer removido - layout mais limpo */
+.dashboard-footer {
+  display: none !important; /* Footer completamente removido */
+}
+
+/* Ajustes para sidebar contraída */
+.main-content.expanded ~ .dashboard-footer {
+  display: none !important;
+}
+  transition: all var(--transition-fast);
+}
+
+.footer-link:hover {
+  color: var(--unisales-blue);
+  text-decoration: underline;
+}
+
+.footer-text {
+  text-align: right;
+}
+
+.footer-text p {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* ==========================
+   MOBILE OVERLAY
+   ========================== */
+
+.mobile-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+  transition: all var(--transition-normal);
+}
+
+.mobile-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.footer {
+  /* Isso garante que o footer não vai encolher, 
+    mesmo que o conteúdo tente "esmagá-lo". 
+    O flex-grow: 0 (padrão) garante que ele não vai esticar.
+  */
+  flex-shrink: 0; 
+  
+  /* Abaixo estão apenas estilos de exemplo para organizar 
+     o texto do seu footer, ajuste como preferir! */
+  display: flex;
+  justify-content: space-between; /* Espalha os itens */
+  align-items: center;
+  padding: 1rem var(--padding-large); /* Exemplo de padding */
+  background-color: #ffffff; /* Ou a cor que preferir */
+}
+
+/* ==========================
+   CORREÇÕES FINAIS PARA FOOTER
+   ========================== */
+
+/* Garantir que o dashboard-container sempre tenha pelo menos a altura da viewport */
+.dashboard-container {
+  min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height para melhor compatibilidade */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Garantir que o main-content cresça para empurrar o footer */
+.main-content {
+  flex: 1 1 auto; /* Crescer e encolher conforme necessário */
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* Essencial para flexbox */
+  overflow: hidden; /* Prevenir scroll desnecessário */
+}
+
+/* Page content que contém todo o conteúdo que cresce */
+.page-content {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto; /* Scroll apenas no conteúdo se necessário */
+}
+
+/* Layout otimizado sem footer */
+.page-content {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding-bottom: var(--spacing-lg);
+    overflow-y: auto;
+    padding-top: var(--spacing-lg);
+}

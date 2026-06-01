@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste das Melhorias - Checklist Acadêmico</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: #94a3b8;
+        }
+
+        .test-section {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(20px);
+        }
+
+        .test-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #f1f5f9;
+        }
+
+        .test-section p {
+            color: #cbd5e1;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            margin-right: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e2e8f0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #64748b;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox.checked {
+            background: linear-gradient(90deg, #10b981, #059669);
+            border-color: #10b981;
+            position: relative;
+        }
+
+        .checkbox.checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        .progress-demo {
+            margin: 1.5rem 0;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 999px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #1d4ed8, #1e40af);
+            border-radius: 999px;
+            transition: width 0.6s ease;
+            position: relative;
+            box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
+        }
+
+        .progress-fill::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: progress-shine 3s infinite;
+        }
+
+        @keyframes progress-shine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .notification {
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin: 1rem 0;
+            display: none;
+        }
+
+        .notification.show {
+            display: block;
+        }
+
+        .notification.success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #10b981;
+        }
+
+        .notification.info {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #3b82f6;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin: 1rem 0;
+        }
+
+        .feature-list li {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+            color: #cbd5e1;
+        }
+
+        .feature-list li::before {
+            content: '✨';
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Teste das Melhorias</h1>
+            <p>Verifique as melhorias implementadas no sistema</p>
+        </div>
+
+        <div class="test-section">
+            <h2>🎯 Melhoria 1: Acesso Múltiplo ao Tutorial</h2>
+            <p>Agora você pode acessar o tutorial quantas vezes quiser, mesmo se não concluir na primeira vez.</p>
+            
+            <ul class="feature-list">
+                <li>Sempre permite re-acesso ao tutorial</li>
+                <li>Progresso é mantido mesmo ao fechar e reabrir</li>
+                <li>Botão permanece ativo para permitir retorno</li>
+            </ul>
+
+            <a href="../CHECKLIST ACADEMICO/checklist-academico.html" class="btn btn-primary">
+                🧪 Testar Acesso ao Tutorial
+            </a>
+
+            <div class="notification info" id="tutorialInfo">
+                <strong>Instruções:</strong> Clique no botão "Ver Tutorial" várias vezes para verificar que sempre abre.
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🎨 Melhoria 2: Barra de Progresso Aprimorada</h2>
+            <p>Nova aparência com efeitos visuais elegantes e cores dinâmicas.</p>
+            
+            <ul class="feature-list">
+                <li>Gradiente suave e moderno</li>
+                <li>Efeito de brilho animado</li>
+                <li>Cores que mudam conforme o progresso</li>
+                <li>Animação especial para 100% completo</li>
+                <li>Sombra e profundidade visual</li>
+            </ul>
+
+            <div class="progress-demo">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="demoProgress" style="width: 0%"></div>
+                </div>
+                <div class="progress-text">
+                    <span>Progresso de Exemplo</span>
+                    <span id="demoProgressText">0%</span>
+                </div>
+            </div>
+
+            <button class="btn btn-secondary" onclick="updateDemoProgress(25)">25%</button>
+            <button class="btn btn-secondary" onclick="updateDemoProgress(50)">50%</button>
+            <button class="btn btn-secondary" onclick="updateDemoProgress(75)">75%</button>
+            <button class="btn btn-secondary" onclick="updateDemoProgress(100)">100%</button>
+        </div>
+
+        <div class="test-section">
+            <h2>🧪 Demonstração Interativa</h2>
+            <p>Teste a barra de progresso personalizada com os checkboxes abaixo:</p>
+            
+            <div class="checklist-item">
+                <div class="checkbox" onclick="toggleCheckbox(this, 1)"></div>
+                <span>Passo 1: Configure o portal TOTVS</span>
+            </div>
+            
+            <div class="checklist-item">
+                <div class="checkbox" onclick="toggleCheckbox(this, 2)"></div>
+                <span>Passo 2: Faça login no sistema</span>
+            </div>
+            
+            <div class="checklist-item">
+                <div class="checkbox" onclick="toggleCheckbox(this, 3)"></div>
+                <span>Passo 3: Explore as funcionalidades</span>
+            </div>
+            
+            <div class="checklist-item">
+                <div class="checkbox" onclick="toggleCheckbox(this, 4)"></div>
+                <span>Passo 4: Complete a configuração</span>
+            </div>
+
+            <div class="progress-demo">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="interactiveProgress" style="width: 0%"></div>
+                </div>
+                <div class="progress-text">
+                    <span>Seu Progresso</span>
+                    <span id="interactiveProgressText">0% completo</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🔄 Reset de Dados</h2>
+            <p>Use estes botões para testar o sistema com dados limpos:</p>
+            
+            <button class="btn btn-secondary" onclick="resetTutorialProgress()">
+                🔄 Reset Progresso Tutorial
+            </button>
+            
+            <button class="btn btn-secondary" onclick="clearAllData()">
+                🗑️ Limpar Todos os Dados
+            </button>
+
+            <div class="notification success" id="resetNotification" style="display: none;">
+                Dados resetados com sucesso! Recarregue a página para ver os efeitos.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let completedSteps = 0;
+        const totalSteps = 4;
+
+        function updateDemoProgress(percentage) {
+            const progressFill = document.getElementById('demoProgress');
+            const progressText = document.getElementById('demoProgressText');
+            
+            progressFill.style.width = percentage + '%';
+            progressText.textContent = percentage + '%';
+            
+            // Mostrar notificação
+            const notification = document.getElementById('tutorialInfo');
+            notification.style.display = 'block';
+            notification.textContent = `Progresso definido para ${percentage}% - Observe os efeitos visuais!`;
+        }
+
+        function toggleCheckbox(checkbox, stepNumber) {
+            checkbox.classList.toggle('checked');
+            
+            // Calcular progresso
+            const allCheckboxes = document.querySelectorAll('.checklist-item .checkbox');
+            completedSteps = Array.from(allCheckboxes).filter(cb => cb.classList.contains('checked')).length;
+            
+            updateInteractiveProgress();
+        }
+
+        function updateInteractiveProgress() {
+            const percentage = Math.round((completedSteps / totalSteps) * 100);
+            const progressFill = document.getElementById('interactiveProgress');
+            const progressText = document.getElementById('interactiveProgressText');
+            
+            progressFill.style.width = percentage + '%';
+            
+            if (percentage === 100) {
+                progressText.textContent = 'Tutorial completo!';
+            } else {
+                progressText.textContent = `${percentage}% completo`;
+            }
+        }
+
+        function resetTutorialProgress() {
+            // Limpar dados do tutorial
+            localStorage.removeItem('tutorial_accessed');
+            localStorage.removeItem('tutorial_completed');
+            localStorage.removeItem('tutorial_checklist_data');
+            
+            // Reset checkboxes
+            document.querySelectorAll('.checklist-item .checkbox').forEach(cb => {
+                cb.classList.remove('checked');
+            });
+            
+            completedSteps = 0;
+            updateInteractiveProgress();
+            
+            showNotification('Progresso do tutorial resetado!', 'success');
+        }
+
+        function clearAllData() {
+            // Limpar todos os dados relacionados
+            const keysToRemove = [
+                'tutorial_accessed',
+                'tutorial_completed', 
+                'tutorial_checklist_data',
+                'tutorial-theme',
+                'checklist_academico_data',
+                'demoCard2Locked'
+            ];
+            
+            keysToRemove.forEach(key => {
+                localStorage.removeItem(key);
+            });
+            
+            // Reset interface
+            resetTutorialProgress();
+            
+            showNotification('Todos os dados foram limpos!', 'success');
+        }
+
+        function showNotification(message, type) {
+            const notification = document.getElementById('resetNotification');
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Página de teste carregada!');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,193 @@
+/* Reset e Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.object-contain {
+    object-fit: contain;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-primary);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  overflow-x: hidden;
+  transition: background-color var(--transition-normal), color var(--transition-normal);
+}
+
+/* ==========================
+   ANIMAÇÕES E EFEITOS
+   ========================== */
+
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes logoContainerFloat {
+  0%, 100% {
+    transform: translateY(-20px);
+  }
+  50% {
+    transform: translateY(-30px);
+  }
+}
+
+@keyframes logoFloat {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-15px) rotate(1deg);
+  }
+}
+
+@keyframes logoGlow {
+  0%, 100% {
+    box-shadow: 0 8px 32px rgba(108, 189, 181, 0.4);
+  }
+  50% {
+    box-shadow: 0 12px 40px rgba(108, 189, 181, 0.6);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.3) rotate(-10deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes textGlow {
+  0%, 100% {
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  }
+  50% {
+    text-shadow: 0 4px 16px rgba(108, 189, 181, 0.6);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -300px 0;
+  }
+  100% {
+    background-position: 300px 0;
+  }
+}
+
+@keyframes loadingProgress {
+  0% { width: 0%; }
+  100% { width: 100%; }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ==========================
+   PERFORMANCE E ACESSIBILIDADE
+   ========================== */
+
+/* Otimização de performance */
+.dashboard-loaded .sidebar-toggle,
+.dashboard-loaded .nav-link,
+.dashboard-loaded .card-action {
+  will-change: transform;
+}
+
+/* Melhorias de foco para acessibilidade */
+.nav-link:focus-visible,
+.sidebar-toggle:focus-visible,
+.search-input:focus-visible,
+button:focus-visible {
+  outline: 2px solid #38BDF8;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Performance optimizada */
+.content-card,
+.sidebar-toggle,
+.nav-link,
+.user-dropdown {
+  will-change: transform;
+}
+
+/* Acessibilidade - movimento reduzido */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .content-card:hover {
+    transform: none !important;
+  }
+  
+  .sidebar-toggle:hover {
+    transform: none !important;
+  }
+}
+
+/* Focus visible para acessibilidade */
+*:focus-visible {
+  outline: 2px solid var(--unisales-blue);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ==========================
+   UTILITÁRIOS
+   ========================== */
+
+.hidden {
+  display: none !important;
+}
+
+.avatar,
+.profile-avatar,
+img.avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+}

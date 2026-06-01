@@ -1,0 +1,345 @@
+:root {
+    --bg-base: #050a12;
+    --bg-accent: #0a1b2f;
+    --card-bg: #0d2238;
+    --card-border: rgba(164, 203, 255, 0.22);
+    --input-bg: rgba(255, 255, 255, 0.06);
+    --text-main: #f4f8ff;
+    --text-muted: #b2c3da;
+    --primary: #63d4c5;
+    --primary-strong: #42b9cf;
+    --danger: #ff6b6b;
+    --success: #18c58f;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Open Sans", sans-serif;
+}
+
+html {
+    font-size: 62.5%;
+}
+
+body {
+    min-height: 100vh;
+    padding: 8.4rem 2rem 3.2rem;
+    display: grid;
+    place-items: center;
+    color: var(--text-main);
+    background:
+        radial-gradient(circle at 12% 12%, rgba(99, 212, 197, 0.2), transparent 28%),
+        radial-gradient(circle at 80% 0%, rgba(66, 185, 207, 0.2), transparent 24%),
+        linear-gradient(160deg, var(--bg-base), var(--bg-accent));
+}
+
+.auth-shell {
+    width: min(100%, 52rem);
+}
+
+.auth-card {
+    background: linear-gradient(180deg, rgba(13, 34, 56, 0.95), rgba(9, 23, 39, 0.95));
+    border: 0.1rem solid var(--card-border);
+    border-radius: 2.4rem;
+    padding: 3rem;
+    box-shadow: 0 2.2rem 4.8rem rgba(0, 0, 0, 0.36);
+}
+
+.auth-header {
+    display: flex;
+    align-items: center;
+    gap: 1.6rem;
+    margin-bottom: 2.4rem;
+}
+
+.logo-unicheck {
+    width: 6.4rem;
+    height: 6.4rem;
+    object-fit: contain;
+    flex-shrink: 0;
+    filter: drop-shadow(0 0 1.2rem rgba(99, 212, 197, 0.35));
+}
+
+.eyebrow {
+    font-size: 1.2rem;
+    letter-spacing: 0.16rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 0.6rem;
+}
+
+h1 {
+    font-size: 3rem;
+    line-height: 1.1;
+    margin-bottom: 0.8rem;
+}
+
+.subtitle {
+    font-size: 1.45rem;
+    color: var(--text-muted);
+    line-height: 1.45;
+}
+
+.auth-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+    margin-bottom: 2rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 0.1rem solid rgba(255, 255, 255, 0.1);
+    border-radius: 1.4rem;
+    padding: 0.6rem;
+}
+
+.tab-btn {
+    border: 0;
+    border-radius: 1rem;
+    padding: 1.1rem;
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: transparent;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.tab-btn.is-active {
+    color: #0b1727;
+    background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+}
+
+.form-panel {
+    display: none;
+}
+
+.form-panel.is-active {
+    display: block;
+}
+
+.field-group {
+    margin-bottom: 1.4rem;
+}
+
+.field-label {
+    display: block;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.7rem;
+}
+
+input {
+    width: 100%;
+    border: 0.1rem solid transparent;
+    border-radius: 1.2rem;
+    background: var(--input-bg);
+    color: var(--text-main);
+    font-size: 1.45rem;
+    padding: 1.35rem 1.4rem;
+    outline: none;
+    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+input::placeholder {
+    color: rgba(244, 248, 255, 0.48);
+}
+
+input:focus {
+    border-color: rgba(99, 212, 197, 0.75);
+    box-shadow: 0 0 0 0.35rem rgba(99, 212, 197, 0.18);
+    background: rgba(255, 255, 255, 0.09);
+}
+
+input.error {
+    border-color: var(--danger);
+    background: rgba(255, 107, 107, 0.08);
+}
+
+input[type="date"] {
+    color-scheme: dark;
+}
+
+.password-field {
+    position: relative;
+}
+
+.password-field input {
+    padding-right: 8.6rem;
+}
+
+.toggle-password {
+    position: absolute;
+    top: 50%;
+    right: 0.8rem;
+    transform: translateY(-50%);
+    border: 0;
+    border-radius: 999px;
+    padding: 0.7rem 1rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--primary);
+    background: rgba(255, 255, 255, 0.08);
+    cursor: pointer;
+}
+
+.toggle-password:hover,
+.toggle-password:focus-visible {
+    color: var(--text-main);
+    background: rgba(99, 212, 197, 0.22);
+}
+
+.field-error {
+    min-height: 1.8rem;
+    font-size: 1.2rem;
+    color: #ff9b9b;
+    margin-top: 0.6rem;
+}
+
+.strength-wrap {
+    margin-top: 0.9rem;
+}
+
+.strength {
+    height: 0.7rem;
+    width: 0;
+    border-radius: 999px;
+    background: transparent;
+    transition: width 0.25s ease, background 0.25s ease;
+}
+
+.strength-text {
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    margin-top: 0.8rem;
+}
+
+button[type="submit"] {
+    width: 100%;
+    border: 0;
+    border-radius: 1.2rem;
+    margin-top: 0.6rem;
+    padding: 1.4rem;
+    font-size: 1.55rem;
+    font-weight: 800;
+    color: #0b1727;
+    background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+    box-shadow: 0 1.2rem 2.8rem rgba(66, 185, 207, 0.22);
+    cursor: pointer;
+}
+
+button[type="submit"]:hover,
+button[type="submit"]:focus-visible {
+    filter: brightness(1.05);
+}
+
+button[disabled] {
+    opacity: 0.68;
+    cursor: not-allowed;
+}
+
+.switch-senha {
+    margin-top: 1.4rem;
+    text-align: right;
+}
+
+.action-link {
+    font-size: 1.25rem;
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.action-link:hover,
+.action-link:focus-visible {
+    color: var(--text-main);
+    text-decoration: underline;
+}
+
+.toast {
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
+    max-width: min(34rem, calc(100vw - 3.2rem));
+    padding: 1.3rem 1.6rem;
+    border-radius: 1.2rem;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #fff;
+    opacity: 0;
+    transform: translateY(-1.2rem);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    z-index: 9;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast.success {
+    background: rgba(24, 197, 143, 0.95);
+}
+
+.toast.error {
+    background: rgba(255, 107, 107, 0.95);
+}
+
+.back-btn-link {
+    position: fixed;
+    top: 2rem;
+    left: 2rem;
+}
+
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    border-radius: 999px;
+    border: 0.1rem solid rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-main);
+    text-decoration: none;
+    font-size: 1.3rem;
+    font-weight: 700;
+    padding: 1rem 1.4rem;
+}
+
+.back-btn::before {
+    content: "<";
+}
+
+.back-btn:hover,
+.back-btn:focus-visible {
+    background: rgba(255, 255, 255, 0.14);
+}
+
+@media (max-width: 720px) {
+    body {
+        padding: 7rem 1.4rem 2rem;
+    }
+
+    .auth-card {
+        padding: 2.2rem;
+        border-radius: 2rem;
+    }
+
+    .auth-header {
+        align-items: flex-start;
+    }
+
+    h1 {
+        font-size: 2.6rem;
+    }
+
+    .back-btn-link {
+        top: 1.4rem;
+        left: 1.4rem;
+    }
+
+    .toast {
+        top: 1.4rem;
+        right: 1.4rem;
+    }
+}

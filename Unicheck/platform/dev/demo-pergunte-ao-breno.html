@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo - UniCheck Ações Rápidas</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: #f8fafc;
+            color: #1a1f2e;
+        }
+        .demo-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+        .demo-title {
+            color: #6cbdb5;
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .demo-button {
+            background: #6cbdb5;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 8px 8px 8px 0;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 0.9rem;
+        }
+        .demo-button:hover {
+            background: #5aa89d;
+            transform: translateY(-2px);
+        }
+        .demo-button.secondary {
+            background: #64748b;
+        }
+        .demo-button.secondary:hover {
+            background: #475569;
+        }
+        .demo-button.danger {
+            background: #ef4444;
+        }
+        .demo-button.danger:hover {
+            background: #dc2626;
+        }
+        .demo-button.success {
+            background: #10b981;
+        }
+        .demo-button.success:hover {
+            background: #059669;
+        }
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        .action-item {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .action-item h4 {
+            margin: 0 0 1rem 0;
+            color: #6cbdb5;
+            font-size: 1.1rem;
+        }
+        .action-item p {
+            margin: 0 0 1rem 0;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+        .status {
+            background: #10b981;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        .info-box {
+            background: #eff6ff;
+            border: 1px solid #3b82f6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            color: #1e40af;
+        }
+        .result-box {
+            background: #f1f5f9;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            border-left: 4px solid #6cbdb5;
+            display: none;
+        }
+        .result-box.visible {
+            display: block;
+        }
+        .quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .shortcut-btn {
+            background: linear-gradient(135deg, #6cbdb5, #4fa3a5);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+        }
+        .shortcut-btn:hover {
+            background: linear-gradient(135deg, #5aa89d, #459092);
+            transform: translateY(-1px);
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        /* Animações para Tutorial Progress Card */
+        @keyframes shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .tutorial-step {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .tutorial-step:hover {
+            transform: translateX(4px);
+            border-color: #0B61FF;
+            box-shadow: 0 4px 12px rgba(11, 97, 255, 0.15);
+        }
+
+        .tutorial-step.completed {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border-color: #10b981;
+        }
+
+        .tutorial-step.in-progress {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            border-color: #f59e0b;
+        }
+
+        .tutorial-step.pending {
+            background: #f8fafc;
+            color: #64748b;
+            border-color: #e2e8f0;
+        }
+
+        .step-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-title {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .step-description {
+            font-size: 0.875rem;
+            opacity: 0.8;
+        }
+
+        .step-status {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .stat-item {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #6cbdb5;
+            display: block;
+        }
+        .stat-label {
+            color: #64748b;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-card">
+        <h1 class="demo-title">
+            🚀 UniCheck - Ações Rápidas
+        </h1>
+        <p><strong>Sistema:</strong> Dashboard Acadêmico | <strong>Status:</strong> <span class="status">100% Operacional</span></p>
+        <p>Centro de controle e ações rápidas para testar todas as funcionalidades do sistema UniCheck.</p>
+    </div>
+
+    <div class="demo-card">
+        <h2 class="demo-title" style="font-size: 1.4rem;">📊 Estatísticas do Sistema</h2>
+        <div class="stats">
+            <div class="stat-item">
+                <span class="stat-number" id="totalProfiles">0</span>
+                <div class="stat-label">Perfis Cadastrados</div>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="completedChecklists">0</span>
+                <div class="stat-label">Checklists Concluídos</div>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="tutorialViews">0</span>
+                <div class="stat-label">Tutoriais Visualizados</div>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="systemPages">8</span>
+                <div class="stat-label">Páginas do Sistema</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="demo-card">
+        <h2 class="demo-title" style="font-size: 1.4rem;">🛠️ Ações Rápidas</h2>
+        
+        <div class="action-grid">
+            <div class="action-item">
+                <h4>🔐 Dados do Perfil</h4>
+                <p>Gerencie e visualize dados de perfil do usuário</p>
+                <button class="demo-button" onclick="showProfileData()">Ver Dados Atuais</button>
+                <button class="demo-button danger" onclick="clearProfileData()">Limpar Dados</button>
+            </div>
+
+            <div class="action-item">
+                <h4>📋 Checklists Acadêmicos</h4>
+                <p>Teste o sistema de checklists sequenciais</p>
+                <button class="demo-button" onclick="openChecklistPage()">Abrir Checklists</button>
+                <button class="demo-button secondary" onclick="resetChecklistProgress()">Resetar Progresso</button>
+                <div id="tutorialStatusBtn" style="margin-top: 1rem; padding: 1rem; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;"></div>
+            </div>
+
+            <div class="action-item">
+                <h4>📚 Tutorial do Sistema</h4>
+                <p>Gerencie acesso ao tutorial do portal TOTVS</p>
+                <button class="demo-button" onclick="resetTutorialAccess()">Resetar Acesso</button>
+                <button class="demo-button success" onclick="resetTutorialCompletion()">Resetar Concluído</button>
+                <button class="demo-button danger" onclick="clearAllTutorialData()">Limpar Tudo</button>
+                <button class="demo-button secondary" onclick="checkTutorialStatus()">Verificar Status</button>
+                <button class="demo-button secondary" onclick="resetAllChecklists()">Resetar Checklists</button>
+            </div>
+
+            <div class="action-item">
+                <h4>⚙️ Páginas do Sistema</h4>
+                <p>Acesso rápido às principais páginas</p>
+                <div class="quick-actions">
+                    <button class="shortcut-btn" onclick="openPage('../index-interno.html')">Dashboard</button>
+                    <button class="shortcut-btn" onclick="openPage('../CONFIGURACOES PERFIL/configuracoes.html')">Configurações</button>
+                    <button class="shortcut-btn" onclick="openPage('../CHECKLIST ACADEMICO/checklist-academico.html')">Checklists</button>
+                    <button class="shortcut-btn" onclick="openPage('../CHECKLIST ACADEMICO/tutorial.html')">Tutorial</button>
+                    <button class="shortcut-btn" onclick="openPage('../PLATAFORMAS/plataformas-gratuitas.html')">Plataformas</button>
+                </div>
+            </div>
+
+            <div class="action-item">
+                <h4>🧪 Testes de Funcionalidade</h4>
+                <p>Testes específicos de componentes</p>
+                <button class="demo-button" onclick="testThemeToggle()">Testar Tema</button>
+                <button class="demo-button" onclick="testSidebarToggle()">Testar Sidebar</button>
+                <button class="demo-button" onclick="testModalSystem()">Testar Modal</button>
+            </div>
+
+            <div class="action-item">
+                <h4>📱 Testes de Responsividade</h4>
+                <p>Verificar comportamento em diferentes dispositivos</p>
+                <button class="demo-button" onclick="simulateMobileView()">Simular Mobile</button>
+                <button class="demo-button" onclick="simulateTabletView()">Simular Tablet</button>
+                <button class="demo-button" onclick="restoreDesktopView()">Desktop</button>
+            </div>
+        </div>
+
+        <!-- Seção Especial: Orientações do Tutorial TOTVS -->
+        <div class="tutorial-progress-card" style="
+            background: linear-gradient(135deg, rgba(11, 97, 255, 0.1), rgba(108, 189, 181, 0.1));
+            border: 2px solid #0B61FF;
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+            position: relative;
+            overflow: hidden;
+        ">
+            <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #0B61FF, #6CBDB5);"></div>
+            
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+                <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #0B61FF, #0077CC); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">
+                    🎓
+                </div>
+                <div style="flex: 1;">
+                    <h3 style="margin: 0; color: #0B61FF; font-size: 1.5rem; font-weight: 800;">Tutorial TOTVS - Guia de Passos</h3>
+                    <p style="margin: 0.5rem 0 0 0; color: #64748b; font-size: 1rem;">Siga os passos abaixo para completar sua jornada acadêmica</p>
+                </div>
+            </div>
+
+            <!-- Barra de Progresso -->
+            <div style="background: #e2e8f0; border-radius: 12px; height: 12px; margin: 1.5rem 0; position: relative; overflow: hidden;">
+                <div id="tutorialProgressBar" style="
+                    background: linear-gradient(90deg, #10b981, #059669);
+                    height: 100%;
+                    border-radius: 12px;
+                    width: 0%;
+                    transition: width 0.5s ease;
+                    position: relative;
+                ">
+                    <div style="
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+                        animation: shine 2s infinite;
+                    "></div>
+                </div>
+            </div>
+
+            <!-- Progress Text -->
+            <div id="progressText" style="
+                text-align: center;
+                font-weight: 600;
+                color: #64748b;
+                margin-bottom: 1.5rem;
+                font-size: 0.95rem;
+            ">
+                📚 Iniciando tutorial... (0/1)
+            </div>
+
+            <!-- Steps Guide -->
+            <div id="tutorialSteps" style="display: grid; gap: 1rem;">
+                <!-- Os passos serão preenchidos dinamicamente via JavaScript -->
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 2rem;">
+                <button onclick="openTutorial()" style="
+                    background: linear-gradient(135deg, #0B61FF, #0077CC);
+                    color: white;
+                    border: none;
+                    padding: 1rem;
+                    border-radius: 12px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: transform 0.2s ease;
+                " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                    🚀 Iniciar Tutorial
+                </button>
+                <button onclick="checkTutorialStatus()" style="
+                    background: linear-gradient(135deg, #6CBDB5, #93CCC6);
+                    color: white;
+                    border: none;
+                    padding: 1rem;
+                    border-radius: 12px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: transform 0.2s ease;
+                " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                    📊 Verificar Status
+                </button>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <strong>💡 Dica:</strong> Use as ações rápidas acima para testar e verificar o funcionamento de todos os componentes do sistema. Os resultados serão exibidos abaixo.
+        </div>
+
+        <div id="actionResult" class="result-box"></div>
+    </div>
+
+    <div class="demo-card">
+        <h2 class="demo-title" style="font-size: 1.4rem;">📋 Logs de Atividade</h2>
+        <div id="activityLog" style="max-height: 300px; overflow-y: auto; background: #f8fafc; padding: 1rem; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <p style="color: #64748b; font-style: italic;">As ações realizadas aparecerão aqui...</p>
+        </div>
+        <button class="demo-button secondary" onclick="clearActivityLog()" style="margin-top: 1rem;">Limpar Logs</button>
+    </div>
+
+    <script>
+        // ========================================
+        // SISTEMA DE AÇÕES RÁPIDAS
+        // ========================================
+
+        function addLog(message, type = 'info') {
+            const logContainer = document.getElementById('activityLog');
+            const timestamp = new Date().toLocaleTimeString('pt-BR');
+            const logEntry = document.createElement('div');
+            logEntry.style.cssText = `
+                margin-bottom: 0.5rem;
+                padding: 0.5rem;
+                border-left: 3px solid ${type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : '#6cbdb5'};
+                background: white;
+                border-radius: 4px;
+                font-size: 0.875rem;
+            `;
+            logEntry.innerHTML = `<strong>[${timestamp}]</strong> ${message}`;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function showResult(message, type = 'success') {
+            const resultBox = document.getElementById('actionResult');
+            resultBox.className = 'result-box visible';
+            resultBox.style.borderLeftColor = type === 'error' ? '#ef4444' : '#6cbdb5';
+            resultBox.innerHTML = message;
+            
+            setTimeout(() => {
+                resultBox.classList.remove('visible');
+            }, 5000);
+        }
+
+        // ========================================
+        // AÇÕES DE PERFIL
+        // ========================================
+
+        function showProfileData() {
+            try {
+                const data = localStorage.getItem('userProfile');
+                if (data) {
+                    const profile = JSON.parse(data);
+                    showResult(`
+                        <h4>📊 Dados do Perfil:</h4>
+                        <pre style="background: #f1f5f9; padding: 1rem; border-radius: 4px; overflow-x: auto; font-size: 0.8rem;">${JSON.stringify(profile, null, 2)}</pre>
+                    `);
+                    addLog('Dados do perfil exibidos com sucesso');
+                    updateStats();
+                } else {
+                    showResult('<p>❌ Nenhum dado de perfil encontrado.</p>', 'error');
+                    addLog('Tentativa de exibir dados de perfil - nenhum dado encontrado', 'error');
+                }
+            } catch (error) {
+                showResult(`<p>❌ Erro ao carregar dados: ${error.message}</p>`, 'error');
+                addLog(`Erro ao carregar perfil: ${error.message}`, 'error');
+            }
+        }
+
+        function clearProfileData() {
+            if (confirm('Tem certeza que deseja limpar todos os dados de perfil? Esta ação não pode ser desfeita.')) {
+                localStorage.removeItem('userProfile');
+                localStorage.removeItem('checklist_academico_data');
+                localStorage.removeItem('tutorial_accessed');
+                localStorage.removeItem('tutorial_completed');
+                localStorage.removeItem('tutorial_checklist_data');
+                localStorage.removeItem('tutorial-theme');
+                localStorage.removeItem('theme');
+                localStorage.removeItem('sidebarCollapsed');
+                showResult('<p>✅ Todos os dados foram limpos com sucesso!</p>');
+                addLog('Todos os dados do sistema foram limpos (incluindo tutorial e checklist completos)');
+                updateStats();
+            }
+        }
+
+        // ========================================
+        // AÇÕES DE CHECKLIST
+        // ========================================
+
+        function openChecklistPage() {
+            const checklistWindow = window.open('../CHECKLIST ACADEMICO/checklist-academico.html', '_blank');
+            showResult('<p>📋 Página de checklists aberta em nova aba</p>');
+            addLog('Página de checklists aberta em nova aba');
+        }
+
+        function resetChecklistProgress() {
+            if (confirm('Resetar todo o progresso dos checklists?')) {
+                // Limpar dados dos checklists
+                localStorage.removeItem('checklist_academico_data');
+                localStorage.removeItem('demoCard2Locked');
+                
+                // Limpar dados do tutorial
+                localStorage.removeItem('tutorial_accessed');
+                localStorage.removeItem('tutorial_completed');
+                localStorage.removeItem('tutorial_checklist_data');
+                localStorage.removeItem('tutorial-theme');
+                
+                showResult('<p>✅ Progresso dos checklists e tutorial resetado!</p>');
+                addLog('Progresso dos checklists e tutorial foi resetado completamente');
+                updateStats();
+                updateTutorialStatusDisplay();
+                renderTutorialSteps();
+                
+                // Forçar recarregamento da página do checklist se estiver aberta
+                const checklistWindows = window.open('', '_blank');
+                if (checklistWindows && checklistWindows.location.href.includes('checklist-academico.html')) {
+                    checklistWindows.location.reload();
+                }
+            }
+        }
+
+        // ========================================
+        // SISTEMA DE VISUALIZAÇÃO DO TUTORIAL
+        // ========================================
+
+        function updateTutorialStatusDisplay() {
+            const container = document.getElementById('tutorialStatusBtn');
+            if (!container) return;
+
+            const tutorialAccessed = localStorage.getItem('tutorial_accessed');
+            const tutorialCompleted = localStorage.getItem('tutorial_completed');
+
+            let statusHtml = '';
+            let statusIcon = '';
+            let statusColor = '';
+            let statusText = '';
+            let buttonText = '';
+            let buttonAction = '';
+            let buttonColor = '';
+
+            if (tutorialCompleted) {
+                // Tutorial Concluído
+                statusIcon = '✅';
+                statusColor = '#10b981';
+                statusText = 'Tutorial TOTVS Concluído!';
+                buttonText = '🔄 Ver Tutorial Novamente';
+                buttonAction = 'openTutorial()';
+                buttonColor = 'background: linear-gradient(135deg, #10b981, #059669)';
+            } else if (tutorialAccessed) {
+                // Tutorial Acessado mas não concluído
+                statusIcon = '⏳';
+                statusColor = '#f59e0b';
+                statusText = 'Tutorial Acessado - Pendente Conclusão';
+                buttonText = '🎯 Completar Tutorial';
+                buttonAction = 'openTutorial()';
+                buttonColor = 'background: linear-gradient(135deg, #f59e0b, #d97706)';
+            } else {
+                // Tutorial não acessado
+                statusIcon = '📚';
+                statusColor = '#6b7280';
+                statusText = 'Tutorial TOTVS - Primeiro Acesso';
+                buttonText = '🚀 Iniciar Tutorial';
+                buttonAction = 'openTutorial()';
+                buttonColor = 'background: linear-gradient(135deg, #6cbdb5, #4fa3a5)';
+            }
+
+            statusHtml = `
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                    <div style="font-size: 2rem;">${statusIcon}</div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; color: ${statusColor}; margin-bottom: 0.25rem;">${statusText}</div>
+                        <div style="font-size: 0.875rem; color: #64748b;">
+                            ${tutorialCompleted ? 'Você pode revisar o tutorial quando quiser' : 
+                              tutorialAccessed ? 'Complete o tutorial para avançar no checklist' : 
+                              'Inicie o tutorial para começar sua jornada acadêmica'}
+                        </div>
+                    </div>
+                </div>
+                <button onclick="${buttonAction}" 
+                        style="width: 100%; padding: 0.75rem 1.5rem; border: none; border-radius: 8px; 
+                               color: white; font-weight: 600; cursor: pointer; ${buttonColor}">
+                    ${buttonText}
+                </button>
+            `;
+
+            container.innerHTML = statusHtml;
+        }
+
+        function openTutorial() {
+            window.open('../CHECKLIST ACADEMICO/tutorial.html', '_blank');
+            showResult('<p>📚 Tutorial TOTVS aberto em nova aba</p>');
+            addLog('Tutorial TOTVS aberto');
+        }
+
+        // ========================================
+        // AÇÕES DE TUTORIAL
+        // ========================================
+
+        function resetTutorialAccess() {
+            localStorage.removeItem('tutorial_accessed');
+            showResult('<p>✅ Acesso ao tutorial foi resetado!</p>');
+            addLog('Acesso ao tutorial foi resetado - usuário verá tutorial na próxima vez');
+            updateStats();
+            updateTutorialStatusDisplay();
+            renderTutorialSteps();
+        }
+
+        function resetTutorialCompletion() {
+            localStorage.removeItem('tutorial_completed');
+            showResult('<p>✅ Status de "concluído" do tutorial foi resetado!</p>');
+            addLog('Status de "concluído" do tutorial foi resetado - usuário pode marcar como concluído novamente');
+            updateStats();
+            updateTutorialStatusDisplay();
+            renderTutorialSteps();
+        }
+
+        function clearAllTutorialData() {
+            if (confirm('ATENÇÃO: Isso irá limpar TODOS os dados do tutorial:\n\n• tutorial_accessed\n• tutorial_completed\n• tutorial_checklist_data\n• tutorial_theme\n\nVocê confirma esta ação? Esta ação não pode ser desfeita!')) {
+                localStorage.removeItem('tutorial_accessed');
+                localStorage.removeItem('tutorial_completed');
+                localStorage.removeItem('tutorial_checklist_data');
+                localStorage.removeItem('tutorial-theme');
+                showResult('<p>✅ Todos os dados do tutorial foram limpos!</p>');
+                addLog('TODOS os dados do tutorial foram removidos do localStorage (incluindo checklist)');
+                updateStats();
+                updateTutorialStatusDisplay();
+                renderTutorialSteps();
+            }
+        }
+
+        function checkTutorialStatus() {
+            const tutorialAccessed = localStorage.getItem('tutorial_accessed');
+            const tutorialCompleted = localStorage.getItem('tutorial_completed');
+            const tutorialTheme = localStorage.getItem('tutorial-theme') || 'padrão';
+            
+            let status = [];
+            status.push(`Acesso: ${tutorialAccessed ? '✅ Já acessado' : '❌ Nunca acessado'}`);
+            status.push(`Conclusão: ${tutorialCompleted ? '✅ Concluído' : '❌ Não concluído'}`);
+            status.push(`Tema: ${tutorialTheme}`);
+            
+            showResult(`<p>📚 Status completo do tutorial:<br><strong>${status.join('<br>')}</strong></p>`);
+            addLog(`Status completo do tutorial verificado: ${status.join(', ')}`);
+        }
+
+        function resetAllChecklists() {
+            if (confirm('Resetar APENAS o progresso dos checklists (manter dados do tutorial)?')) {
+                localStorage.removeItem('checklist_academico_data');
+                localStorage.removeItem('demoCard2Locked');
+                
+                showResult('<p>✅ Progresso dos checklists foi resetado!</p>');
+                addLog('Progresso dos checklists foi resetado (dados do tutorial mantidos)');
+                updateStats();
+                renderTutorialSteps();
+            }
+        }
+
+        // ========================================
+        // NAVEGAÇÃO
+        // ========================================
+
+        function openPage(pagePath) {
+            window.open(pagePath, '_blank');
+            showResult(`<p>🔗 Página ${pagePath} aberta em nova aba</p>`);
+            addLog(`Página ${pagePath} aberta`);
+        }
+
+        // ========================================
+        // TESTES DE FUNCIONALIDADE
+        // ========================================
+
+        function testThemeToggle() {
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            localStorage.setItem('theme', newTheme);
+            showResult(`<p>🎨 Tema alterado para: <strong>${newTheme}</strong></p>`);
+            addLog(`Tema alterado para ${newTheme}`);
+        }
+
+        function testSidebarToggle() {
+            const currentState = localStorage.getItem('sidebarCollapsed') === 'true';
+            localStorage.setItem('sidebarCollapsed', !currentState);
+            showResult(`<p>📱 Estado da sidebar: <strong>${!currentState ? 'Minimizada' : 'Expandida'}</strong></p>`);
+            addLog(`Estado da sidebar alterado para ${!currentState ? 'minimizada' : 'expandida'}`);
+        }
+
+        function testModalSystem() {
+            showResult(`
+                <p>🪟 Sistema de modal testado com sucesso!</p>
+                <p><em>Esta janela de resultado simula um modal funcional.</em></p>
+            `);
+            addLog('Sistema de modal testado');
+        }
+
+        // ========================================
+        // TESTES DE RESPONSIVIDADE
+        // ========================================
+
+        function simulateMobileView() {
+            document.body.style.maxWidth = '375px';
+            document.body.style.margin = '0 auto';
+            showResult('<p>📱 Visualização simulada para mobile (375px)</p>');
+            addLog('Simulação de visualização mobile ativada');
+        }
+
+        function simulateTabletView() {
+            document.body.style.maxWidth = '768px';
+            document.body.style.margin = '0 auto';
+            showResult('<p>📱 Visualização simulada para tablet (768px)</p>');
+            addLog('Simulação de visualização tablet ativada');
+        }
+
+        function restoreDesktopView() {
+            document.body.style.maxWidth = '900px';
+            document.body.style.margin = '0 auto';
+            showResult('<p>🖥️ Visualização desktop restaurada</p>');
+            addLog('Visualização desktop restaurada');
+        }
+
+        // ========================================
+        // ESTATÍSTICAS
+        // ========================================
+
+        function updateStats() {
+            const profileData = localStorage.getItem('userProfile');
+            const checklistData = localStorage.getItem('checklist_academico_data');
+            const tutorialAccessed = localStorage.getItem('tutorial_accessed');
+
+            document.getElementById('totalProfiles').textContent = profileData ? '1' : '0';
+            document.getElementById('completedChecklists').textContent = checklistData ? '1' : '0';
+            document.getElementById('tutorialViews').textContent = tutorialAccessed ? '1' : '0';
+        }
+
+        function clearActivityLog() {
+            document.getElementById('activityLog').innerHTML = '<p style="color: #64748b; font-style: italic;">Logs limpos...</p>';
+            addLog('Log de atividade foi limpo');
+        }
+
+        // ========================================
+        // SISTEMA DE PASSOS DO TUTORIAL
+        // ========================================
+
+        function renderTutorialSteps() {
+            const container = document.getElementById('tutorialSteps');
+            if (!container) return;
+
+            const tutorialAccessed = localStorage.getItem('tutorial_accessed');
+            const tutorialCompleted = localStorage.getItem('tutorial_completed');
+            const checklistData = getChecklistDataFromDemo();
+
+            const steps = [
+                {
+                    id: 1,
+                    title: '1º Passo: Acesso ao Portal',
+                    description: 'Aprender como acessar o sistema acadêmico TOTVS',
+                    icon: '🚀',
+                    status: checklistData['access-portal'] ? 'completed' : 'pending'
+                },
+                {
+                    id: 2,
+                    title: '2º Passo: Credenciais',
+                    description: 'Entender como usar RA e senha inicial',
+                    icon: '🔐',
+                    status: checklistData['learn-credentials'] ? 'completed' : 'pending'
+                },
+                {
+                    id: 3,
+                    title: '3º Passo: Navegação',
+                    description: 'Conhecer a barra de navegação e seções',
+                    icon: '🧭',
+                    status: checklistData['navigate-system'] ? 'completed' : 'pending'
+                },
+                {
+                    id: 4,
+                    title: '4º Passo: Relatórios',
+                    description: 'Descobrir os documentos disponíveis',
+                    icon: '📋',
+                    status: checklistData['view-reports'] ? 'completed' : 'pending'
+                },
+                {
+                    id: 5,
+                    title: 'Finalizar Tutorial',
+                    description: 'Marcar como concluído e acessar o portal',
+                    icon: '✅',
+                    status: tutorialCompleted ? 'completed' : 'pending'
+                }
+            ];
+
+            container.innerHTML = steps.map(step => {
+                const statusClass = step.status;
+                const statusIcon = step.status === 'completed' ? '✓' : '○';
+                
+                return `
+                    <div class="tutorial-step ${statusClass}" onclick="highlightStep(${step.id})">
+                        <div class="step-icon">${step.icon}</div>
+                        <div class="step-content">
+                            <div class="step-title">${step.title}</div>
+                            <div class="step-description">${step.description}</div>
+                        </div>
+                        <div class="step-status">${statusIcon}</div>
+                    </div>
+                `;
+            }).join('');
+
+            updateProgressBar();
+        }
+
+        function updateProgressBar(externalData) {
+            const progressBar = document.getElementById('tutorialProgressBar');
+            const progressText = document.getElementById('progressText');
+            
+            if (!progressBar || !progressText) return;
+
+            const tutorialAccessed = localStorage.getItem('tutorial_accessed');
+            const tutorialCompleted = localStorage.getItem('tutorial_completed');
+            
+            // Usar dados externos quando disponíveis (da mensagem do tutorial)
+            const checklistData = externalData?.checklistData || getChecklistDataFromDemo();
+
+            let progress = 0;
+            let currentStep = 0;
+            let totalSteps = 5;
+
+            if (tutorialCompleted) {
+                progress = 100;
+                currentStep = totalSteps;
+            } else if (externalData) {
+                // Usar dados diretos da mensagem do tutorial
+                progress = externalData.percentage;
+                currentStep = Math.min(externalData.completedItems + 1, totalSteps);
+                console.log('Usando dados externos:', { 
+                    checklistData, 
+                    completedItems: externalData.completedItems,
+                    progress: externalData.percentage 
+                });
+            } else if (tutorialAccessed && checklistData && Object.keys(checklistData).length > 0) {
+                // Fallback: calcular do localStorage
+                const completedItems = Object.values(checklistData).filter(Boolean).length;
+                const checklistProgress = (completedItems / 4) * 80; // 4 itens do checklist valem 80%
+                progress = Math.round(checklistProgress);
+                currentStep = Math.min(completedItems + 1, totalSteps);
+                
+                console.log('Progresso calculado (fallback):', { 
+                    completedItems, 
+                    checklistProgress, 
+                    finalProgress: progress 
+                });
+            } else {
+                progress = 0;
+                currentStep = 0;
+                
+                // Verificar se tem dados de checklist mas tutorial não foi acessado
+                if (checklistData && Object.keys(checklistData).length > 0) {
+                    const completedItems = Object.values(checklistData).filter(Boolean).length;
+                    const checklistProgress = (completedItems / 4) * 80;
+                    progress = Math.round(checklistProgress);
+                    currentStep = Math.min(completedItems + 1, totalSteps);
+                }
+            }
+
+            progressBar.style.width = progress + '%';
+            
+            if (tutorialCompleted) {
+                progressText.innerHTML = `🎉 Tutorial TOTVS concluído! (${currentStep}/${totalSteps})`;
+                progressText.style.color = '#10b981';
+            } else if (progress > 0) {
+                progressText.innerHTML = `⏳ Tutorial em andamento... ${progress}% (${currentStep}/${totalSteps})`;
+                progressText.style.color = '#f59e0b';
+            } else {
+                progressText.innerHTML = `📚 Não iniciado ainda... (${currentStep}/${totalSteps})`;
+                progressText.style.color = '#64748b';
+            }
+            
+            console.log('Status final:', { progress, currentStep, totalSteps });
+        }
+
+        function getChecklistDataFromDemo() {
+            try {
+                const data = localStorage.getItem('tutorial_checklist_data');
+                return data ? JSON.parse(data) : {};
+            } catch (error) {
+                console.error('Erro ao ler dados do checklist:', error);
+                return {};
+            }
+        }
+
+        function highlightStep(stepId) {
+            const tutorialSteps = document.querySelectorAll('.tutorial-step');
+            tutorialSteps.forEach((step, index) => {
+                if (index + 1 === stepId) {
+                    step.style.transform = 'scale(1.02)';
+                    step.style.boxShadow = '0 8px 24px rgba(11, 97, 255, 0.3)';
+                    
+                    setTimeout(() => {
+                        step.style.transform = '';
+                        step.style.boxShadow = '';
+                    }, 1000);
+                    
+                    // Scroll suave para o step
+                    step.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                }
+            });
+
+            addLog(`Passo ${stepId} do tutorial foi destacado`);
+        }
+
+        // ========================================
+        // INICIALIZAÇÃO
+        // ========================================
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 UniCheck Ações Rápidas carregado!');
+            console.log('📊 Sistema de controle e testes operacional');
+            
+            updateStats();
+            updateTutorialStatusDisplay();
+            renderTutorialSteps();
+            addLog('Sistema de ações rápidas inicializado');
+            
+            // Mostrar informações do sistema
+            const systemInfo = {
+                userAgent: navigator.userAgent,
+                screenSize: `${screen.width}x${screen.height}`,
+                viewport: `${window.innerWidth}x${window.innerHeight}`,
+                localStorage: typeof(Storage) !== "undefined" ? 'Disponível' : 'Não disponível'
+            };
+            
+            console.log('🔧 Informações do sistema:', systemInfo);
+        });
+
+        // Atualizar estatísticas e status do tutorial quando a página ganhar foco
+        window.addEventListener('focus', function() {
+            updateStats();
+            updateTutorialStatusDisplay();
+            renderTutorialSteps();
+        });
+        
+        // Escutar mensagens do tutorial
+        window.addEventListener('message', function(event) {
+            console.log('Mensagem recebida na demo:', event.data);
+            
+            if (event.data.type === 'tutorial-progress-updated') {
+                console.log('Progresso do tutorial atualizado:', event.data);
+                renderTutorialSteps();
+                updateProgressBar(event.data); // Passar dados externos
+                addLog(`Progresso tutorial: ${event.data.percentage}% (${event.data.completedItems}/${event.data.totalItems})`);
+            } else if (event.data.type === 'checklist-updated') {
+                console.log('Checklist atualizado:', event.data.checklistData);
+                renderTutorialSteps();
+                updateProgressBar();
+                addLog('Checklist do tutorial foi atualizado');
+            } else if (event.data.type === 'tutorial-completed') {
+                console.log('Tutorial concluído:', event.data);
+                renderTutorialSteps();
+                updateProgressBar(event.data); // Passar dados externos
+                updateTutorialStatusDisplay();
+                updateStats();
+                addLog('Tutorial TOTVS foi marcado como concluído!');
+                showResult('<p>🎉 Tutorial TOTVS concluído! O progresso foi atualizado.</p>', 'success');
+            }
+        });
+    </script>
+</body>
+</html>

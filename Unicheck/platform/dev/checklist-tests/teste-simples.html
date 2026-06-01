@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Simples - Botão Ver Tutorial</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .test-box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 400px;
+            margin: 20px auto;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            background: linear-gradient(135deg, #0B61FF 0%, #0077CC 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin: 10px 0;
+        }
+        .test-button:hover {
+            transform: translateY(-2px);
+        }
+        .result {
+            background: #e8f4fd;
+            border: 1px solid #bee5eb;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-box">
+        <h1>🔧 Teste do Botão Ver Tutorial</h1>
+        
+        <div id="status" class="result">
+            Status: Verificando arquivos...
+        </div>
+
+        <button class="test-button" onclick="testRedirection()">
+            📖 TESTAR BOTÃO VER TUTORIAL
+        </button>
+
+        <button class="test-button" onclick="checkFiles()">
+            🔍 VERIFICAR ARQUIVOS
+        </button>
+
+        <button class="test-button" onclick="clearStorage()">
+            🗑️ LIMPAR STORAGE
+        </button>
+
+        <button class="test-button" onclick="showCurrentStatus()">
+            📊 STATUS ATUAL
+        </button>
+
+        <div id="output" style="margin-top: 20px; font-family: monospace; font-size: 12px; max-height: 200px; overflow-y: auto; background: #f8f9fa; padding: 10px; border-radius: 5px;">
+            Aguardando teste...
+        </div>
+    </div>
+
+    <script>
+        function log(message) {
+            const output = document.getElementById('output');
+            const timestamp = new Date().toLocaleTimeString();
+            output.innerHTML += `[${timestamp}] ${message}<br>`;
+            output.scrollTop = output.scrollHeight;
+            console.log(`[${timestamp}] ${message}`);
+        }
+
+        function updateStatus(message, isError = false) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = 'result' + (isError ? ' error' : '');
+        }
+
+        async function checkFiles() {
+            log('🔍 Verificando arquivos...');
+            
+            // Verificar ../CHECKLIST ACADEMICO/tutorial.html
+            try {
+                const response = await fetch('../CHECKLIST ACADEMICO/tutorial.html');
+                if (response.ok) {
+                    log('✅ ../CHECKLIST ACADEMICO/tutorial.html encontrado');
+                    updateStatus('✅ ../CHECKLIST ACADEMICO/tutorial.html disponível');
+                } else {
+                    log('❌ ../CHECKLIST ACADEMICO/tutorial.html não encontrado (status: ' + response.status + ')');
+                    updateStatus('❌ ../CHECKLIST ACADEMICO/tutorial.html não encontrado', true);
+                }
+            } catch (error) {
+                log('❌ Erro ao verificar ../CHECKLIST ACADEMICO/tutorial.html: ' + error.message);
+                updateStatus('❌ Erro de rede', true);
+            }
+            
+            // Verificar ../CHECKLIST ACADEMICO/checklist-academico.html
+            try {
+                const response = await fetch('../CHECKLIST ACADEMICO/checklist-academico.html');
+                if (response.ok) {
+                    log('✅ ../CHECKLIST ACADEMICO/checklist-academico.html encontrado');
+                } else {
+                    log('❌ ../CHECKLIST ACADEMICO/checklist-academico.html não encontrado');
+                }
+            } catch (error) {
+                log('❌ Erro ao verificar ../CHECKLIST ACADEMICO/checklist-academico.html: ' + error.message);
+            }
+        }
+
+        function testRedirection() {
+            log('🚀 TESTANDO REDIRECIONAMENTO...');
+            
+            const tutorialAccess = localStorage.getItem('tutorial_accessed');
+            log('📝 tutorial_accessed: ' + (tutorialAccess ? tutorialAccess : 'null'));
+            
+            updateStatus('Testando redirecionamento...');
+            
+            if (!tutorialAccess) {
+                log('📖 Primeira vez - redirecionando para ../CHECKLIST ACADEMICO/tutorial.html');
+                updateStatus('Redirecionando para ../CHECKLIST ACADEMICO/tutorial.html...');
+                
+                // Testar se o arquivo existe antes de redirecionar
+                fetch('../CHECKLIST ACADEMICO/tutorial.html')
+                    .then(response => {
+                        if (response.ok) {
+                            log('✅ Arquivo encontrado, redirecionando...');
+                            window.location.href = '../CHECKLIST ACADEMICO/tutorial.html';
+                        } else {
+                            log('❌ Arquivo não encontrado (status: ' + response.status + ')');
+                            updateStatus('❌ ../CHECKLIST ACADEMICO/tutorial.html não encontrado!', true);
+                        }
+                    })
+                    .catch(error => {
+                        log('❌ Erro de rede: ' + error.message);
+                        updateStatus('❌ Erro de rede', true);
+                    });
+            } else {
+                log('📋 Tutorial já acessado - abriria modal do checklist');
+                updateStatus('Tutorial já foi acessado anteriormente');
+                alert('Tutorial já foi acessado! Para testar o redirecionamento, clique em "Limpar Storage" primeiro.');
+            }
+        }
+
+        function clearStorage() {
+            localStorage.removeItem('tutorial_accessed');
+            log('🗑️ localStorage limpo - tutorial_accessed removido');
+            updateStatus('Storage limpo - próximo clique redirecionará para tutorial');
+            
+            setTimeout(() => {
+                showCurrentStatus();
+            }, 500);
+        }
+
+        function showCurrentStatus() {
+            const tutorialAccess = localStorage.getItem('tutorial_accessed');
+            log('📊 Status atual: tutorial_accessed = ' + (tutorialAccess ? tutorialAccess : 'null'));
+            updateStatus('Tutorial acessado: ' + (tutorialAccess ? 'SIM' : 'NÃO'));
+        }
+
+        // Inicialização
+        window.addEventListener('load', function() {
+            log('🚀 Página de teste carregada');
+            showCurrentStatus();
+            checkFiles();
+            
+            // Auto-teste após 3 segundos
+            setTimeout(() => {
+                log('🤖 Executando auto-teste...');
+                checkFiles();
+            }, 3000);
+        });
+    </script>
+</body>
+</html>

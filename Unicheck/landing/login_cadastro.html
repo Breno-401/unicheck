@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unicheck - Login & Cadastro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="CSS_login/login_cadastro.css">
+</head>
+<body>
+    <a href="index.html" class="back-btn-link back-btn">Voltar</a>
+
+    <main class="auth-shell" aria-labelledby="authTitle">
+        <section class="auth-card">
+            <header class="auth-header">
+                <img src="img/bola1.png" alt="Logo Unicheck" class="logo-unicheck">
+                <div>
+                    <p class="eyebrow">Unicheck</p>
+                    <h1 id="authTitle">Acesse sua conta</h1>
+                    <p class="subtitle">Login e cadastro com uma experiencia simples, segura e consistente.</p>
+                </div>
+            </header>
+
+            <nav class="auth-tabs" aria-label="Alternar entre login e cadastro">
+                <button class="tab-btn is-active" type="button" data-tab-target="loginPanel" aria-selected="true">Login</button>
+                <button class="tab-btn" type="button" data-tab-target="registerPanel" aria-selected="false">Cadastro</button>
+            </nav>
+
+            <section id="loginPanel" class="form-panel is-active" aria-labelledby="authTitle">
+                <form id="loginForm" novalidate>
+                    <div class="field-group">
+                        <label class="field-label" for="loginEmail">E-mail</label>
+                        <input type="email" placeholder="ex: teste@gmail.com" id="loginEmail" autocomplete="email" required>
+                        <p class="field-error" id="loginEmailError" aria-live="polite"></p>
+                    </div>
+
+                    <div class="field-group">
+                        <label class="field-label" for="matriculasenha">Registro academico</label>
+                        <input type="text" placeholder="Seu RA" id="matriculasenha" autocomplete="username" required>
+                        <p class="field-error" id="matriculasenhaError" aria-live="polite"></p>
+                    </div>
+
+                    <div class="field-group">
+                        <label class="field-label" for="loginSenha">Senha</label>
+                        <div class="password-field">
+                            <input type="password" placeholder="Digite sua senha" id="loginSenha" autocomplete="current-password" required minlength="8">
+                            <button type="button" class="toggle-password" data-toggle-password="loginSenha" aria-label="Mostrar senha" aria-pressed="false">Mostrar</button>
+                        </div>
+                        <p class="field-error" id="loginSenhaError" aria-live="polite"></p>
+                    </div>
+
+                    <button id="loginSubmit" type="submit">Entrar</button>
+                    <div class="switch-senha"><a href="#" class="action-link" id="forgotPasswordLink">Esqueceu a senha?</a></div>
+                </form>
+            </section>
+
+            <section id="registerPanel" class="form-panel" aria-labelledby="authTitle" hidden>
+                <form id="registerForm" novalidate>
+                    <div class="field-group">
+                        <label class="field-label" for="nomeCadastro">Nome completo</label>
+                        <input type="text" placeholder="Como aparece no cadastro" id="nomeCadastro" autocomplete="name" required>
+                        <p class="field-error" id="nomeCadastroError" aria-live="polite"></p>
+                    </div>
+
+                    <div class="field-group">
+                        <label class="field-label" for="emailCadastro">E-mail</label>
+                        <input type="email" placeholder="Digite seu e-mail" id="emailCadastro" autocomplete="email" required>
+                        <p class="field-error" id="emailCadastroError" aria-live="polite"></p>
+                    </div>
+
+                    <div class="field-group">
+                        <label class="field-label" for="nascimentoCadastro">Data de nascimento</label>
+                        <input type="date" id="nascimentoCadastro" required>
+                        <p class="field-error" id="nascimentoCadastroError" aria-live="polite"></p>
+                    </div>
+
+                    <div class="field-group">
+                        <label class="field-label" for="matriculaCadastro">Registro academico</label>
+                        <input type="text" placeholder="Seu RA" id="matriculaCadastro" autocomplete="username" required>
+                        <p class="field-error" id="matriculaCadastroError" aria-live="polite"></p>
+                    </div>
+
+                    <div class="field-group">
+                        <label class="field-label" for="senhaCadastro">Crie uma senha</label>
+                        <div class="password-field">
+                            <input type="password" placeholder="Use pelo menos 8 caracteres" id="senhaCadastro" autocomplete="new-password" required minlength="8">
+                            <button type="button" class="toggle-password" data-toggle-password="senhaCadastro" aria-label="Mostrar senha" aria-pressed="false">Mostrar</button>
+                        </div>
+                        <div class="strength-wrap">
+                            <div id="strength" class="strength" aria-hidden="true"></div>
+                            <p id="strengthText" class="strength-text">Forca da senha: fraca</p>
+                        </div>
+                        <p class="field-error" id="senhaCadastroError" aria-live="polite"></p>
+                    </div>
+
+                    <button id="registerSubmit" type="submit">Cadastrar</button>
+                </form>
+            </section>
+        </section>
+    </main>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="js/login.js"></script>
+</body>
+</html>

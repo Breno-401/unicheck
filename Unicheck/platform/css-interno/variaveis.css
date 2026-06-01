@@ -1,0 +1,105 @@
+:root {
+  /* Paleta de Cores UniSales + UniCheck */
+  --unisales-blue: #0B61FF;
+  --unisales-blue-light: #0077CC;
+  --unisales-red: #E60023;
+  --unisales-red-light: #FF3B3B;
+  
+  /* Paleta Oficial UniCheck */
+  --unicheck-beige: #E3DFBA;
+  --unicheck-light-green: #C8D6BF;
+  --unicheck-medium-green: #93CCC6;
+  --unicheck-primary: #6CBDB5;
+  --unicheck-dark: #1A1F2E;
+  
+  /* Unifica cores */
+  --unicheck-green: var(--unicheck-primary);
+  --unicheck-green-light: var(--unicheck-light-green);
+  
+  /* Gradientes principais */
+  --gradient-primary: linear-gradient(135deg, var(--unisales-blue) 0%, var(--unisales-blue-light) 100%);
+  --gradient-secondary: linear-gradient(135deg, var(--unisales-red) 0%, var(--unisales-red-light) 100%);
+  --gradient-accent: linear-gradient(135deg, var(--unicheck-primary) 0%, var(--unicheck-light-green) 100%);
+  --gradient-card: linear-gradient(135deg, var(--unicheck-primary) 0%, var(--unicheck-medium-green) 100%);
+  
+  /* Cores Neutras */
+  --gray-50: #F7F9FC;
+  --gray-100: #E9EEF5;
+  --gray-200: #d1d5db;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+  --white: #ffffff;
+  
+  /* Tipografia */
+  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  
+  /* Espaçamentos */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  --spacing-3xl: 4rem;
+  --spacing-4xl: 3rem;
+  --spacing-5xl: 5rem; /* Espaçamento extra para título */
+  --spacing-6xl: 4.5rem; /* Gap-x-6 e gap-y-6 equivalente */
+  --spacing-welcome-cards: 4.5rem; /* Espaçamento entre seção welcome e cards */
+  --spacing-cards-gap: 2rem; /* Espaçamento entre os 3 cards */
+  --spacing-padding-large: 5rem; /* Padding geral do conteúdo */
+  
+  /* Sombras */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-glow: 0 0 20px rgba(11, 97, 255, 0.3);
+  
+  /* Border Radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  
+  /* Transições */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Modo Escuro - Com paleta UniSales */
+[data-theme="dark"] {
+  --bg-primary: #0F172A;
+  --bg-secondary: #1E293B;
+  --bg-tertiary: #334155;
+  --text-primary: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --text-muted: #94A3B8;
+  --border-color: #475569;
+  --hover-bg: rgba(56, 189, 248, 0.1);
+  
+  /* Ajustes para modo escuro com gradientes */
+  --gradient-primary: linear-gradient(135deg, #38BDF8 0%, #0EA5E9 100%);
+  --gradient-secondary: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+  --gradient-accent: linear-gradient(135deg, #38BDF8 0%, #14B8A6 100%);
+  --gradient-card: linear-gradient(135deg, rgba(56, 189, 248, 0.2) 0%, rgba(20, 184, 166, 0.15) 100%);
+}
+
+/* Modo Claro */
+[data-theme="light"] {
+  --bg-primary: #ffffff;
+  --bg-secondary: var(--gray-50);
+  --bg-tertiary: var(--gray-100);
+  --text-primary: var(--gray-900);
+  --text-secondary: var(--gray-600);
+  --text-muted: var(--gray-500);
+  --border-color: var(--gray-200);
+  --hover-bg: var(--gray-50);
+}

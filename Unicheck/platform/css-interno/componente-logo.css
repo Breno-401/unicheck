@@ -1,0 +1,60 @@
+/* ==========================
+   LOGO STYLES - UniCheck Original
+   ========================== */
+
+/* Garantir que logos não tenham bordas ou backgrounds */
+.logo-animation img,
+.sidebar-logo img,
+.unicheck-logo-loading,
+.sidebar-logo-image,
+.sidebar-logo-enhanced img {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: block;
+}
+
+.logo-animation {
+  border: none !important;
+  background: transparent !important;
+  outline: none !important;
+}
+
+.sidebar-logo {
+  border: none !important;
+  background: transparent !important;
+  outline: none !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Estilos específicos para a logo UniCheck */
+.unicheck-logo-loading {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 8px rgba(108, 189, 181, 0.3));
+  transition: all 0.3s ease;
+}
+
+.sidebar-logo-image {
+  width: 45px;
+  height: 45px;
+  object-fit: contain;
+  transition: all 0.3s ease;
+}
+
+.sidebar-logo-enhanced {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) 0;
+}
+
+/* Controlar visibilidade da logo baseado no estado da sidebar */
+.sidebar.collapsed .logo-section .sidebar-logo-enhanced {
+  display: none;
+}

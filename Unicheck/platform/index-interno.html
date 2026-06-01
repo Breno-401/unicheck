@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniCheck - Dashboard Institucional</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Importar Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <!-- Arquivos CSS e JS separados -->
+    <link rel="stylesheet" href="css-interno/base.css">
+    <link rel="stylesheet" href="css-interno/componente-logo.css">
+    <link rel="stylesheet" href="css-interno/componentes-atividades-recentes.css">
+    <link rel="stylesheet" href="css-interno/componentes-cards-status.css">
+    <link rel="stylesheet" href="css-interno/componentes-header.css">
+    <link rel="stylesheet" href="css-interno/componentes-loading.css">
+    <link rel="stylesheet" href="css-interno/componentes-parceiros.css">
+    <link rel="stylesheet" href="css-interno/componentes-sidebar.css">
+    <link rel="stylesheet" href="css-interno/layout.css">
+    <link rel="stylesheet" href="css-interno/responsividade.css">
+    <link rel="stylesheet" href="css-interno/variaveis.css">
+    <link rel="stylesheet" href="css-interno/style.css">
+</head>
+<body>
+    <!-- Tela de Loading -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-logo">
+            <div class="logo-animation">
+                <!-- Logo UniCheck Original -->
+                <img src="logo-interno.png" alt="UniCheck Logo" class="unicheck-logo-loading">
+            </div>
+            <div class="loading-text">
+                <h3>UniCheck</h3>
+                <div class="loading-bar">
+                    <div class="loading-progress"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Container Principal do Dashboard -->
+    <div class="dashboard-container" id="dashboardContainer">
+        <!-- Sidebar/Navbar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-section">
+                    <div class="sidebar-logo-enhanced">
+                        <!-- Logo UniCheck Original -->
+                        <img src="img-interno/logo.png" alt="UniCheck Logo" class="sidebar-logo-image">
+                    </div>
+                    <span class="logo-text">UniCheck</span>
+                </div>
+                <!-- BOTÃO HAMBURGUER MELHORADO - 32x32px com espaçamento adequado -->
+                <button class="sidebar-toggle" id="sidebarToggle" title="Retrair/Expandir Navbar">
+                    <div class="hamburger-menu">
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Perfil do Usuário -->
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <span>JS</span>
+                </div>
+                <div class="user-info">
+                    <h4>João Silva</h4>
+                    <p>Aluno UniSales</p>
+                </div>
+                <div class="user-status">
+                    <span class="status-indicator online"></span>
+                </div>
+            </div>
+
+            <!-- Navegação -->
+            <nav class="sidebar-nav">
+                <ul class="nav-menu">
+                    <li class="nav-item active">
+                        <a href="#" class="nav-link" data-tooltip="Início">
+                            <i data-lucide="home"></i>
+                            <span>Início</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="CHECKLIST ACADEMICO/checklist-academico.html" class="nav-link" data-tooltip="Checklists Acadêmicos">
+                            <i data-lucide="graduation-cap"></i>
+                            <span>Checklists Acadêmicos</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="PLATAFORMAS/plataformas-gratuitas.html" class="nav-link" data-tooltip="Checklists de Plataformas" data-action="navigate-with-loading">
+                            <i data-lucide="monitor"></i>
+                            <span>Checklists de Plataformas</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-tooltip="Notificações">
+                            <i data-lucide="bell"></i>
+                            <span>Notificações</span>
+                            <span class="notification-badge">3</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-tooltip="Plataformas">
+                            <i data-lucide="layers"></i>
+                            <span>Plataformas</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-tooltip="Ajuda/Suporte">
+                            <i data-lucide="help-circle"></i>
+                            <span>Ajuda/Suporte</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Rodapé da Navbar -->
+                <div class="nav-footer">
+                    <button class="theme-toggle" id="themeToggle">
+                        <i data-lucide="moon"></i>
+                        <span>Modo Escuro</span>
+                    </button>
+                    <button class="logout-btn logout-action" data-action="logout">
+                        <i data-lucide="log-out"></i>
+                        <span>Sair</span>
+                    </button>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <main class="main-content">
+            <!-- Cabeçalho -->
+            <header class="main-header">
+                <div class="header-top">
+                    <div class="header-mobile-controls">
+                        <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                            <i data-lucide="menu"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="welcome-section">
+                        <h1 class="welcome-title">Bem-vindo ao UniCheck</h1>
+                        <p class="welcome-subtitle">Sua confiança começa agora. UniCheck: A plataforma que valida a originalidade e enriquece a qualidade da sua informação.</p>
+                    </div>
+                </div>
+
+                <div class="header-bottom-enhanced">
+                    <!-- Campo de Busca à Esquerda -->
+                    <div class="header-search-enhanced">
+                        <div class="search-box">
+                            <i data-lucide="search" class="search-icon"></i>
+                            <input type="text" placeholder="Buscar relatórios, documentos ou dados..." class="search-input">
+                            <button class="search-filters">
+                                <i data-lucide="filter"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Ações do Usuário à Direita -->
+                    <div class="header-actions-enhanced">
+                        <button class="theme-toggle-mobile" id="themeToggleMobile">
+                            <i data-lucide="moon"></i>
+                        </button>
+                        <div class="user-menu">
+                            <button class="user-menu-trigger" id="userMenuTrigger">
+                                <div class="user-avatar-small">
+                                    <span>JS</span>
+                                </div>
+                                <span class="user-name-indicator">João Silva</span>
+                                <i data-lucide="chevron-down" class="dropdown-indicator"></i>
+                            </button>
+                            <!-- DROPDOWN DO USUÁRIO COM Z-INDEX CORRIGIDO -->
+                            <div class="user-dropdown" id="userDropdown">
+                                <div class="user-dropdown-header">
+                                    <div class="user-dropdown-avatar">
+                                        <span>JS</span>
+                                    </div>
+                                    <div class="user-dropdown-info">
+                                        <h4>João Silva</h4>
+                                        <p>joao.silva@unisales.com.br</p>
+                                    </div>
+                                </div>
+                                <div class="user-dropdown-menu">
+                                    <button class="user-dropdown-item" id="meuPerfilBtn">
+                                        <i data-lucide="user"></i>
+                                        <span>Meu Perfil</span>
+                                    </button>
+    
+                                    <a href="CONFIGURACOES PERFIL/configuracoes.html" class="user-dropdown-item">
+                                        <i data-lucide="settings"></i>
+                                        <span>Configurações</span>
+                                    </a>
+                                    
+                                    <button class="user-dropdown-item">
+                                        <i data-lucide="credit-card"></i>
+                                        <span>Assinatura</span>
+                                    </button>
+                                    <div class="user-dropdown-divider"></div>
+                                    <button class="user-dropdown-item">
+                                        <i data-lucide="help-circle"></i>
+                                        <span>Ajuda & Suporte</span>
+                                    </button>
+                                    <button class="user-dropdown-item logout-action" data-action="logout">
+                                        <i data-lucide="log-out"></i>
+                                        <span>Sair</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Estatísticas Rápidas -->
+            <section class="stats-section">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i data-lucide="check-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>24</h3>
+                            <p>Checklists Completos</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i data-lucide="bell"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>3</h3>
+                            <p>Notificações Novas</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i data-lucide="layers"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>12</h3>
+                            <p>Plataformas Ativas</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Grid de Cards Principais -->
+            <section class="cards-section-enhanced">
+                <div class="cards-grid-enhanced">
+                    <!-- Card 1: Gerenciar Checklists -->
+                    <div class="content-card">
+                        <div class="card-image">
+                            <!-- IMAGEM COERENTE: Lista de tarefas/checklists -->
+                            <img src="https://images.unsplash.com/photo-1586281380349-632531db7ed4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                                 alt="Checklists e tarefas organizadas" 
+                                 class="card-bg-image">
+                            <div class="card-image-overlay">
+                                <i data-lucide="check-square" class="card-icon"></i>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="card-title">Gerenciar Checklists</h3>
+                            <p class="card-description">Acesse e gerencie todos os seus checklists acadêmicos e de plataformas em um só lugar.</p>
+                            <div class="card-stats">
+                                <span class="card-stat">
+                                    <i data-lucide="check-circle"></i>
+                                    24 checklists
+                                </span>
+                                <span class="card-stat">
+                                    <i data-lucide="clock"></i>
+                                    3 pendentes
+                                </span>
+                            </div>
+                            <a href="CHECKLIST ACADEMICO/checklist-academico.html" class="card-action">
+                                <span>Acessar Checklists</span>
+                                <i data-lucide="arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Minhas Notificações -->
+                    <div class="content-card">
+                        <div class="card-image">
+                            <!-- IMAGEM COERENTE: Notificações/mensagens -->
+                            <img src="https://images.unsplash.com/photo-1611224923853-80b023f02d71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                                 alt="Notificações e mensagens" 
+                                 class="card-bg-image">
+                            <div class="card-image-overlay">
+                                <i data-lucide="bell" class="card-icon"></i>
+                                <div class="notification-pulse"></div>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="card-title">Minhas Notificações</h3>
+                            <p class="card-description">Fique por dentro de todas as novidades, prazos e atualizações importantes.</p>
+                            <div class="card-stats">
+                                <span class="card-stat highlight">
+                                    <i data-lucide="alert-circle"></i>
+                                    3 novas
+                                </span>
+                                <span class="card-stat">
+                                    <i data-lucide="eye"></i>
+                                    Todas vistas
+                                </span>
+                            </div>
+                            <button class="card-action">
+                                <span>Ver Notificações</span>
+                                <i data-lucide="arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Biblioteca de Plataformas -->
+                    <div class="content-card">
+                        <div class="card-image">
+                            <!-- IMAGEM COERENTE: Plataformas tecnológicas -->
+                            <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                                 alt="Plataformas tecnológicas e serviços digitais" 
+                                 class="card-bg-image">
+                            <div class="card-image-overlay">
+                                <i data-lucide="monitor-play" class="card-icon"></i>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="card-title">Biblioteca de Plataformas</h3>
+                            <p class="card-description">Acesso rápido a todas as plataformas educacionais e serviços estudantis.</p>
+                            <div class="card-stats">
+                                <span class="card-stat">
+                                    <i data-lucide="star"></i>
+                                    12 ativas
+                                </span>
+                                <span class="card-stat">
+                                    <i data-lucide="zap"></i>
+                                    Descontos
+                                </span>
+                            </div>
+                            <button class="card-action" data-action="navigate-platforms">
+                                <span>Explorar Plataformas</span>
+                                <i data-lucide="arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Card 4: Central de Documentos -->
+                    <div class="content-card">
+                        <div class="card-image">
+                            <!-- IMAGEM COERENTE: Biblioteca de documentos -->
+                            <img src="img-interno/biblioteca-documentos.jpg" 
+                                 alt="Biblioteca de documentos acadêmicos" 
+                                 class="card-bg-image">
+                            <div class="card-image-overlay">
+                                <i data-lucide="file-text" class="card-icon"></i>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="card-title">Central de Documentos</h3>
+                            <p class="card-description">Acesse certificados, históricos e todos os seus documentos acadêmicos organizados.</p>
+                            <div class="card-stats">
+                                <span class="card-stat">
+                                    <i data-lucide="folder"></i>
+                                    18 documentos
+                                </span>
+                                <span class="card-stat">
+                                    <i data-lucide="download"></i>
+                                    Download
+                                </span>
+                            </div>
+                            <button class="card-action">
+                                <span>Acessar Documentos</span>
+                                <i data-lucide="arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Atividade Recente -->
+            <section class="activity-section">
+                <div class="section-header">
+                    <h2>Atividade Recente</h2>
+                    <button class="view-all-btn">
+                        <span>Ver Tudo</span>
+                        <i data-lucide="arrow-right"></i>
+                    </button>
+                </div>
+                <div class="activity-timeline">
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i data-lucide="check-circle"></i>
+                        </div>
+                        <div class="activity-content">
+                            <h4>Checklist "Documentos para Formatura" concluído</h4>
+                            <p>Há 2 horas</p>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i data-lucide="bell"></i>
+                        </div>
+                        <div class="activity-content">
+                            <h4>Nova notificação: Prazo para inscrição no TCC</h4>
+                            <p>Há 4 horas</p>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i data-lucide="star"></i>
+                        </div>
+                        <div class="activity-content">
+                            <h4>Plataforma "LinkedIn Learning" adicionada aos favoritos</h4>
+                            <p>Ontem</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Conteúdo que cresce -->
+            <div class="page-content">
+                <!-- Seção de Parceiros -->
+                <section class="partners-section">
+                    <div class="partners-container">
+                        <h3 class="partners-title">Nossos Parceiros</h3>
+                        <div class="partners-grid">
+                            <div class="partner-card">
+                                <div class="partner-logo-placeholder bradesco-logo">
+                                    <img 
+                                     width="140"
+                                     height="80"
+                                     class="object-contain"
+                                     src="img-interno/fundacao bradesco.png"
+                                     alt="Logo da Fundacao Bradesco">
+                                </div>
+                                <p class="partner-name">Fundação Bradesco</p>
+                                <p class="partner-description">Parceiro educacional que apoia a inovação acadêmica</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+
+        </main>
+    </div>
+
+    <!-- Overlay para Menu Mobile -->
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+
+    <!-- Script JavaScript separado -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/profile.js"></script>
+    <script src="js/core-config.js"></script>
+    <script src="js/profile-manager.js"></script>
+    <script src="js/loading-navigation.js"></script>
+    <script src="script-interno.js"></script>
+    <script src="script-profile-sync.js"></script>
+    
+
+</body>
+</html>

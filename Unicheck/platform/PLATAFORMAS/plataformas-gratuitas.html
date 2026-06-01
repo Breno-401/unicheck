@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataformas Gratuitas - UniCheck</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <!-- CSS específico para checklist acadêmico -->
+    <link rel="stylesheet" href="../css-interno/base.css">
+    <link rel="stylesheet" href="../css-interno/componente-logo.css">
+    <link rel="stylesheet" href="../css-interno/componentes-header.css">
+    <link rel="stylesheet" href="../css-interno/componentes-sidebar.css">
+    <link rel="stylesheet" href="../css-interno/layout.css">
+    <link rel="stylesheet" href="../css-interno/responsividade.css">
+    <link rel="stylesheet" href="../css-interno/variaveis.css">
+    <link rel="stylesheet" href="../css-interno/style.css">
+    <!-- CSS específico da página -->
+    <link rel="stylesheet" href="../css-interno/checklist-plataformas.css">
+    <link rel="stylesheet" href="plataformas-gratuitas.css">
+    <link rel="stylesheet" href="platform-styles.css">
+</head>
+<body>
+    <!-- Tela de Loading -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-logo">
+            <div class="logo-animation">
+                <img src="../img-interno/logo.png" alt="UniCheck Logo" class="unicheck-logo-loading">
+            </div>
+            <div class="loading-text">
+                <h3>UniCheck</h3>
+                <div class="loading-bar">
+                    <div class="loading-progress"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Container Principal do Dashboard -->
+    <div class="dashboard-container" id="dashboardContainer">
+        <!-- Sidebar/Navbar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-section">
+                    <div class="sidebar-logo-enhanced">
+                        <img src="../img-interno/logo.png" alt="UniCheck Logo" class="sidebar-logo-image">
+                    </div>
+                    <span class="logo-text">UniCheck</span>
+                </div>
+                <button class="sidebar-toggle" id="sidebarToggle" title="Retrair/Expandir Navbar">
+                    <div class="hamburger-menu">
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Perfil do Usuário -->
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <span>JS</span>
+                </div>
+                <div class="user-info">
+                    <h4>João Silva</h4>
+                    <p>Aluno UniSales</p>
+                </div>
+                <div class="user-status">
+                    <span class="status-indicator online"></span>
+                </div>
+            </div>
+
+            <!-- Navegação -->
+            <nav class="sidebar-nav">
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="../index-interno.html" class="nav-link" data-tooltip="Início">
+                            <i data-lucide="home"></i>
+                            <span>Início</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="../CHECKLIST ACADEMICO/checklist-academico.html" class="nav-link" data-tooltip="Checklists Acadêmicos">
+                            <i data-lucide="graduation-cap"></i>
+                            <span>Checklists Acadêmicos</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="plataformas-gratuitas.html" class="nav-link" data-tooltip="Plataformas Gratuitas">
+                            <i data-lucide="monitor"></i>
+                            <span>Plataformas Gratuitas</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-tooltip="Notificações" data-action="noop">
+                            <i data-lucide="bell"></i>
+                            <span>Notificações</span>
+                            <span class="notification-badge">3</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-tooltip="Central de Documentos">
+                            <i data-lucide="file-text"></i>
+                            <span>Central de Documentos</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-tooltip="Ajuda & Suporte">
+                            <i data-lucide="help-circle"></i>
+                            <span>Ajuda & Suporte</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Rodapé da Navbar -->
+                <div class="nav-footer">
+                    <button class="theme-toggle" id="themeToggle">
+                        <i data-lucide="moon"></i>
+                        <span>Modo Escuro</span>
+                    </button>
+                    <button class="logout-btn logout-action" data-action="logout">
+                        <i data-lucide="log-out"></i>
+                        <span>Sair</span>
+                    </button>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <main class="main-content" id="mainContent">
+            <!-- Header -->
+            <header class="main-header">
+                <div class="header-top">
+                    <div class="header-mobile-controls">
+                        <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                            <i data-lucide="menu"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="welcome-section">
+                        <h1 class="welcome-title">Plataformas Gratuitas para Estudantes</h1>
+                        <p class="welcome-subtitle">Descubra ferramentas gratuitas e com desconto exclusivas para estudantes</p>
+                    </div>
+                </div>
+
+                <div class="header-bottom-enhanced">
+                    <!-- Campo de Busca à Esquerda -->
+                    <div class="header-search-enhanced">
+                        <div class="search-box">
+                            <i data-lucide="search" class="search-icon"></i>
+                            <input type="text" placeholder="Buscar plataformas, categorias..." class="search-input" id="platformSearch">
+                            <button class="search-filters">
+                                <i data-lucide="filter"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Filtros de Categoria -->
+                    <div class="category-filters">
+                        <button class="filter-btn active" data-category="all">Todas</button>
+                        <button class="filter-btn" data-category="productivity">Produtividade</button>
+                        <button class="filter-btn" data-category="design">Design</button>
+                        <button class="filter-btn" data-category="development">Desenvolvimento</button>
+                        <button class="filter-btn" data-category="education">Educação</button>
+                        <button class="filter-btn" data-category="cloud">Cloud</button>
+                        <button class="filter-btn" data-category="music">Música</button>
+                    </div>
+
+                    <!-- Ações do Usuário à Direita -->
+                    <div class="header-actions-enhanced">
+                        <button class="theme-toggle-mobile" id="themeToggleMobile">
+                            <i data-lucide="moon"></i>
+                        </button>
+                        <div class="user-menu">
+                            <button class="user-menu-trigger" id="userMenuTrigger">
+                                <div class="user-avatar-small">
+                                    <span>JS</span>
+                                </div>
+                                <span class="user-name-indicator">João Silva</span>
+                                <i data-lucide="chevron-down" class="dropdown-indicator"></i>
+                            </button>
+                            <!-- DROPDOWN DO USUÁRIO -->
+                            <div class="user-dropdown" id="userDropdown">
+                                <div class="user-dropdown-header">
+                                    <div class="user-dropdown-avatar">
+                                        <span>JS</span>
+                                    </div>
+                                    <div class="user-dropdown-info">
+                                        <h4>João Silva</h4>
+                                        <p>joao.silva@unisales.com.br</p>
+                                    </div>
+                                </div>
+                                <div class="user-dropdown-menu">
+                                    <a href="../CONFIGURACOES PERFIL/configuracoes.html" class="user-dropdown-item">
+                                        <i data-lucide="user"></i>
+                                        <span>Meu Perfil</span>
+                                    </a>
+
+                                    <a href="../CONFIGURACOES PERFIL/configuracoes.html" class="user-dropdown-item">
+                                        <i data-lucide="settings"></i>
+                                        <span>Configurações</span>
+                                    </a>
+                                    
+                                    <button class="user-dropdown-item">
+                                        <i data-lucide="credit-card"></i>
+                                        <span>Assinatura</span>
+                                    </button>
+                                    <div class="user-dropdown-divider"></div>
+                                    <button class="user-dropdown-item">
+                                        <i data-lucide="help-circle"></i>
+                                        <span>Ajuda & Suporte</span>
+                                    </button>
+                                    <button class="user-dropdown-item logout-action" data-action="logout">
+                                        <i data-lucide="log-out"></i>
+                                        <span>Sair</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Conteúdo da Página -->
+            <div class="page-content">
+                <!-- Cards das Plataformas Gratuitas -->
+                <div class="platforms-grid" id="platformsGrid">
+                    
+                    <!-- Card: JetBrains Student Pack -->
+                    <div class="platform-card free" data-category="development" data-favorite="false">
+                        <div class="card-header">
+                            <img src="../img-interno/jetbrains-logo.png" alt="JetBrains" class="platform-logo">
+                            <div class="platform-info">
+                                <h3 class="platform-title">JetBrains Student Pack</h3>
+                                <span class="discount-badge">100% Gratuito</span>
+                            </div>
+                            <button class="favorite-btn is-muted" data-platform="jetbrains">
+                                <i data-lucide="star" class="favorite-icon"></i>
+                            </button>
+                        </div>
+                        <div class="card-content">
+                            <p class="platform-description">
+                                Suite completa de IDEs para estudantes. Inclui IntelliJ IDEA, PyCharm, WebStorm e mais.
+                            </p>
+                            <div class="features-list">
+                                <span class="feature-tag">IDE Avançadas</span>
+                                <span class="feature-tag">Suporte 24/7</span>
+                                <span class="feature-tag">Plugins Inclusos</span>
+                            </div>
+                            <div class="pricing-info">
+                                <span class="original-price">R$ 45,90/mês</span>
+                                <span class="student-price">Grátis para estudantes</span>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-primary" data-action="open-platform" data-platform="jetbrains">
+                                <i data-lucide="external-link"></i>
+                                Acessar Plataforma
+                            </button>
+                            <button class="btn btn-secondary" data-action="open-tutorial" data-platform="jetbrains">
+                                <i data-lucide="book-open"></i>
+                                Tutorial
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Card: Spotify Student -->
+                    <div class="platform-card free" data-category="music" data-favorite="false">
+                        <div class="card-header">
+                            <img src="../img-interno/spotify-logo.png" alt="Spotify" class="platform-logo">
+                            <div class="platform-info">
+                                <h3 class="platform-title">Spotify Student</h3>
+                                <span class="discount-badge">50% Desconto</span>
+                            </div>
+                            <button class="favorite-btn" data-platform="spotify">
+                                <i data-lucide="star"></i>
+                            </button>
+                        </div>
+                        <div class="card-content">
+                            <p class="platform-description">
+                                Streaming de música premium com desconto exclusivo para estudantes universitários.
+                            </p>
+                            <div class="features-list">
+                                <span class="feature-tag">Sem Anúncios</span>
+                                <span class="feature-tag">Baixa Qualidade</span>
+                                <span class="feature-tag">Controle Offline</span>
+                            </div>
+                            <div class="pricing-info">
+                                <span class="original-price">R$ 21,90/mês</span>
+                                <span class="student-price">R$ 10,95/mês</span>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-primary" data-action="open-platform" data-platform="spotify">
+                                <i data-lucide="external-link"></i>
+                                Acessar Plataforma
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Card: Microsoft Azure -->
+                    <div class="platform-card free" data-category="cloud" data-favorite="false">
+                        <div class="card-header">
+                            <img src="../img-interno/azure-logo.png" alt="Microsoft Azure" class="platform-logo">
+                            <div class="platform-info">
+                                <h3 class="platform-title">Microsoft Azure for Students</h3>
+                                <span class="discount-badge">$100 Créditos</span>
+                            </div>
+                            <button class="favorite-btn" data-platform="azure">
+                                <i data-lucide="star"></i>
+                            </button>
+                        </div>
+                        <div class="card-content">
+                            <p class="platform-description">
+                                Plataforma de nuvem com $100 em créditos gratuitos e acesso a serviços de IA e machine learning.
+                            </p>
+                            <div class="features-list">
+                                <span class="feature-tag">$100 Grátis</span>
+                                <span class="feature-tag">Serviços IA</span>
+                                <span class="feature-tag">Machine Learning</span>
+                            </div>
+                            <div class="pricing-info">
+                                <span class="original-price">Pago por uso</span>
+                                <span class="student-price">$100 créditos gratuitos</span>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-primary" data-action="open-platform" data-platform="azure">
+                                <i data-lucide="external-link"></i>
+                                Acessar Plataforma
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Card: Canva for Education -->
+                    <div class="platform-card free" data-category="design" data-favorite="false">
+                        <div class="card-header">
+                            <div class="platform-logo-placeholder design">
+                                <i data-lucide="palette"></i>
+                            </div>
+                            <div class="platform-info">
+                                <h3 class="platform-title">Canva for Education</h3>
+                                <span class="discount-badge">100% Gratuito</span>
+                            </div>
+                            <button class="favorite-btn" data-platform="canva">
+                                <i data-lucide="star"></i>
+                            </button>
+                        </div>
+                        <div class="card-content">
+                            <p class="platform-description">
+                                Ferramenta de design gráfico com recursos premium gratuitos para educadores e estudantes.
+                            </p>
+                            <div class="features-list">
+                                <span class="feature-tag">Templates Premium</span>
+                                <span class="feature-tag">Biblioteca Extensa</span>
+                                <span class="feature-tag">Colaboração</span>
+                            </div>
+                            <div class="pricing-info">
+                                <span class="original-price">R$ 34,90/mês</span>
+                                <span class="student-price">Grátis para educadores</span>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-primary" data-action="open-platform" data-platform="canva">
+                                <i data-lucide="external-link"></i>
+                                Acessar Plataforma
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Card: GitHub Student -->
+                    <div class="platform-card free" data-category="development" data-favorite="false">
+                        <div class="card-header">
+                            <div class="platform-logo-placeholder">
+                                <i data-lucide="github"></i>
+                            </div>
+                            <div class="platform-info">
+                                <h3 class="platform-title">GitHub Student Pack</h3>
+                                <span class="discount-badge">100% Gratuito</span>
+                            </div>
+                            <button class="favorite-btn" data-platform="github">
+                                <i data-lucide="star"></i>
+                            </button>
+                        </div>
+                        <div class="card-content">
+                            <p class="platform-description">
+                                Mais de 100 ferramentas gratuitas para desenvolvedores estudantes. Inclui hosting, domains e muito mais.
+                            </p>
+                            <div class="features-list">
+                                <span class="feature-tag">Repo Privados Ilimitados</span>
+                                <span class="feature-tag">GitHub Actions</span>
+                                <span class="feature-tag">Domain Grátis</span>
+                            </div>
+                            <div class="pricing-info">
+                                <span class="original-price">Diversos serviços</span>
+                                <span class="student-price">Tudo incluído gratuitamente</span>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-primary" data-action="open-platform" data-platform="github">
+                                <i data-lucide="external-link"></i>
+                                Acessar Plataforma
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Card: Notion -->
+                    <div class="platform-card free" data-category="productivity" data-favorite="false">
+                        <div class="card-header">
+                            <div class="platform-logo-placeholder">
+                                <i data-lucide="file-text"></i>
+                            </div>
+                            <div class="platform-info">
+                                <h3 class="platform-title">Notion for Students</h3>
+                                <span class="discount-badge">100% Gratuito</span>
+                            </div>
+                            <button class="favorite-btn" data-platform="notion">
+                                <i data-lucide="star"></i>
+                            </button>
+                        </div>
+                        <div class="card-content">
+                            <p class="platform-description">
+                                Workspace tudo-em-um para estudos, projetos e organização pessoal. Perfect para acadêmicos.
+                            </p>
+                            <div class="features-list">
+                                <span class="feature-tag">Workspace Ilimitado</span>
+                                <span class="feature-tag">Colaboração</span>
+                                <span class="feature-tag">Templates Acadêmicos</span>
+                            </div>
+                            <div class="pricing-info">
+                                <span class="original-price">R$ 15,00/mês</span>
+                                <span class="student-price">Grátis para estudantes</span>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-primary" data-action="open-platform" data-platform="notion">
+                                <i data-lucide="external-link"></i>
+                                Acessar Plataforma
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Card: Coursera Plus -->
+                    <div class="platform-card discount" data-category="education" data-favorite="false">
+                        <div class="card-header">
+                            <div class="platform-logo-placeholder education">
+                                <i data-lucide="graduation-cap"></i>
+                            </div>
+                            <div class="platform-info">
+                                <h3 class="platform-title">Coursera Plus</h3>
+                                <span class="discount-badge">65% Desconto</span>
+                            </div>
+                            <button class="favorite-btn" data-platform="coursera">
+                                <i data-lucide="star"></i>
+                            </button>
+                        </div>
+                        <div class="card-content">
+                            <p class="platform-description">
+                                Acesso ilimitado a mais de 7.000 cursos das melhores universidades e empresas do mundo.
+                            </p>
+                            <div class="features-list">
+                                <span class="feature-tag">Certificados</span>
+                                <span class="feature-tag">Certificações Profissionais</span>
+                                <span class="feature-tag">Programas Completos</span>
+                            </div>
+                            <div class="pricing-info">
+                                <span class="original-price">R$ 329,00/mês</span>
+                                <span class="student-price">R$ 115,15/mês</span>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-primary" data-action="open-platform" data-platform="coursera">
+                                <i data-lucide="external-link"></i>
+                                Acessar Plataforma
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Card: Adobe Creative Cloud -->
+                    <div class="platform-card discount" data-category="design" data-favorite="false">
+                        <div class="card-header">
+                            <div class="platform-logo-placeholder design">
+                                <i data-lucide="camera"></i>
+                            </div>
+                            <div class="platform-info">
+                                <h3 class="platform-title">Adobe Creative Cloud Student</h3>
+                                <span class="discount-badge">60% Desconto</span>
+                            </div>
+                            <button class="favorite-btn" data-platform="adobe">
+                                <i data-lucide="star"></i>
+                            </button>
+                        </div>
+                        <div class="card-content">
+                            <p class="platform-description">
+                                Suite completa de aplicações criativas com desconto exclusivo para estudantes. Photoshop, Illustrator e mais.
+                            </p>
+                            <div class="features-list">
+                                <span class="feature-tag">20+ Apps</span>
+                                <span class="feature-tag">100GB Cloud</span>
+                                <span class="feature-tag">Fontes Adobe</span>
+                            </div>
+                            <div class="pricing-info">
+                                <span class="original-price">R$ 89,90/mês</span>
+                                <span class="student-price">R$ 35,96/mês</span>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-primary" data-action="open-platform" data-platform="adobe">
+                                <i data-lucide="external-link"></i>
+                                Acessar Plataforma
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Card: Google Workspace for Education -->
+                    <div class="platform-card free" data-category="productivity" data-favorite="false">
+                        <div class="card-header">
+                            <div class="platform-logo-placeholder">
+                                <i data-lucide="folder"></i>
+                            </div>
+                            <div class="platform-info">
+                                <h3 class="platform-title">Google Workspace for Education</h3>
+                                <span class="discount-badge">100% Gratuito</span>
+                            </div>
+                            <button class="favorite-btn" data-platform="google">
+                                <i data-lucide="star"></i>
+                            </button>
+                        </div>
+                        <div class="card-content">
+                            <p class="platform-description">
+                                Ferramentas de produtividade do Google com recursos expandidos para instituições educacionais.
+                            </p>
+                            <div class="features-list">
+                                <span class="feature-tag">Gmail Ilimitado</span>
+                                <span class="feature-tag">Drive 100GB</span>
+                                <span class="feature-tag">Meet 300 participantes</span>
+                            </div>
+                            <div class="pricing-info">
+                                <span class="original-price">Variado por instituição</span>
+                                <span class="student-price">Grátis para escolas</span>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-primary" data-action="open-platform" data-platform="google">
+                                <i data-lucide="external-link"></i>
+                                Acessar Plataforma
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Call to Action para adicionar mais plataformas -->
+                <div class="add-platform-cta">
+                    <div class="cta-content">
+                        <h3>Conhece uma plataforma gratuita que deveria estar aqui?</h3>
+                        <p>Ajude a comunidade enviando sugestões de ferramentas gratuitas para estudantes</p>
+                        <button class="btn btn-primary" data-action="open-suggest">
+                            <i data-lucide="plus"></i>
+                            Sugerir Plataforma
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+
+        </main>
+    </div>
+
+    <!-- Modal para detalhes da plataforma -->
+    <div class="modal" id="platformModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Detalhes da Plataforma</h3>
+                <button class="modal-close" id="modalClose">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Conteúdo será inserido via JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="modalCancel">Cancelar</button>
+                <button class="btn btn-primary" id="modalConfirm">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para sugerir plataforma -->
+    <div class="modal" id="suggestPlatformModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Sugerir Nova Plataforma</h3>
+                <button class="modal-close" id="suggestModalClose">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="suggestPlatformForm">
+                    <div class="form-group">
+                        <label for="platformName">Nome da Plataforma</label>
+                        <input type="text" id="platformName" name="platformName" required 
+                               placeholder="Ex: Figma for Education">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="platformUrl">URL da Plataforma</label>
+                        <input type="url" id="platformUrl" name="platformUrl" required 
+                               placeholder="https://figma.com/education/">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="platformCategory">Categoria</label>
+                        <select id="platformCategory" name="platformCategory" required>
+                            <option value="">Selecione uma categoria</option>
+                            <option value="productivity">Produtividade</option>
+                            <option value="design">Design</option>
+                            <option value="development">Desenvolvimento</option>
+                            <option value="education">Educação</option>
+                            <option value="cloud">Cloud</option>
+                            <option value="music">Música</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="platformBenefits">Benefícios para Estudantes</label>
+                        <textarea id="platformBenefits" name="platformBenefits" required 
+                                  placeholder="Descreva os benefícios, descontos ou recursos gratuitos disponíveis para estudantes..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="yourName">Seu Nome (Opcional)</label>
+                        <input type="text" id="yourName" name="yourName" 
+                               placeholder="Como devemos dar os créditos?">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="suggestModalCancel">Cancelar</button>
+                <button class="btn btn-primary" data-action="submit-suggestion">Enviar Sugestão</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Tutorial -->
+    <div class="modal" id="tutorialModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="tutorialTitle">Tutorial da Plataforma</h3>
+                <button class="modal-close" id="tutorialClose">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="tutorialBody">
+                <div class="tutorial-content">
+                    <div class="tutorial-icon">
+                        <i data-lucide="graduation-cap"></i>
+                    </div>
+                    <h4>Tutorial em Desenvolvimento</h4>
+                    <p>Estamos preparando um tutorial completo para esta plataforma!</p>
+                    <ul class="tutorial-features">
+                        <li>📋 Guia passo a passo de cadastro</li>
+                        <li>🎯 Configurações essenciais para estudantes</li>
+                        <li>💡 Dicas para maximizar o uso</li>
+                        <li>🔗 Links úteis e recursos adicionais</li>
+                    </ul>
+                    <p class="tutorial-note">
+                        <strong>Nota:</strong> O tutorial estará disponível em breve. 
+                        Por enquanto, você pode acessar a plataforma diretamente.
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="tutorialCancel">Fechar</button>
+                <button class="btn btn-primary" id="tutorialConfirm">Acessar Plataforma</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay para Menu Mobile -->
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+
+    <!-- JavaScript específico para plataformas gratuitas -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../js/config.js"></script>
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/profile.js"></script>
+    <script src="../script-interno.js"></script>
+    <script src="../script-profile-sync.js"></script>
+    <script src="../script-page-state.js"></script>
+    <script src="../script.js"></script>
+    <script src="plataformas-gratuitas.js"></script>
+</body>
+</html>
+
+
+

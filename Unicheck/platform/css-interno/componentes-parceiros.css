@@ -1,0 +1,80 @@
+/* ==========================
+   PARCEIROS SECTION
+   ========================== */
+
+.partners-section {
+  padding: var(--spacing-xl) var(--spacing-2xl);
+}
+
+.partners-container {
+  text-align: center;
+}
+
+.partners-title {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-xl);
+}
+
+.partners-grid {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-2xl);
+  flex-wrap: wrap;
+}
+
+.partner-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  text-align: center;
+  transition: all var(--transition-normal);
+  min-width: 250px;
+}
+
+.partner-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.partner-logo-placeholder {
+  width: 80px;
+  height: 80px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto var(--spacing-md);
+  background: transparent;
+  overflow: hidden;
+}
+
+/* Container específico para logo da Fundação Bradesco - aumentado */
+.partner-logo-placeholder.bradesco-logo {
+  width: 150px;
+  height: 85px;
+}
+
+.partner-logo-placeholder img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: var(--radius-lg);
+  background: transparent;
+}
+
+.partner-name {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.partner-description {
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
