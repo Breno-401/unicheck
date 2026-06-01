@@ -117,7 +117,7 @@
         }
 
         return {
-            icon: checklist.title === "Portal Acadêmico TOTVS" ? "monitor-play" : "arrow-right",
+            icon: "arrow-right",
             label: checklist.progress > 0 ? "Continuar" : "Iniciar"
         };
     }
@@ -464,40 +464,10 @@
         }
     }
 
-    function handleTutorialMessages(event) {
-        if (event.data?.type === "unicheck-tutorial-back") {
-            goBackToList();
-            return;
-        }
-
-        if (event.data?.type === "unicheck-tutorial-progress-saved") {
-            const checklistId = event.data.checklistId;
-            const tasks = event.data.tasks || {};
-            if (!checklistId) return;
-
-            state.progress[checklistId] = {
-                ...(state.progress[checklistId] || {}),
-                tasks: {
-                    ...((state.progress[checklistId] || {}).tasks || {}),
-                    ...tasks
-                }
-            };
-
-            saveStoredProgress();
-            hydrateChecklists();
-            renderListView();
-
-            if (state.currentChecklistId === checklistId) {
-                updateDetailSummaryView(getChecklistById(checklistId));
-            }
-        }
-    }
-
     function setupEventListeners() {
         refs.pageContent?.addEventListener("click", handlePageClick);
         refs.pageContent?.addEventListener("change", handlePageChange);
         window.addEventListener("popstate", syncFromLocation);
-        window.addEventListener("message", handleTutorialMessages);
     }
 
     async function init() {
