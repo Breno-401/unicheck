@@ -176,6 +176,7 @@ Fluxo:
 - aplica regra de bloqueio entre fases;
 - mostra lista de fases;
 - abre a visao detalhada de uma fase com o mesmo padrao de cards de conclusao para todas as etapas;
+- exibe conteudo informativo especifico por fase dentro da propria tela de checklist;
 - permite marcar itens como concluido;
 - persiste progresso localmente e no banco;
 - libera a fase seguinte quando a atual e finalizada.
@@ -185,7 +186,8 @@ Regra central do modulo:
 - o checklist e ordenado por `ordem`;
 - a primeira fase nao e bloqueada;
 - uma fase posterior fica bloqueada ate a anterior estar concluida;
-- a visao de detalhe usa um unico padrao de cards de conclusao, variando apenas o texto e o conteudo de apoio de cada checklist.
+- a visao de detalhe usa um unico padrao de cards de conclusao, variando apenas o texto e o conteudo de apoio de cada checklist;
+- o tutorial TOTVS em tela separada foi removido para evitar duplicacao de fluxo e concentrar a experiencia no checklist.
 
 ### 6.5 Plataformas gratuitas
 

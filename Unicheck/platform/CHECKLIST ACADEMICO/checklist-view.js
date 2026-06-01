@@ -12,6 +12,44 @@
         "Mentorias": "../img-interno/logo.png"
     };
 
+    const cardCopy = {
+        "Primeiros passos na faculdade": {
+            eyebrow: "Onboarding da turma",
+            description: "Defina os combinados iniciais, centralize a comunicação e prepare a turma para a rotina academica.",
+            highlights: ["Organizacao da turma", "Canais oficiais", "Calendario academico"]
+        },
+        "Portal Acadêmico TOTVS": {
+            eyebrow: "Acesso academico",
+            description: "Entenda o acesso ao portal, a navegacao principal e a localizacao dos documentos mais usados.",
+            highlights: ["Login inicial", "Navegacao do portal", "Documentos e relatorios"]
+        },
+        "Configuração de Email": {
+            eyebrow: "Conta institucional",
+            description: "Valide o email da instituicao, confirme acesso e deixe a conta pronta para avisos e recuperacao.",
+            highlights: ["Acesso validado", "Recuperacao de senha", "Avisos institucionais"]
+        },
+        "Biblioteca Virtual": {
+            eyebrow: "Acesso à pesquisa",
+            description: "Prepare a consulta a acervo, bases digitais e materiais de apoio para estudo e pesquisa.",
+            highlights: ["Busca de acervo", "Bases digitais", "Materiais de apoio"]
+        },
+        "Microsoft Teams": {
+            eyebrow: "Comunicação da turma",
+            description: "Organize a conta, os canais e a rotina de uso do Teams para aulas, recados e encontros.",
+            highlights: ["Contas institucionais", "Canais e equipes", "Avisos e reunioes"]
+        },
+        "Plataforma A": {
+            eyebrow: "Ferramenta complementar",
+            description: "Conclua a configuracao minima da plataforma adicional usada no fluxo academico.",
+            highlights: ["Acesso inicial", "Configuracao final", "Uso complementar"]
+        },
+        "Mentorias": {
+            eyebrow: "Apoio acadêmico",
+            description: "Entenda como acionar o acompanhamento e usar os canais de apoio ao estudante.",
+            highlights: ["Canal de apoio", "Agendamento", "Acompanhamento"]
+        }
+    };
+
     const state = {
         rawChecklists: [],
         checklists: [],
@@ -77,6 +115,14 @@
         return checklist.imageUrl || checklistImages[checklist.title] || FALLBACK_IMAGE;
     }
 
+    function getCardCopy(checklist) {
+        return cardCopy[checklist.title] || {
+            eyebrow: `Fase ${checklist.phase || 1}`,
+            description: checklist.description || "Card de conclusao da fase academica.",
+            highlights: ["Progresso sincronizado", "Fluxo continuo", "Checklist objetivo"]
+        };
+    }
+
     function hydrateChecklists() {
         state.checklists = window.UniCheckChecklist
             .applyProgress(state.rawChecklists, state.progress)
@@ -124,6 +170,7 @@
 
     function buildChecklistCard(checklist, index) {
         const action = createCardActionLabel(checklist);
+        const copy = getCardCopy(checklist);
         const lockMessage = index === 0
             ? "Sempre liberado"
             : `Complete a fase ${index} para desbloquear`;
@@ -151,10 +198,16 @@
                     <div class="phase-info">
                         <span class="phase-number">Fase ${escapeHtml(checklist.phase || index + 1)}</span>
                         <span class="phase-title">${escapeHtml(checklist.title)}</span>
+                        <span class="card-eyebrow">${escapeHtml(copy.eyebrow)}</span>
                     </div>
                 </div>
                 <div class="card-content">
-                    <p class="platform-description">${escapeHtml(checklist.description || "Sem descricao cadastrada.")}</p>
+                    <p class="platform-description">${escapeHtml(copy.description)}</p>
+                    <div class="card-highlights">
+                        ${copy.highlights.slice(0, 3).map(highlight => `
+                            <span class="card-highlight">${escapeHtml(highlight)}</span>
+                        `).join("")}
+                    </div>
                     <div class="progress-section">
                         <div class="progress-bar">
                             <div class="progress-fill" style="width: ${checklist.progress}%"></div>
@@ -222,34 +275,6 @@
         }
 
         window.UniCheckChecklistDetail.render(refs.detailContent, checklist);
-    }
-
-    function updateDetailSummaryView(checklist) {
-        if (!checklist || !refs.detailContent || refs.detailView?.classList.contains("is-hidden")) {
-            return;
-        }
-
-        const summaryValue = refs.detailContent.querySelector(".detail-summary-value");
-        const progressFill = refs.detailContent.querySelector(".detail-progress-fill");
-        const progressText = refs.detailContent.querySelector(".detail-progress-text");
-        const status = refs.detailContent.querySelector(".detail-summary-status");
-
-        if (summaryValue) {
-            summaryValue.textContent = `${checklist.progress}%`;
-        }
-
-        if (progressFill) {
-            progressFill.style.width = `${checklist.progress}%`;
-        }
-
-        if (progressText) {
-            progressText.textContent = `${checklist.tasks.filter(task => task.completed).length}/${checklist.tasks.length} itens concluidos`;
-        }
-
-        if (status) {
-            status.textContent = checklist.completed ? "Checklist concluido" : "Checklist em andamento";
-            status.classList.toggle("is-completed", checklist.completed);
-        }
     }
 
     function syncVisibleView() {
@@ -476,6 +501,7 @@
 
         createLayoutIfNeeded();
         state.progress = getStoredProgress();
+
         try {
             state.user = await window.UniCheckChecklist.getCurrentUser();
             if (state.user?.id) {
@@ -486,6 +512,7 @@
         } catch (error) {
             console.error("Erro ao carregar usuario/progresso remoto:", error);
         }
+
         setupEventListeners();
         await loadChecklists();
     }
