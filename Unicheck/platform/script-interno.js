@@ -117,39 +117,12 @@ if (themeToggleMobile) {
 // TELA DE LOADING
 // ==========================
 
-const loadingScreen = document.getElementById('loadingScreen');
-
 /**
- * Simula o carregamento da página e esconde a tela de loading
+ * Loading interno removido.
+ * Mantido como no-op para preservar a assinatura usada pela inicialização.
  */
 function simulateLoading() {
-    // Verificar se o elemento de loading existe
-    if (!loadingScreen) {
-        console.warn('Elemento loadingScreen não encontrado');
-        return;
-    }
-    
-    // Aguardar 3 segundos para simular carregamento
-    const loadingTimeout = setTimeout(() => {
-        try {
-            // Adicionar classe para esconder a tela de loading
-            loadingScreen.classList.add('hidden');
-            
-            // Remover completamente do DOM após a animação
-            setTimeout(() => {
-                loadingScreen.style.display = 'none';
-                // Emitir evento customizado para indicar que o loading terminou
-                document.dispatchEvent(new CustomEvent('loadingComplete'));
-            }, 500);
-        } catch (error) {
-            console.warn('Erro ao finalizar loading:', error);
-            // Fallback: forçar ocultação
-            loadingScreen.style.display = 'none';
-        }
-    }, 3000);
-    
-    // Armazenar o timeout para limpeza se necessário
-    loadingScreen.dataset.loadingTimeout = loadingTimeout;
+    return;
 }
 
 // ==========================
@@ -705,9 +678,6 @@ function initializeDashboard() {
         // Inicializar tema
         initializeTheme();
         
-        // Simular carregamento
-        simulateLoading();
-        
         // Restaurar estado da sidebar
         restoreSidebarState();
         
@@ -787,10 +757,6 @@ function initializeDashboard() {
         
     } catch (error) {
         console.error('❌ Erro na inicialização do dashboard:', error);
-        // Garantir que a tela de loading seja escondida mesmo em caso de erro
-        if (loadingScreen) {
-            loadingScreen.style.display = 'none';
-        }
     }
 }
 

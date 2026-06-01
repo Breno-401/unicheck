@@ -1,14 +1,6 @@
-// Navegação com tela de loading
 (function () {
-    function showLoadingAndNavigate(url) {
-        const loadingScreen = document.getElementById('loadingScreen');
-        if (loadingScreen) {
-            loadingScreen.style.display = 'flex';
-        }
-
-        setTimeout(() => {
-            window.location.href = url;
-        }, 500);
+    function navigateDirectly(url) {
+        window.location.href = url;
     }
 
     function handleClick(event) {
@@ -23,13 +15,13 @@
             event.preventDefault();
             const link = actionElement.closest('a');
             if (link && link.href) {
-                showLoadingAndNavigate(link.href);
+                navigateDirectly(link.href);
             }
         }
 
         if (action === 'navigate-platforms') {
             event.preventDefault();
-            showLoadingAndNavigate('PLATAFORMAS/plataformas-gratuitas.html');
+            navigateDirectly('PLATAFORMAS/plataformas-gratuitas.html');
         }
     }
 

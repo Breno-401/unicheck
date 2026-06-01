@@ -1,13 +1,5 @@
-// Utilitários de estado de página (loading e navbar ativa)
+// Utilitários de estado de página
 (function () {
-    function hideLoadingAfterDelay(delayMs) {
-        const loadingScreen = document.getElementById('loadingScreen');
-        if (!loadingScreen) return;
-        setTimeout(() => {
-            loadingScreen.style.display = 'none';
-        }, delayMs);
-    }
-
     function setActiveNav() {
         const currentPath = decodeURIComponent(window.location.pathname).replace(/\\/g, '/');
         const navLinks = document.querySelectorAll('.nav-link[href]');
@@ -29,12 +21,8 @@
     }
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-            hideLoadingAfterDelay(1000);
-            setActiveNav();
-        });
+        document.addEventListener('DOMContentLoaded', setActiveNav);
     } else {
-        hideLoadingAfterDelay(1000);
         setActiveNav();
     }
 })();
