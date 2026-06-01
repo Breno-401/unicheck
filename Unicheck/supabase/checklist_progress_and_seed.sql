@@ -56,7 +56,7 @@ with fase1 as (
 )
 update public.checklists
 set titulo = 'Primeiros passos na faculdade',
-    descricao = 'Estruture os combinados iniciais da turma e deixe o onboarding pronto para a rotina academica.'
+    descricao = 'Estruture os combinados iniciais da turma, defina os contatos principais e prepare o onboarding para a rotina academica.'
 where id in (select id from fase1);
 
 with fase1 as (
@@ -112,7 +112,7 @@ with fase2 as (
 )
 update public.checklists
 set titulo = 'Portal Acadêmico TOTVS',
-    descricao = 'Aprenda a acessar o portal, entrar com suas credenciais e localizar os recursos essenciais.'
+    descricao = 'Aprenda a acessar o Portal do Aluno, entrar com RA e senha e localizar a central do aluno e os documentos mais usados.'
 where id in (select id from fase2);
 
 with fase2 as (
@@ -126,10 +126,10 @@ select fase2.id, item_data.ordem, item_data.titulo
 from fase2
 cross join (
     values
-        (1, 'Acessar o portal academico'),
+        (1, 'Abrir o Portal do Aluno UniSales'),
         (2, 'Fazer login com RA e senha inicial'),
-        (3, 'Localizar a navegacao principal do sistema'),
-        (4, 'Encontrar relatorios e documentos academicos')
+        (3, 'Localizar a Central do Aluno e a Secretaria'),
+        (4, 'Baixar boletos, comprovantes e relatorios')
 ) as item_data(ordem, titulo)
 where not exists (
     select 1
@@ -151,10 +151,10 @@ fase2_items as (
 )
 update public.checklist_items ci
 set titulo = case fase2_items.pos
-    when 1 then 'Acessar o portal academico'
+    when 1 then 'Abrir o Portal do Aluno UniSales'
     when 2 then 'Fazer login com RA e senha inicial'
-    when 3 then 'Localizar a navegacao principal do sistema'
-    when 4 then 'Encontrar relatorios e documentos academicos'
+    when 3 then 'Localizar a Central do Aluno e a Secretaria'
+    when 4 then 'Baixar boletos, comprovantes e relatorios'
     else ci.titulo
 end
 from fase2_items
@@ -168,7 +168,7 @@ with fase3 as (
 )
 update public.checklists
 set titulo = 'Configuração de Email',
-    descricao = 'Valide o email institucional, confirme o acesso e prepare a conta para avisos e recuperacao.'
+    descricao = 'Valide o email institucional, entre no Outlook/Webmail e prepare a conta para avisos, comunicados e recuperacao.'
 where id in (select id from fase3);
 
 with fase3 as (
@@ -183,7 +183,7 @@ from fase3
 cross join (
     values
         (1, 'Confirmar o email institucional'),
-        (2, 'Entrar no webmail ou aplicativo'),
+        (2, 'Entrar no Outlook/Webmail'),
         (3, 'Alterar a senha provisoria'),
         (4, 'Testar envio e recebimento de mensagens')
 ) as item_data(ordem, titulo)
@@ -208,7 +208,7 @@ fase3_items as (
 update public.checklist_items ci
 set titulo = case fase3_items.pos
     when 1 then 'Confirmar o email institucional'
-    when 2 then 'Entrar no webmail ou aplicativo'
+    when 2 then 'Entrar no Outlook/Webmail'
     when 3 then 'Alterar a senha provisoria'
     when 4 then 'Testar envio e recebimento de mensagens'
     else ci.titulo
@@ -224,7 +224,7 @@ with fase4 as (
 )
 update public.checklists
 set titulo = 'Biblioteca Virtual',
-    descricao = 'Prepare a consulta a acervo, bases digitais e materiais de apoio para estudo e pesquisa.'
+    descricao = 'Prepare a consulta ao acervo, livros, artigos e bases digitais para estudo e pesquisa.'
 where id in (select id from fase4);
 
 with fase4 as (
@@ -280,7 +280,7 @@ with fase5 as (
 )
 update public.checklists
 set titulo = 'Microsoft Teams',
-    descricao = 'Organize a conta, os canais e a rotina de uso do Teams para aulas, recados e encontros.'
+    descricao = 'Organize a conta, os canais e a rotina de uso do Teams para aulas, recados, encontros e arquivos da turma.'
 where id in (select id from fase5);
 
 with fase5 as (
@@ -295,7 +295,7 @@ from fase5
 cross join (
     values
         (1, 'Entrar com a conta institucional'),
-        (2, 'Abrir a equipe da turma'),
+        (2, 'Abrir a equipe da turma ou disciplina'),
         (3, 'Ajustar notificacoes e perfil'),
         (4, 'Localizar canais, arquivos e reunioes')
 ) as item_data(ordem, titulo)
@@ -335,8 +335,8 @@ with fase6 as (
     limit 1
 )
 update public.checklists
-set titulo = 'Plataforma A',
-    descricao = 'Conclua a configuracao minima da plataforma adicional usada no fluxo academico.'
+set titulo = 'Plataforma A+',
+    descricao = 'Conclua a configuracao minima da Plataforma A+ para materiais e recursos extras do fluxo academico.'
 where id in (select id from fase6);
 
 with fase6 as (
@@ -350,7 +350,7 @@ select fase6.id, item_data.ordem, item_data.titulo
 from fase6
 cross join (
     values
-        (1, 'Acessar a plataforma complementar'),
+        (1, 'Acessar a Plataforma A+'),
         (2, 'Concluir o login inicial'),
         (3, 'Identificar materiais e recursos principais'),
         (4, 'Registrar acesso ou pendencias da ferramenta')
@@ -375,7 +375,7 @@ fase6_items as (
 )
 update public.checklist_items ci
 set titulo = case fase6_items.pos
-    when 1 then 'Acessar a plataforma complementar'
+    when 1 then 'Acessar a Plataforma A+'
     when 2 then 'Concluir o login inicial'
     when 3 then 'Identificar materiais e recursos principais'
     when 4 then 'Registrar acesso ou pendencias da ferramenta'
@@ -392,7 +392,7 @@ with fase7 as (
 )
 update public.checklists
 set titulo = 'Mentorias',
-    descricao = 'Entenda como acionar o acompanhamento e usar os canais de apoio ao estudante.'
+    descricao = 'Entenda como acionar o acompanhamento, registrar demandas e usar os canais de apoio ao estudante.'
 where id in (select id from fase7);
 
 with fase7 as (

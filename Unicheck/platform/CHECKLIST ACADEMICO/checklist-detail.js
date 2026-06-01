@@ -32,14 +32,14 @@
             ]
         },
         "Portal Acadêmico TOTVS": {
-            eyebrow: "Acesso academico",
-            helper: "Use os cards para entrar no portal, localizar menus essenciais e recuperar documentos sem depender de outra tela.",
+            eyebrow: "Portal do aluno",
+            helper: "Use os cards para entrar no Portal Academico TOTVS, localizar a central do aluno e acessar os documentos mais usados.",
             sectionTitle: "Fluxo do portal",
-            sectionDescription: "Cada card espelha uma etapa real do primeiro acesso e da navegacao basica no TOTVS.",
+            sectionDescription: "Cada card espelha uma etapa real do primeiro acesso, da navegacao e da consulta de documentos no portal.",
             summaryLabel: "Resumo do acesso",
             summaryStatus: "Acesso operacional",
             summaryLead: "Entrada e navegação no portal",
-            nextStep: "Depois dessa fase, o estudante ja consegue consultar rotinas e documentos com autonomia.",
+            nextStep: "Depois dessa fase, o estudante ja consegue consultar rotinas, boletos, documentos e comunicados com autonomia.",
             overview: [
                 { label: "Objetivo", value: "Entrar com segurança" },
                 { label: "Foco", value: "Navegacao e documentos" },
@@ -155,9 +155,9 @@
                 "Materiais e comunicados tendem a ficar em canais especificos do curso."
             ]
         },
-        "Plataforma A": {
+        "Plataforma A+": {
             eyebrow: "Ferramenta complementar",
-            helper: "Siga os cards para deixar o acesso a plataforma complementar pronto e sem pendencias.",
+            helper: "Siga os cards para deixar o acesso a Plataforma A+ pronto e sem pendencias.",
             sectionTitle: "Uso complementar",
             sectionDescription: "A fase cobre a configuracao minima para operar uma ferramenta adicional da rotina academica.",
             summaryLabel: "Resumo da plataforma",

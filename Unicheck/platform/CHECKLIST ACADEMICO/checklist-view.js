@@ -8,7 +8,7 @@
         "Configuração de Email": "../img-interno/outlook.png",
         "Biblioteca Virtual": "../img-interno/bibliotecaV.png",
         "Microsoft Teams": "../img-interno/MicrosoftT.png",
-        "Plataforma A": "../img-interno/platafromaA.png",
+        "Plataforma A+": "../img-interno/platafromaA.png",
         "Mentorias": "../img-interno/logo.png"
     };
 
@@ -19,33 +19,33 @@
             highlights: ["Organizacao da turma", "Canais oficiais", "Calendario academico"]
         },
         "Portal Acadêmico TOTVS": {
-            eyebrow: "Acesso academico",
-            description: "Entenda o acesso ao portal, a navegacao principal e a localizacao dos documentos mais usados.",
-            highlights: ["Login inicial", "Navegacao do portal", "Documentos e relatorios"]
+            eyebrow: "Portal do aluno",
+            description: "Acesse o Portal Academico TOTVS, entre com seu RA, encontre a central do aluno e localize documentos essenciais.",
+            highlights: ["Portal do Aluno", "Central do aluno", "Documentos e relatorios"]
         },
         "Configuração de Email": {
-            eyebrow: "Conta institucional",
-            description: "Valide o email da instituicao, confirme acesso e deixe a conta pronta para avisos e recuperacao.",
-            highlights: ["Acesso validado", "Recuperacao de senha", "Avisos institucionais"]
+            eyebrow: "Email institucional",
+            description: "Ative o e-mail da faculdade, valide o acesso no Outlook/Webmail e garanta o canal oficial de comunicacao.",
+            highlights: ["Outlook/Webmail", "Senha atualizada", "Canal oficial"]
         },
         "Biblioteca Virtual": {
-            eyebrow: "Acesso à pesquisa",
-            description: "Prepare a consulta a acervo, bases digitais e materiais de apoio para estudo e pesquisa.",
-            highlights: ["Busca de acervo", "Bases digitais", "Materiais de apoio"]
+            eyebrow: "Pesquisa e acervo",
+            description: "Use a Biblioteca Virtual para pesquisar livros, artigos e bases digitais ligadas à sua disciplina.",
+            highlights: ["Acervo digital", "Artigos e livros", "Busca por disciplina"]
         },
         "Microsoft Teams": {
             eyebrow: "Comunicação da turma",
-            description: "Organize a conta, os canais e a rotina de uso do Teams para aulas, recados e encontros.",
-            highlights: ["Contas institucionais", "Canais e equipes", "Avisos e reunioes"]
+            description: "Organize o Teams da turma, confirme a equipe da disciplina e ajuste avisos e reunioes.",
+            highlights: ["Equipe da disciplina", "Arquivos e canais", "Aulas e avisos"]
         },
-        "Plataforma A": {
+        "Plataforma A+": {
             eyebrow: "Ferramenta complementar",
-            description: "Conclua a configuracao minima da plataforma adicional usada no fluxo academico.",
-            highlights: ["Acesso inicial", "Configuracao final", "Uso complementar"]
+            description: "Acesse a Plataforma A+ e conclua a configuracao minima para materiais e recursos extras.",
+            highlights: ["Acesso inicial", "Materiais extras", "Uso complementar"]
         },
         "Mentorias": {
-            eyebrow: "Apoio acadêmico",
-            description: "Entenda como acionar o acompanhamento e usar os canais de apoio ao estudante.",
+            eyebrow: "Apoio academico",
+            description: "Localize o canal de mentoria, saiba como agendar atendimento e acompanhe suas demandas.",
             highlights: ["Canal de apoio", "Agendamento", "Acompanhamento"]
         }
     };
