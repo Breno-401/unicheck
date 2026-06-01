@@ -177,6 +177,7 @@ Fluxo:
 - mostra lista de fases;
 - abre a visao detalhada de uma fase com o mesmo padrao de cards de conclusao para todas as etapas;
 - exibe conteudo informativo especifico por fase dentro da propria tela de checklist;
+- trabalha com fases ja estruturadas com tarefas reais, de forma que o desbloqueio entre fases possa ser testado de ponta a ponta;
 - permite marcar itens como concluido;
 - persiste progresso localmente e no banco;
 - libera a fase seguinte quando a atual e finalizada.
