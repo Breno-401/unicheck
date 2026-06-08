@@ -2,7 +2,8 @@
 (function () {
     function getStoredProfile() {
         try {
-            const savedProfile = localStorage.getItem('userProfile');
+            const key = window.UniCheckConfig?.STORAGE_KEYS?.USER_PROFILE || 'userProfile';
+            const savedProfile = localStorage.getItem(key);
             return savedProfile ? JSON.parse(savedProfile) : null;
         } catch (error) {
             console.warn('Erro ao carregar dados do perfil:', error);
@@ -106,7 +107,8 @@
 
         window.addEventListener('focus', loadProfileData);
         window.addEventListener('storage', event => {
-            if (event.key === 'userProfile') {
+            const key = window.UniCheckConfig?.STORAGE_KEYS?.USER_PROFILE || 'userProfile';
+            if (event.key === key) {
                 loadProfileData();
             }
         });

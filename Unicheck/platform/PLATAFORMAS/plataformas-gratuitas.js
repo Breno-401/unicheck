@@ -4,6 +4,36 @@
  */
 
 // Estado da aplicação
+function getCurrentUserStorageSuffix() {
+    try {
+        const profileKey = window.UniCheckConfig?.STORAGE_KEYS?.USER_PROFILE || 'userProfile';
+        const rawProfile = localStorage.getItem(profileKey);
+        if (!rawProfile) return 'anonymous';
+
+        const profile = JSON.parse(rawProfile);
+        return profile?.id || 'anonymous';
+    } catch (error) {
+        return 'anonymous';
+    }
+}
+
+function getPlatformStorageKey(baseKey) {
+    return `${baseKey}:${getCurrentUserStorageSuffix()}`;
+}
+
+function readStoredList(baseKey) {
+    try {
+        const raw = localStorage.getItem(getPlatformStorageKey(baseKey));
+        return raw ? JSON.parse(raw) : [];
+    } catch (error) {
+        return [];
+    }
+}
+
+function writeStoredList(baseKey, value) {
+    localStorage.setItem(getPlatformStorageKey(baseKey), JSON.stringify(value));
+}
+
 const platformState = {
     platforms: [
         {
@@ -260,7 +290,7 @@ const platformState = {
             logo: '../img-interno/stackoverflow_logo_6.png'
         }
     ],
-    favorites: JSON.parse(localStorage.getItem('platformFavorites')) || [],
+    favorites: readStoredList('platformFavorites'),
     currentFilter: 'all',
     searchTerm: '',
     currentPage: 1,
@@ -751,7 +781,7 @@ function toggleFavorite(platformId, button) {
     }
     
     // Salvar no localStorage
-    localStorage.setItem('platformFavorites', JSON.stringify(platformState.favorites));
+    writeStoredList('platformFavorites', platformState.favorites);
     
     // Animação no botão
     button.style.transform = 'scale(1.2)';
@@ -1016,9 +1046,9 @@ function submitSuggestion() {
     };
     
     // Salvar no localStorage para demonstração
-    let suggestions = JSON.parse(localStorage.getItem('platformSuggestions')) || [];
+    let suggestions = readStoredList('platformSuggestions');
     suggestions.push(suggestion);
-    localStorage.setItem('platformSuggestions', JSON.stringify(suggestions));
+    writeStoredList('platformSuggestions', suggestions);
     
     // Fechar modal
     closeSuggestModal();

@@ -2,7 +2,7 @@
     // Ajuste PROFILE_USER_ID_COLUMN se a coluna de relacionamento com auth.users
     // na sua tabela users_profile tiver outro nome.
     const PROFILE_TABLE = "users_profile";
-    const PROFILE_USER_ID_COLUMN = "id";
+    const PROFILE_USER_ID_COLUMN = "user_id";
     const STORAGE_KEY = "userProfile";
 
     function getClient() {

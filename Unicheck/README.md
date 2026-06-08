@@ -107,8 +107,8 @@ Depois acesse: `http://localhost:8000`
 
 1. **Paths Relativos:** Todos os paths foram ajustados para funcionar com a estrutura de pastas
 2. **Confirmação de Logout:** Há um diálogo de confirmação ao clicar em "Sair"
-3. **Simulação de Login:** Atualmente o login é simulado (aceita qualquer credencial)
-4. **LocalStorage:** O sistema usa localStorage para salvar dados do perfil
+3. **Autenticação Real:** O login usa Supabase Auth com validação de RA
+4. **LocalStorage:** O sistema usa localStorage para salvar tema, perfil cacheado e progresso auxiliar por usuário
 
 ## Suporte
 

@@ -316,8 +316,8 @@ Chaves relevantes atualmente:
 - `theme`
 - `sidebarCollapsed`
 - `userProfile`
-- `platformFavorites`
-- `platformSuggestions`
+- `platformFavorites:<user_id>`
+- `platformSuggestions:<user_id>`
 - `unicheck_checklist_progress_v2:<user_id>`
 
 ### Supabase Auth
@@ -353,7 +353,7 @@ O projeto funciona, mas existem inconsistencias tecnicas que precisam ser conhec
 
 - [`js/checklist.js`](./js/checklist.js) e [`supabase/checklist_progress_and_seed.sql`](./supabase/checklist_progress_and_seed.sql) agora estao alinhados em `user_checklist_item_progress`, com `user_id` e `checklist_item_id`.
 - O cache local do checklist e separado por usuario autenticado para evitar vazamento de progresso entre contas no mesmo navegador.
-- [`js/profile.js`](./js/profile.js) assume que `users_profile` usa a coluna `id` como chave de relacionamento com `auth.users`, mas as politicas em [`supabase/users_profile_policies.sql`](./supabase/users_profile_policies.sql) trabalham com `user_id`.
+- [`js/profile.js`](./js/profile.js) e [`supabase/users_profile_policies.sql`](./supabase/users_profile_policies.sql) estao alinhados em `users_profile.user_id` como chave de relacionamento com `auth.users`.
 - Alguns documentos auxiliares em `platform/PLATAFORMAS/` e `platform/CHECKLIST ACADEMICO/` descrevem funcionalidades de forma mais antiga do que o comportamento atual do codigo.
 
 Isto nao invalida a arquitetura geral, mas significa que este `architecture.md` deve ser tratado como a fonte de contexto mais fiel do estado atual do projeto.
