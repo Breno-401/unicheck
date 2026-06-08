@@ -14,12 +14,23 @@
     }
 
     async function getCurrentUser() {
-        const session = await window.UniCheckAuth?.getSession?.();
-        const user = session?.user;
+        const auth = window.UniCheckAuth;
+        if (!auth) {
+            throw new Error("Modulo de autenticacao nao encontrado.");
+        }
+
+        const debug = await auth.getAuthDebugSnapshot?.("profile.getCurrentUser");
+        const user = debug?.user || await auth.getUser?.();
 
         if (!user) {
             throw new Error("Nenhum usuario autenticado.");
         }
+
+        console.info("[UniCheckProfile] Usuario autenticado confirmado", {
+            userId: user.id || null,
+            email: user.email || null,
+            hasSession: Boolean(debug?.session)
+        });
 
         return user;
     }
@@ -61,6 +72,11 @@
         const client = getClient();
         const user = await getCurrentUser();
 
+        console.info("[UniCheckProfile] Buscando perfil no Supabase", {
+            userId: user.id || null,
+            email: user.email || null
+        });
+
         const { data, error } = await client
             .from(PROFILE_TABLE)
             .select("nome, email, foto_url")
@@ -68,11 +84,20 @@
             .maybeSingle();
 
         if (error) {
+            console.error("[UniCheckProfile] Erro ao consultar users_profile", {
+                userId: user.id || null,
+                message: error?.message || error
+            });
             throw error;
         }
 
         if (data) {
             const profile = normalizeProfile(data, user);
+            console.info("[UniCheckProfile] Perfil encontrado na tabela users_profile", {
+                userId: user.id || null,
+                nome: profile.nome,
+                email: profile.email
+            });
             persistLocalProfile(profile);
             return profile;
         }
@@ -91,10 +116,19 @@
             .single();
 
         if (insertError) {
+            console.error("[UniCheckProfile] Erro ao criar perfil base", {
+                userId: user.id || null,
+                message: insertError?.message || insertError
+            });
             throw insertError;
         }
 
         const profile = normalizeProfile(inserted, user);
+        console.info("[UniCheckProfile] Perfil base criado/atualizado", {
+            userId: user.id || null,
+            nome: profile.nome,
+            email: profile.email
+        });
         persistLocalProfile(profile);
         return profile;
     }
@@ -106,6 +140,11 @@
     async function updateMyProfile({ nome, email, foto_url }) {
         const client = getClient();
         const user = await getCurrentUser();
+
+        console.info("[UniCheckProfile] Atualizando perfil", {
+            userId: user.id || null,
+            emailAnterior: user.email || null
+        });
 
         const cleanProfile = {
             nome: (nome || "").trim(),
@@ -127,6 +166,10 @@
 
         const { error: authError } = await client.auth.updateUser(updatePayload);
         if (authError) {
+            console.error("[UniCheckProfile] Erro ao atualizar auth.users", {
+                userId: user.id || null,
+                message: authError?.message || authError
+            });
             throw authError;
         }
 
@@ -143,6 +186,10 @@
             .single();
 
         if (error) {
+            console.error("[UniCheckProfile] Erro ao atualizar users_profile", {
+                userId: user.id || null,
+                message: error?.message || error
+            });
             throw error;
         }
 
@@ -156,6 +203,11 @@
             }
         });
 
+        console.info("[UniCheckProfile] Perfil atualizado com sucesso", {
+            userId: user.id || null,
+            nome: profile.nome,
+            email: profile.email
+        });
         persistLocalProfile(profile);
         return profile;
     }

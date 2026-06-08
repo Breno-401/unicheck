@@ -11,13 +11,70 @@
         }
     }
 
+    async function getCurrentAuthUserId() {
+        try {
+            const debug = await window.UniCheckAuth?.getAuthDebugSnapshot?.('script-profile-sync');
+            return debug?.user?.id || null;
+        } catch (error) {
+            console.warn('Erro ao validar usuario autenticado:', error);
+            return null;
+        }
+    }
+
+    function clearProfileDisplay() {
+        const selectors = [
+            { container: '.user-profile .user-avatar', text: '.user-profile .user-avatar span' },
+            { container: '.user-dropdown-avatar', text: '.user-dropdown-avatar span' },
+            { container: '.user-avatar-small', text: '.user-avatar-small span' }
+        ];
+
+        selectors.forEach(({ container, text }) => {
+            const element = document.querySelector(container);
+            const textElement = document.querySelector(text);
+
+            if (element) {
+                element.style.backgroundImage = 'none';
+                element.style.backgroundSize = '';
+                element.style.backgroundPosition = '';
+            }
+
+            if (textElement) {
+                textElement.style.opacity = '1';
+                textElement.textContent = 'US';
+            }
+        });
+
+        const sidebarName = document.querySelector('.user-profile h4');
+        if (sidebarName) sidebarName.textContent = 'Usuario';
+
+        const userNameIndicator = document.querySelector('.user-name-indicator');
+        if (userNameIndicator) userNameIndicator.textContent = 'Usuario';
+
+        const dropdownName = document.querySelector('.user-dropdown-info h4');
+        if (dropdownName) dropdownName.textContent = 'Usuario';
+
+        const dropdownEmail = document.querySelector('.user-dropdown-info p');
+        if (dropdownEmail) dropdownEmail.textContent = '';
+    }
+
     async function loadProfileData() {
         try {
+            const currentUserId = await getCurrentAuthUserId();
+
             if (window.UniCheckProfile && typeof window.UniCheckProfile.getMyProfile === 'function') {
                 const profile = await window.UniCheckProfile.getMyProfile();
-                if (profile) {
+                if (profile && currentUserId && profile.id === currentUserId) {
                     updateProfileDisplay(profile);
                     return;
+                }
+
+                if (profile && currentUserId && profile.id !== currentUserId) {
+                    const key = window.UniCheckConfig?.STORAGE_KEYS?.USER_PROFILE || 'userProfile';
+                    localStorage.removeItem(key);
+                    console.warn('Perfil local ignorado por pertencer a outro usuario.', {
+                        profileId: profile.id || null,
+                        currentUserId
+                    });
                 }
             }
         } catch (error) {
@@ -25,9 +82,13 @@
         }
 
         const profile = getStoredProfile();
-        if (profile) {
+        const currentUserId = await getCurrentAuthUserId();
+        if (profile && currentUserId && profile.id === currentUserId) {
             updateProfileDisplay(profile);
+            return;
         }
+
+        clearProfileDisplay();
     }
 
     function updateProfileDisplay(profile) {

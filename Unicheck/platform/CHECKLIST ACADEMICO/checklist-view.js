@@ -419,6 +419,15 @@
         renderLoadingState();
 
         try {
+            if (!state.user?.id) {
+                throw new Error("Usuario autenticado nao encontrado para carregar checklists.");
+            }
+
+            console.info("[UniCheckChecklistView] Carregando checklists", {
+                userId: state.user.id || null,
+                email: state.user.email || null
+            });
+
             if (state.user?.id) {
                 const remoteProgress = await window.UniCheckChecklist.fetchUserProgressMap(state.user.id);
                 state.progress = mergeProgressMaps(remoteProgress, state.progress);
@@ -430,7 +439,10 @@
             syncFromLocation();
             renderListView();
         } catch (error) {
-            console.error("Erro ao carregar checklists:", error);
+            console.error("[UniCheckChecklistView] Erro ao carregar checklists:", {
+                message: error?.message || error,
+                userId: state.user?.id || null
+            });
             refs.grid.innerHTML = `
                 <div class="platform-card">
                     <div class="card-content">
@@ -511,19 +523,27 @@
         if (state.initialized) return;
         state.initialized = true;
 
-        createLayoutIfNeeded();
-
-        try {
-            state.user = await window.UniCheckChecklist.getCurrentUser();
-            if (state.user?.id) {
-                state.progress = getStoredProgress(state.user.id);
-            } else {
-                state.progress = {};
-            }
-        } catch (error) {
-            console.error("Erro ao carregar usuario/progresso remoto:", error);
-            state.progress = {};
+        if (window.UniCheckAuth?.getAuthDebugSnapshot) {
+            await window.UniCheckAuth.getAuthDebugSnapshot("checklist-view.init");
         }
+
+        const authSession = await window.UniCheckAuth?.requireAuth?.({
+            redirectTo: window.UniCheckAuth?.getLoginPage?.()
+        });
+
+        if (!authSession?.user) {
+            console.warn("[UniCheckChecklistView] Acesso bloqueado sem usuario autenticado.");
+            return;
+        }
+
+        state.user = authSession.user;
+
+        createLayoutIfNeeded();
+        state.progress = getStoredProgress(state.user.id);
+        console.info("[UniCheckChecklistView] Usuario carregado para a tela", {
+            userId: state.user.id || null,
+            email: state.user.email || null
+        });
 
         setupEventListeners();
         await loadChecklists();

@@ -1,5 +1,11 @@
 (function () {
     const PROFILE_STORAGE_KEY = "userProfile";
+    const SUPABASE_AUTH_STORAGE_PATTERNS = [
+        /^sb-.*auth-token/i,
+        /^sb-.*auth-token-code-verifier/i,
+        /^sb-.*auth-token-challenge/i,
+        /^supabase\.auth\.token$/i
+    ];
 
     function getClient() {
         const client = window.UniCheckSupabase?.client;
@@ -48,6 +54,39 @@
         localStorage.removeItem(getProfileStorageKey());
     }
 
+    function clearSupabaseAuthStorage() {
+        const storageKeys = [];
+
+        for (let index = 0; index < localStorage.length; index += 1) {
+            const key = localStorage.key(index);
+            if (!key) continue;
+
+            if (SUPABASE_AUTH_STORAGE_PATTERNS.some(pattern => pattern.test(key))) {
+                storageKeys.push(key);
+            }
+        }
+
+        for (let index = 0; index < sessionStorage.length; index += 1) {
+            const key = sessionStorage.key(index);
+            if (!key) continue;
+
+            if (SUPABASE_AUTH_STORAGE_PATTERNS.some(pattern => pattern.test(key))) {
+                storageKeys.push({ key, session: true });
+            }
+        }
+
+        storageKeys.forEach(entry => {
+            if (typeof entry === "string") {
+                localStorage.removeItem(entry);
+                return;
+            }
+
+            if (entry?.session) {
+                sessionStorage.removeItem(entry.key);
+            }
+        });
+    }
+
     function getPlatformHome() {
         return `${window.location.origin}${window.location.pathname.replace(/\/landing\/.*$/i, "/platform/index-interno.html").replace(/\/platform\/.*$/i, "/platform/index-interno.html")}`;
     }
@@ -81,11 +120,53 @@
         return data.session;
     }
 
+    async function getUser() {
+        const client = getClient();
+        const { data, error } = await client.auth.getUser();
+        if (error) throw error;
+        return data.user || null;
+    }
+
+    async function getAuthDebugSnapshot(context, extra = {}) {
+        const client = getClient();
+        const [sessionResult, userResult] = await Promise.allSettled([
+            client.auth.getSession(),
+            client.auth.getUser()
+        ]);
+
+        const session = sessionResult.status === "fulfilled" ? sessionResult.value.data.session || null : null;
+        const user = userResult.status === "fulfilled" ? userResult.value.data.user || null : null;
+
+        const snapshot = {
+            context,
+            session: session
+                ? {
+                    userId: session.user?.id || null,
+                    email: session.user?.email || null,
+                    expiresAt: session.expires_at || null
+                }
+                : null,
+            user: user
+                ? {
+                    userId: user.id || null,
+                    email: user.email || null
+                }
+                : null,
+            sessionError: sessionResult.status === "rejected" ? sessionResult.reason?.message || String(sessionResult.reason) : null,
+            userError: userResult.status === "rejected" ? userResult.reason?.message || String(userResult.reason) : null,
+            extra
+        };
+
+        console.info("[UniCheckAuth] Estado de autenticacao", snapshot);
+        return { session, user, snapshot };
+    }
+
     async function restoreSession() {
-        const session = await getSession();
-        if (session?.user) {
-            saveProfile(session.user);
-            return session;
+        const { session, user } = await getAuthDebugSnapshot("restoreSession");
+
+        if (user) {
+            saveProfile(user);
+            return session || { user };
         }
 
         clearProfile();
@@ -122,8 +203,13 @@
 
         const registeredRa = data.user?.user_metadata?.ra;
         if (ra && registeredRa && ra.trim() !== registeredRa.trim()) {
-            await client.auth.signOut();
+            try {
+                await client.auth.signOut();
+            } catch (error) {
+                console.warn("[UniCheckAuth] Falha ao encerrar sessao por mismatch de RA", error);
+            }
             clearProfile();
+            clearSupabaseAuthStorage();
             throw new Error("O RA informado nao corresponde ao cadastro deste usuario.");
         }
 
@@ -134,23 +220,37 @@
     async function logout(options = {}) {
         const client = getClient();
         const redirectTo = options.redirectTo === undefined ? getLoginPage() : options.redirectTo;
-        const { error } = await client.auth.signOut();
-        if (error) throw error;
+        let signOutError = null;
+
+        try {
+            await client.auth.signOut();
+        } catch (error) {
+            signOutError = error;
+            console.error("[UniCheckAuth] Falha ao chamar signOut()", error);
+        }
 
         clearProfile();
+        clearSupabaseAuthStorage();
 
         if (redirectTo) {
             window.location.href = redirectTo;
+        }
+
+        if (signOutError) {
+            console.warn("[UniCheckAuth] Logout concluido localmente apesar da falha remota.");
         }
     }
 
     async function requireAuth(options = {}) {
         const redirectTo = options.redirectTo === undefined ? getLoginPage() : options.redirectTo;
-        const session = await restoreSession();
+        const { session, user } = await getAuthDebugSnapshot("requireAuth", { redirectTo });
 
-        if (session?.user) {
-            return session;
+        if (user) {
+            saveProfile(user);
+            return session || { user };
         }
+
+        clearProfile();
 
         if (redirectTo) {
             window.location.href = redirectTo;
@@ -159,14 +259,23 @@
         return null;
     }
 
-    function onAuthStateChange(callback) {
+    async function onAuthStateChange(callback) {
         const client = getClient();
         return client.auth.onAuthStateChange((event, session) => {
             if (session?.user) {
                 saveProfile(session.user);
+            } else if (event === "SIGNED_OUT" || event === "USER_DELETED") {
+                clearProfile();
+                clearSupabaseAuthStorage();
             } else {
                 clearProfile();
             }
+
+            console.info("[UniCheckAuth] auth state change", {
+                event,
+                userId: session?.user?.id || null,
+                email: session?.user?.email || null
+            });
 
             if (typeof callback === "function") {
                 callback(event, session);
@@ -181,12 +290,16 @@
         login,
         logout,
         getSession,
+        getUser,
         restoreSession,
         requireAuth,
         onAuthStateChange,
         getPlatformHome,
         getLoginPage,
         getProfileStorageKey,
-        normalizeErrorMessage
+        normalizeErrorMessage,
+        getAuthDebugSnapshot,
+        clearProfile,
+        clearSupabaseAuthStorage
     };
 })();

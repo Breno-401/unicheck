@@ -72,13 +72,25 @@
     }
 
     async function getCurrentUser() {
-        const client = getClient();
-        const { data, error } = await client.auth.getUser();
-        if (error) {
-            throw error;
+        const auth = window.UniCheckAuth;
+        if (!auth) {
+            throw new Error("Modulo de autenticacao nao encontrado.");
         }
 
-        return data.user || null;
+        const debug = await auth.getAuthDebugSnapshot?.("checklist.getCurrentUser");
+        const user = debug?.user || await auth.getUser?.();
+
+        if (!user) {
+            throw new Error("Nenhum usuario autenticado.");
+        }
+
+        console.info("[UniCheckChecklist] Usuario autenticado confirmado", {
+            userId: user.id || null,
+            email: user.email || null,
+            hasSession: Boolean(debug?.session)
+        });
+
+        return user;
     }
 
     /**
@@ -154,13 +166,20 @@
         }
 
         const client = getClient();
+        console.info("[UniCheckChecklist] Buscando progresso remoto", {
+            userId
+        });
+
         const { data, error } = await client
             .from(CHECKLIST_PROGRESS_TABLE)
             .select("checklist_id, checklist_item_id, completed")
             .eq("user_id", userId);
 
         if (error) {
-            console.error("Erro ao buscar progresso do usuario:", error);
+            console.error("[UniCheckChecklist] Erro ao buscar progresso do usuario:", {
+                userId,
+                message: error?.message || error
+            });
             return {};
         }
 
@@ -185,9 +204,21 @@
             .upsert(payload, { onConflict: "user_id,checklist_item_id" });
 
         if (error) {
+            console.error("[UniCheckChecklist] Erro ao salvar progresso", {
+                userId,
+                checklistId,
+                taskId,
+                message: error?.message || error
+            });
             throw error;
         }
 
+        console.info("[UniCheckChecklist] Progresso salvo", {
+            userId,
+            checklistId,
+            taskId,
+            completed: Boolean(completed)
+        });
         return payload;
     }
 

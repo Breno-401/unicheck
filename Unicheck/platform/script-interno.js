@@ -848,12 +848,14 @@ window.debugSidebar = function() {
 /**
  * Função para fazer logout e retornar à landing page
  */
-function handleLogout() {
+async function handleLogout() {
     if (window.UniCheckAuth && typeof window.UniCheckAuth.logout === 'function') {
-        window.UniCheckAuth.logout().catch(function(error) {
+        try {
+            await window.UniCheckAuth.logout();
+        } catch (error) {
             console.error('Erro ao fazer logout:', error);
             alert(window.UniCheckAuth.normalizeErrorMessage(error));
-        });
+        }
         return;
     }
     // Limpar dados do usuário (opcional)

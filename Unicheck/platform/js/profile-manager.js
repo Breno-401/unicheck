@@ -11,6 +11,56 @@
         }
     }
 
+    async function getCurrentAuthUserId() {
+        try {
+            const debug = await window.UniCheckAuth?.getAuthDebugSnapshot?.('profile-manager');
+            return debug?.user?.id || null;
+        } catch (error) {
+            console.warn('Erro ao validar usuario autenticado:', error);
+            return null;
+        }
+    }
+
+    function clearAvatar(container, textElement) {
+        if (!container) return;
+
+        container.style.backgroundImage = 'none';
+        container.style.backgroundSize = '';
+        container.style.backgroundPosition = '';
+
+        if (textElement) {
+            textElement.style.opacity = '1';
+            textElement.textContent = 'US';
+        }
+    }
+
+    function clearInterface() {
+        clearAvatar(
+            document.querySelector('.user-avatar-small'),
+            document.querySelector('.user-avatar-small span')
+        );
+        clearAvatar(
+            document.querySelector('.user-profile .user-avatar'),
+            document.querySelector('.user-profile .user-avatar span')
+        );
+        clearAvatar(
+            document.querySelector('.user-dropdown-avatar'),
+            document.querySelector('.user-dropdown-avatar span')
+        );
+
+        const sidebarName = document.querySelector('.user-profile h4');
+        if (sidebarName) sidebarName.textContent = 'Usuario';
+
+        const userNameIndicator = document.querySelector('.user-name-indicator');
+        if (userNameIndicator) userNameIndicator.textContent = 'Usuario';
+
+        const dropdownName = document.querySelector('.user-dropdown-info h4');
+        if (dropdownName) dropdownName.textContent = 'Usuario';
+
+        const dropdownEmail = document.querySelector('.user-dropdown-info p');
+        if (dropdownEmail) dropdownEmail.textContent = '';
+    }
+
     function setAvatar(container, textElement, profile) {
         if (!container) return;
 
@@ -67,11 +117,25 @@
         if (dropdownEmail && profile.email) dropdownEmail.textContent = profile.email;
     }
 
-    function sync() {
+    async function sync() {
         const profile = getProfile();
-        if (profile) {
+        const currentUserId = await getCurrentAuthUserId();
+
+        if (profile && currentUserId && profile.id === currentUserId) {
             updateInterface(profile);
+            return;
         }
+
+        if (profile && currentUserId && profile.id !== currentUserId) {
+            const key = window.UniCheckConfig?.STORAGE_KEYS?.USER_PROFILE || 'userProfile';
+            localStorage.removeItem(key);
+            console.warn('Perfil local removido por pertencer a outro usuario.', {
+                profileId: profile.id || null,
+                currentUserId
+            });
+        }
+
+        clearInterface();
     }
 
     function bindAutoSync() {
