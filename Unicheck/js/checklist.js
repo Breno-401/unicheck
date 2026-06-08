@@ -1,7 +1,7 @@
 (function () {
     const CHECKLISTS_TABLE = "checklists";
     const CHECKLIST_ITEMS_TABLE = "checklist_items";
-    const CHECKLIST_PROGRESS_TABLE = "progresso_item_checklist";
+    const CHECKLIST_PROGRESS_TABLE = "user_checklist_item_progress";
 
     // Conexão com o cliente Supabase configurado globalmente
     function getClient() {
@@ -54,15 +54,19 @@
 
     function normalizeProgressRows(rows) {
         return (rows || []).reduce((accumulator, row) => {
-            if (!row.checklist_id || !row.item_id) {
+            const checklistId = row.checklist_id;
+            const itemId = row.checklist_item_id || row.item_id;
+            const completed = row.completed ?? row.concluido;
+
+            if (!checklistId || !itemId) {
                 return accumulator;
             }
 
-            if (!accumulator[row.checklist_id]) {
-                accumulator[row.checklist_id] = { tasks: {} };
+            if (!accumulator[checklistId]) {
+                accumulator[checklistId] = { tasks: {} };
             }
 
-            accumulator[row.checklist_id].tasks[row.item_id] = Boolean(row.concluido);
+            accumulator[checklistId].tasks[itemId] = Boolean(completed);
             return accumulator;
         }, {});
     }
@@ -152,8 +156,8 @@
         const client = getClient();
         const { data, error } = await client
             .from(CHECKLIST_PROGRESS_TABLE)
-            .select("checklist_id, item_id, concluido")
-            .eq("usuario_id", userId);
+            .select("checklist_id, checklist_item_id, completed")
+            .eq("user_id", userId);
 
         if (error) {
             console.error("Erro ao buscar progresso do usuario:", error);
@@ -170,15 +174,15 @@
 
         const client = getClient();
         const payload = {
-            usuario_id: userId,
+            user_id: userId,
             checklist_id: checklistId,
-            item_id: taskId,
-            concluido: Boolean(completed)
+            checklist_item_id: taskId,
+            completed: Boolean(completed)
         };
 
         const { error } = await client
             .from(CHECKLIST_PROGRESS_TABLE)
-            .upsert(payload, { onConflict: "usuario_id,item_id" });
+            .upsert(payload, { onConflict: "user_id,checklist_item_id" });
 
         if (error) {
             throw error;

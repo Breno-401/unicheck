@@ -179,7 +179,7 @@ Fluxo:
 - exibe conteudo informativo especifico por fase dentro da propria tela de checklist;
 - trabalha com fases ja estruturadas com tarefas reais, de forma que o desbloqueio entre fases possa ser testado de ponta a ponta;
 - permite marcar itens como concluido;
-- persiste progresso localmente e no banco;
+- persiste progresso localmente por usuario e no banco;
 - libera a fase seguinte quando a atual e finalizada.
 
 Regra central do modulo:
@@ -208,6 +208,7 @@ Fluxo:
 - mostra modais de detalhes, tutorial e sugestao;
 - abre links externos em nova aba;
 - registra sugestoes localmente como demonstracao.
+- a pagina foi ajustada para ser responsiva em desktop, tablet e mobile, com header empilhado, filtros com rolagem horizontal em telas pequenas, cards em coluna unica e modais adaptados.
 
 Esta pagina tambem depende da infraestrutura de dashboard e autenticacao, porque reaproveita sidebar, tema, logout e sincronizacao de perfil.
 
@@ -317,7 +318,7 @@ Chaves relevantes atualmente:
 - `userProfile`
 - `platformFavorites`
 - `platformSuggestions`
-- `unicheck_checklist_progress_v2`
+- `unicheck_checklist_progress_v2:<user_id>`
 
 ### Supabase Auth
 
@@ -350,7 +351,8 @@ O projeto depende de pelo menos estas estruturas conceituais:
 
 O projeto funciona, mas existem inconsistencias tecnicas que precisam ser conhecidas para nao documentar algo errado:
 
-- [`js/checklist.js`](./js/checklist.js) usa `progresso_item_checklist` como nome de tabela de progresso, enquanto o SQL em [`supabase/checklist_progress_and_seed.sql`](./supabase/checklist_progress_and_seed.sql) cria `user_checklist_item_progress`.
+- [`js/checklist.js`](./js/checklist.js) e [`supabase/checklist_progress_and_seed.sql`](./supabase/checklist_progress_and_seed.sql) agora estao alinhados em `user_checklist_item_progress`, com `user_id` e `checklist_item_id`.
+- O cache local do checklist e separado por usuario autenticado para evitar vazamento de progresso entre contas no mesmo navegador.
 - [`js/profile.js`](./js/profile.js) assume que `users_profile` usa a coluna `id` como chave de relacionamento com `auth.users`, mas as politicas em [`supabase/users_profile_policies.sql`](./supabase/users_profile_policies.sql) trabalham com `user_id`.
 - Alguns documentos auxiliares em `platform/PLATAFORMAS/` e `platform/CHECKLIST ACADEMICO/` descrevem funcionalidades de forma mais antiga do que o comportamento atual do codigo.
 

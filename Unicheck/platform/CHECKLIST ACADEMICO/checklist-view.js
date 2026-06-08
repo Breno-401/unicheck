@@ -76,9 +76,17 @@
             .replace(/'/g, "&#39;");
     }
 
-    function getStoredProgress() {
+    function getStoredProgressKey(userId) {
+        return `${STORAGE_KEY}:${userId || "anonymous"}`;
+    }
+
+    function getStoredProgress(userId) {
+        if (!userId) {
+            return {};
+        }
+
         try {
-            const raw = localStorage.getItem(STORAGE_KEY);
+            const raw = localStorage.getItem(getStoredProgressKey(userId));
             return raw ? JSON.parse(raw) : {};
         } catch (error) {
             console.error("Erro ao ler progresso dos checklists:", error);
@@ -86,9 +94,13 @@
         }
     }
 
-    function saveStoredProgress() {
+    function saveStoredProgress(userId) {
+        if (!userId) {
+            return;
+        }
+
         try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(state.progress));
+            localStorage.setItem(getStoredProgressKey(userId), JSON.stringify(state.progress));
         } catch (error) {
             console.error("Erro ao salvar progresso dos checklists:", error);
         }
@@ -301,7 +313,7 @@
             }
         };
 
-        saveStoredProgress();
+        saveStoredProgress(state.user?.id);
     }
 
     async function toggleTask(checklistId, taskId, completed) {
@@ -410,7 +422,7 @@
             if (state.user?.id) {
                 const remoteProgress = await window.UniCheckChecklist.fetchUserProgressMap(state.user.id);
                 state.progress = mergeProgressMaps(remoteProgress, state.progress);
-                saveStoredProgress();
+                saveStoredProgress(state.user.id);
             }
 
             state.rawChecklists = await window.UniCheckChecklist.fetchAllChecklists();
@@ -500,17 +512,17 @@
         state.initialized = true;
 
         createLayoutIfNeeded();
-        state.progress = getStoredProgress();
 
         try {
             state.user = await window.UniCheckChecklist.getCurrentUser();
             if (state.user?.id) {
-                const remoteProgress = await window.UniCheckChecklist.fetchUserProgressMap(state.user.id);
-                state.progress = mergeProgressMaps(remoteProgress, state.progress);
-                saveStoredProgress();
+                state.progress = getStoredProgress(state.user.id);
+            } else {
+                state.progress = {};
             }
         } catch (error) {
             console.error("Erro ao carregar usuario/progresso remoto:", error);
+            state.progress = {};
         }
 
         setupEventListeners();
