@@ -207,14 +207,13 @@ Arquivos principais:
 
 Fluxo:
 
-- renderiza uma lista fixa de plataformas;
+- renderiza uma lista fixa e ampliada de plataformas;
 - permite busca por nome, descricao e features;
 - filtra por categoria;
-- salva favoritos no `localStorage`;
-- mostra modais de detalhes, tutorial e sugestao;
+- salva favoritos no `localStorage` com ícone padronizado de bookmark;
+- mostra modais de detalhes e tutorial;
 - abre links externos em nova aba;
-- registra sugestoes localmente como demonstracao.
-- a pagina foi ajustada para ser responsiva em desktop, tablet e mobile, com header empilhado, filtros com rolagem horizontal em telas pequenas, cards em coluna unica e modais adaptados.
+- a pagina foi ajustada para ser responsiva em desktop, tablet e mobile, com header em grade, filtros com rolagem horizontal em telas pequenas, cards em coluna unica e modais adaptados.
 
 Esta pagina tambem depende da infraestrutura de dashboard e autenticacao, porque reaproveita sidebar, tema, logout e sincronizacao de perfil.
 
@@ -323,7 +322,6 @@ Chaves relevantes atualmente:
 - `sidebarCollapsed`
 - `userProfile`
 - `platformFavorites:<user_id>`
-- `platformSuggestions:<user_id>`
 - `unicheck_checklist_progress_v2:<user_id>`
 
 ### Supabase Auth
@@ -351,7 +349,7 @@ O projeto depende de pelo menos estas estruturas conceituais:
 - Progresso pode vir do banco ou do cache local.
 - Perfil e refletido em varias telas internas.
 - Logout deve limpar sessao e redirecionar para a area publica.
-- Favoritos e sugestoes das plataformas estao sendo tratados no frontend como demonstracao.
+- Favoritos das plataformas estao sendo tratados no frontend como demonstracao.
 
 ## 11. Estado de consistencia e pontos de atencao
 
