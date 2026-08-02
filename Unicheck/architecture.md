@@ -119,17 +119,15 @@ O fluxo de autenticacao esta em [`landing/login_cadastro.html`](./landing/login_
 
 Comportamento:
 
-- valida email, RA e senha;
+- valida email e senha;
 - cadastra usuario no Supabase Auth;
 - grava metadados do usuario no registro de autenticacao;
 - faz login por email e senha;
-- confere o RA informado no login com o RA guardado no `user_metadata`;
 - redireciona para [`platform/index-interno.html`](./platform/index-interno.html) quando a sessao e valida.
 
 Observacao importante:
 
 - o login nao e apenas visual; ele conversa com Supabase Auth;
-- o RA e tratado como dado adicional de verificacao;
 - a senha segue regra minima de complexidade no frontend.
 
 ### 6.3 Dashboard interno
