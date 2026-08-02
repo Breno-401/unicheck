@@ -146,6 +146,14 @@ O script principal e [`platform/script-interno.js`](./platform/script-interno.js
 - logout;
 - sincronizacao com o perfil local.
 
+O painel inicial da dashboard tambem exibe cards de resumo derivados do estado real do usuario:
+
+- quantidade de checklists concluídos a partir do progresso salvo;
+- notificacoes novas mantidas em zero enquanto o fluxo nao existir;
+- quantidade de plataformas favoritadas a partir do `localStorage`.
+
+Esses cards funcionam como atalhos para as areas principais da plataforma.
+
 O dashboard tambem usa:
 
 - [`platform/js/core-config.js`](./platform/js/core-config.js) para rotas e chaves de storage;
