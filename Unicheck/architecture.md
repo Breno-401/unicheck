@@ -119,17 +119,15 @@ O fluxo de autenticacao esta em [`landing/login_cadastro.html`](./landing/login_
 
 Comportamento:
 
-- valida email, RA e senha;
+- valida email e senha;
 - cadastra usuario no Supabase Auth;
 - grava metadados do usuario no registro de autenticacao;
 - faz login por email e senha;
-- confere o RA informado no login com o RA guardado no `user_metadata`;
 - redireciona para [`platform/index-interno.html`](./platform/index-interno.html) quando a sessao e valida.
 
 Observacao importante:
 
 - o login nao e apenas visual; ele conversa com Supabase Auth;
-- o RA e tratado como dado adicional de verificacao;
 - a senha segue regra minima de complexidade no frontend.
 
 ### 6.3 Dashboard interno
@@ -147,6 +145,14 @@ O script principal e [`platform/script-interno.js`](./platform/script-interno.js
 - animacoes e ajustes de acessibilidade;
 - logout;
 - sincronizacao com o perfil local.
+
+O painel inicial da dashboard tambem exibe cards de resumo derivados do estado real do usuario:
+
+- quantidade de checklists concluídos a partir do progresso salvo;
+- notificacoes novas mantidas em zero enquanto o fluxo nao existir;
+- quantidade de plataformas favoritadas a partir do `localStorage`.
+
+Esses cards funcionam como atalhos para as areas principais da plataforma.
 
 O dashboard tambem usa:
 
@@ -201,14 +207,15 @@ Arquivos principais:
 
 Fluxo:
 
-- renderiza uma lista fixa de plataformas;
+- renderiza uma lista fixa e ampliada de plataformas;
 - permite busca por nome, descricao e features;
 - filtra por categoria;
-- salva favoritos no `localStorage`;
-- mostra modais de detalhes, tutorial e sugestao;
+- salva favoritos no `localStorage` com ícone padronizado de bookmark;
+- mostra modais de detalhes e tutorial;
 - abre links externos em nova aba;
-- registra sugestoes localmente como demonstracao.
-- a pagina foi ajustada para ser responsiva em desktop, tablet e mobile, com header empilhado, filtros com rolagem horizontal em telas pequenas, cards em coluna unica e modais adaptados.
+- exibe cards simples com a logo real da plataforma quando disponivel, badge de desconto e a informacao essencial para leitura rapida;
+- nao exibe botao de tutorial por plataforma;
+- a pagina foi ajustada para ser responsiva em desktop, tablet e mobile, com header em grade, filtros com rolagem horizontal em telas pequenas, cards em coluna unica e modais adaptados.
 
 Esta pagina tambem depende da infraestrutura de dashboard e autenticacao, porque reaproveita sidebar, tema, logout e sincronizacao de perfil.
 
@@ -317,7 +324,6 @@ Chaves relevantes atualmente:
 - `sidebarCollapsed`
 - `userProfile`
 - `platformFavorites:<user_id>`
-- `platformSuggestions:<user_id>`
 - `unicheck_checklist_progress_v2:<user_id>`
 
 ### Supabase Auth
@@ -345,7 +351,7 @@ O projeto depende de pelo menos estas estruturas conceituais:
 - Progresso pode vir do banco ou do cache local.
 - Perfil e refletido em varias telas internas.
 - Logout deve limpar sessao e redirecionar para a area publica.
-- Favoritos e sugestoes das plataformas estao sendo tratados no frontend como demonstracao.
+- Favoritos das plataformas estao sendo tratados no frontend como demonstracao.
 
 ## 11. Estado de consistencia e pontos de atencao
 

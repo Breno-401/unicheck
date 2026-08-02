@@ -147,6 +147,38 @@
   color: var(--text-primary);
 }
 
+.header-notification-button {
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(56, 189, 248, 0.15);
+  border-radius: 999px;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.header-notification-button:hover {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.header-notification-button i {
+  width: 18px;
+  height: 18px;
+}
+
+[data-theme="light"] .header-notification-button {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(15, 23, 42, 0.08);
+}
+
 /* ==========================
    MENU DE USUÁRIO COM Z-INDEX CORRIGIDO
    ========================== */

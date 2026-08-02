@@ -79,19 +79,6 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link" data-tooltip="Notificações" data-action="noop">
-                            <i data-lucide="bell"></i>
-                            <span>Notificações</span>
-                            <span class="notification-badge">3</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link" data-tooltip="Central de Documentos">
-                            <i data-lucide="file-text"></i>
-                            <span>Central de Documentos</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
                         <a href="#" class="nav-link" data-tooltip="Ajuda & Suporte">
                             <i data-lucide="help-circle"></i>
                             <span>Ajuda & Suporte</span>
@@ -130,20 +117,18 @@
                     </div>
                 </div>
 
-                <div class="header-bottom-enhanced">
-                    <!-- Campo de Busca à Esquerda -->
+                <div class="header-bottom-enhanced platforms-toolbar">
                     <div class="header-search-enhanced">
                         <div class="search-box">
                             <i data-lucide="search" class="search-icon"></i>
                             <input type="text" placeholder="Buscar plataformas, categorias..." class="search-input" id="platformSearch">
-                            <button class="search-filters">
+                            <button class="search-filters" type="button" aria-label="Abrir filtros">
                                 <i data-lucide="filter"></i>
                             </button>
                         </div>
                     </div>
 
-                    <!-- Filtros de Categoria -->
-                    <div class="category-filters">
+                    <div class="category-filters" aria-label="Filtros por categoria">
                         <button class="filter-btn active" data-category="all">Todas</button>
                         <button class="filter-btn" data-category="productivity">Produtividade</button>
                         <button class="filter-btn" data-category="design">Design</button>
@@ -153,20 +138,21 @@
                         <button class="filter-btn" data-category="music">Música</button>
                     </div>
 
-                    <!-- Ações do Usuário à Direita -->
                     <div class="header-actions-enhanced">
-                        <button class="theme-toggle-mobile" id="themeToggleMobile">
+                        <button class="theme-toggle-mobile" id="themeToggleMobile" type="button" aria-label="Alternar tema">
                             <i data-lucide="moon"></i>
                         </button>
+                        <button class="header-notification-button" type="button" aria-label="Notificações">
+                            <i data-lucide="bell"></i>
+                        </button>
                         <div class="user-menu">
-                            <button class="user-menu-trigger" id="userMenuTrigger">
+                            <button class="user-menu-trigger" id="userMenuTrigger" type="button">
                                 <div class="user-avatar-small">
                                     <span>JS</span>
                                 </div>
                                 <span class="user-name-indicator">João Silva</span>
                                 <i data-lucide="chevron-down" class="dropdown-indicator"></i>
                             </button>
-                            <!-- DROPDOWN DO USUÁRIO -->
                             <div class="user-dropdown" id="userDropdown">
                                 <div class="user-dropdown-header">
                                     <div class="user-dropdown-avatar">
@@ -243,10 +229,6 @@
                             <button class="btn btn-primary" data-action="open-platform" data-platform="jetbrains">
                                 <i data-lucide="external-link"></i>
                                 Acessar Plataforma
-                            </button>
-                            <button class="btn btn-secondary" data-action="open-tutorial" data-platform="jetbrains">
-                                <i data-lucide="book-open"></i>
-                                Tutorial
                             </button>
                         </div>
                     </div>
@@ -537,17 +519,6 @@
 
                 </div>
 
-                <!-- Call to Action para adicionar mais plataformas -->
-                <div class="add-platform-cta">
-                    <div class="cta-content">
-                        <h3>Conhece uma plataforma gratuita que deveria estar aqui?</h3>
-                        <p>Ajude a comunidade enviando sugestões de ferramentas gratuitas para estudantes</p>
-                        <button class="btn btn-primary" data-action="open-suggest">
-                            <i data-lucide="plus"></i>
-                            Sugerir Plataforma
-                        </button>
-                    </div>
-                </div>
             </div>
 
 
@@ -573,100 +544,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Modal para sugerir plataforma -->
-    <div class="modal" id="suggestPlatformModal">
-        <div class="modal-overlay"></div>
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Sugerir Nova Plataforma</h3>
-                <button class="modal-close" id="suggestModalClose">
-                    <i data-lucide="x"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="suggestPlatformForm">
-                    <div class="form-group">
-                        <label for="platformName">Nome da Plataforma</label>
-                        <input type="text" id="platformName" name="platformName" required 
-                               placeholder="Ex: Figma for Education">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="platformUrl">URL da Plataforma</label>
-                        <input type="url" id="platformUrl" name="platformUrl" required 
-                               placeholder="https://figma.com/education/">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="platformCategory">Categoria</label>
-                        <select id="platformCategory" name="platformCategory" required>
-                            <option value="">Selecione uma categoria</option>
-                            <option value="productivity">Produtividade</option>
-                            <option value="design">Design</option>
-                            <option value="development">Desenvolvimento</option>
-                            <option value="education">Educação</option>
-                            <option value="cloud">Cloud</option>
-                            <option value="music">Música</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="platformBenefits">Benefícios para Estudantes</label>
-                        <textarea id="platformBenefits" name="platformBenefits" required 
-                                  placeholder="Descreva os benefícios, descontos ou recursos gratuitos disponíveis para estudantes..."></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="yourName">Seu Nome (Opcional)</label>
-                        <input type="text" id="yourName" name="yourName" 
-                               placeholder="Como devemos dar os créditos?">
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" id="suggestModalCancel">Cancelar</button>
-                <button class="btn btn-primary" data-action="submit-suggestion">Enviar Sugestão</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal para Tutorial -->
-    <div class="modal" id="tutorialModal">
-        <div class="modal-overlay"></div>
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="tutorialTitle">Tutorial da Plataforma</h3>
-                <button class="modal-close" id="tutorialClose">
-                    <i data-lucide="x"></i>
-                </button>
-            </div>
-            <div class="modal-body" id="tutorialBody">
-                <div class="tutorial-content">
-                    <div class="tutorial-icon">
-                        <i data-lucide="graduation-cap"></i>
-                    </div>
-                    <h4>Tutorial em Desenvolvimento</h4>
-                    <p>Estamos preparando um tutorial completo para esta plataforma!</p>
-                    <ul class="tutorial-features">
-                        <li>📋 Guia passo a passo de cadastro</li>
-                        <li>🎯 Configurações essenciais para estudantes</li>
-                        <li>💡 Dicas para maximizar o uso</li>
-                        <li>🔗 Links úteis e recursos adicionais</li>
-                    </ul>
-                    <p class="tutorial-note">
-                        <strong>Nota:</strong> O tutorial estará disponível em breve. 
-                        Por enquanto, você pode acessar a plataforma diretamente.
-                    </p>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" id="tutorialCancel">Fechar</button>
-                <button class="btn btn-primary" id="tutorialConfirm">Acessar Plataforma</button>
-            </div>
-        </div>
-    </div>
-
     <!-- Overlay para Menu Mobile -->
     <div class="mobile-overlay" id="mobileOverlay"></div>
 
@@ -682,6 +559,7 @@
     <script src="plataformas-gratuitas.js"></script>
 </body>
 </html>
+
 
 
 

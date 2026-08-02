@@ -34,6 +34,88 @@ function writeStoredList(baseKey, value) {
     localStorage.setItem(getPlatformStorageKey(baseKey), JSON.stringify(value));
 }
 
+const platformIconMap = {
+    jetbrains: 'code-2',
+    spotify: 'music',
+    azure: 'cloud',
+    canva: 'palette',
+    github: 'github',
+    notion: 'notebook-pen',
+    coursera: 'graduation-cap',
+    adobe: 'pen-tool',
+    google: 'folder',
+    gemini: 'sparkles',
+    perplexity: 'search',
+    figma: 'pen-tool',
+    discord: 'messages-square',
+    aws: 'cloud',
+    mongodb: 'database',
+    trello: 'layout-grid',
+    zoom: 'video',
+    stackoverflow: 'message-circle',
+    microsoft365: 'monitor',
+    miro: 'workflow',
+    slack: 'messages-square',
+    replit: 'terminal',
+    vscode: 'code-2',
+    vercel: 'rocket',
+    netlify: 'rocket',
+    oraclecloud: 'server',
+    freecodecamp: 'book-check',
+    edx: 'book-open',
+    khanacademy: 'school',
+    duolingo: 'languages',
+    grammarly: 'book-check',
+    copilot: 'sparkles',
+    youtubemusic: 'music',
+    applemusic: 'music',
+    postman: 'send',
+    overleaf: 'file-text',
+    asana: 'clipboard-list',
+    figjam: 'pen-tool',
+    dropbox: 'cloud',
+    skillshare: 'graduation-cap',
+    outlook: 'mail'
+};
+
+const platformLogoMap = {
+    jetbrains: '../img-interno/jetbrains-logo.png',
+    spotify: '../img-interno/spotify-logo.png',
+    azure: '../img-interno/azure-logo.png',
+    canva: '../img-interno/canva_logo.png',
+    github: '../img-interno/github_logo.png',
+    notion: '../img-interno/notion_logo.png',
+    coursera: '../img-interno/coursera_logo.png',
+    adobe: '../img-interno/adobe_logo.png',
+    google: '../img-interno/google_workspace_logo.png',
+    gemini: '../img-interno/gemini_logo_3.png',
+    perplexity: '../img-interno/perplexity_logo_2.png',
+    figma: '../img-interno/figma_logo_2.png',
+    discord: '../img-interno/discord_logo_5.jpg',
+    aws: '../img-interno/aws_logo_2.png',
+    mongodb: '../img-interno/mongodb_logo_1.png',
+    trello: '../img-interno/trello_logo_8.png',
+    zoom: '../img-interno/zoom_logo_2.jpg',
+    stackoverflow: '../img-interno/stackoverflow_logo_6.png',
+    microsoft365: '../img-interno/MicrosoftT.png',
+    outlook: '../img-interno/outlook.png'
+};
+
+const platformTypeLabels = {
+    free: 'Grátis',
+    discount: 'Desconto',
+    premium: 'Premium'
+};
+
+const platformCategoryLabels = {
+    productivity: 'Produtividade',
+    design: 'Design',
+    development: 'Desenvolvimento',
+    education: 'Educação',
+    cloud: 'Cloud',
+    music: 'Música'
+};
+
 const platformState = {
     platforms: [
         {
@@ -288,6 +370,286 @@ const platformState = {
             studentPrice: 'Grátis para estudantes',
             discount: '100% Gratuito',
             logo: '../img-interno/stackoverflow_logo_6.png'
+        },
+        {
+            id: 'microsoft365',
+            name: 'Microsoft 365 Education',
+            category: 'productivity',
+            type: 'free',
+            url: 'https://www.microsoft.com/education/products/microsoft-365',
+            tutorialUrl: '#',
+            description: 'Pacote educacional com Word, Excel, PowerPoint, OneDrive e Teams para instituições e estudantes.',
+            features: ['Word e Excel', 'OneDrive', 'Microsoft Teams'],
+            originalPrice: 'Plano comercial',
+            studentPrice: 'Grátis para educação',
+            discount: '100% Gratuito',
+            logo: ''
+        },
+        {
+            id: 'miro',
+            name: 'Miro Education',
+            category: 'productivity',
+            type: 'free',
+            url: 'https://miro.com/education/',
+            tutorialUrl: '#',
+            description: 'Quadro colaborativo para mapas mentais, brainstorming e planejamento de projetos acadêmicos.',
+            features: ['Quadro infinito', 'Colaboração', 'Templates visuais'],
+            originalPrice: 'Plano pago',
+            studentPrice: 'Grátis para estudantes',
+            discount: '100% Gratuito',
+            logo: ''
+        },
+        {
+            id: 'slack',
+            name: 'Slack for Education',
+            category: 'productivity',
+            type: 'free',
+            url: 'https://slack.com/help/articles/360000768047-Slack-for-Education',
+            tutorialUrl: '#',
+            description: 'Comunicação organizada para grupos de pesquisa, monitorias e projetos em equipe.',
+            features: ['Canais por tema', 'Arquivos', 'Integrações'],
+            originalPrice: 'Plano pago',
+            studentPrice: 'Grátis para educação',
+            discount: '100% Gratuito',
+            logo: ''
+        },
+        {
+            id: 'replit',
+            name: 'Replit',
+            category: 'development',
+            type: 'free',
+            url: 'https://replit.com/',
+            tutorialUrl: '#',
+            description: 'Ambiente online para programar, testar e compartilhar projetos sem configuração local.',
+            features: ['IDE no navegador', 'Hospedagem', 'Colaboração'],
+            originalPrice: 'Plano pago',
+            studentPrice: 'Plano gratuito disponível',
+            discount: 'Freemium',
+            logo: ''
+        },
+        {
+            id: 'vscode',
+            name: 'Visual Studio Code',
+            category: 'development',
+            type: 'free',
+            url: 'https://code.visualstudio.com/',
+            tutorialUrl: '#',
+            description: 'Editor de código leve e extensível para desenvolvimento web, mobile e backend.',
+            features: ['Extensões', 'Git integrado', 'Depuração'],
+            originalPrice: 'Grátis',
+            studentPrice: 'Grátis',
+            discount: '100% Gratuito',
+            logo: ''
+        },
+        {
+            id: 'vercel',
+            name: 'Vercel',
+            category: 'development',
+            type: 'free',
+            url: 'https://vercel.com/',
+            tutorialUrl: '#',
+            description: 'Plataforma de deploy para front-end, projetos Jamstack e aplicações modernas.',
+            features: ['Deploy rápido', 'Preview URLs', 'Integração Git'],
+            originalPrice: 'Plano pago',
+            studentPrice: 'Plano gratuito disponível',
+            discount: 'Freemium',
+            logo: ''
+        },
+        {
+            id: 'netlify',
+            name: 'Netlify',
+            category: 'development',
+            type: 'free',
+            url: 'https://www.netlify.com/',
+            tutorialUrl: '#',
+            description: 'Hospedagem e automação de deploy para sites estáticos e front-end moderno.',
+            features: ['Deploy contínuo', 'Forms', 'Edge Functions'],
+            originalPrice: 'Plano pago',
+            studentPrice: 'Plano gratuito disponível',
+            discount: 'Freemium',
+            logo: ''
+        },
+        {
+            id: 'oraclecloud',
+            name: 'Oracle Cloud Always Free',
+            category: 'cloud',
+            type: 'free',
+            url: 'https://www.oracle.com/cloud/free/',
+            tutorialUrl: '#',
+            description: 'Infraestrutura em nuvem com camada gratuita permanente para testes, labs e projetos.',
+            features: ['VMs gratuitas', 'Banco de dados', 'Armazenamento'],
+            originalPrice: 'Pago por uso',
+            studentPrice: 'Camada gratuita permanente',
+            discount: 'Always Free',
+            logo: ''
+        },
+        {
+            id: 'freecodecamp',
+            name: 'freeCodeCamp',
+            category: 'development',
+            type: 'free',
+            url: 'https://www.freecodecamp.org/',
+            tutorialUrl: '#',
+            description: 'Plataforma gratuita com currículos práticos e projetos para aprender programação.',
+            features: ['Certificações', 'Projetos', 'Comunidade'],
+            originalPrice: 'Grátis',
+            studentPrice: 'Grátis',
+            discount: '100% Gratuito',
+            logo: ''
+        },
+        {
+            id: 'edx',
+            name: 'edX',
+            category: 'education',
+            type: 'free',
+            url: 'https://www.edx.org/',
+            tutorialUrl: '#',
+            description: 'Cursos de universidades e instituições com opção de acesso gratuito ao conteúdo.',
+            features: ['Cursos acadêmicos', 'Certificados opcionais', 'Universidades'],
+            originalPrice: 'Certificado pago',
+            studentPrice: 'Audit gratuito disponível',
+            discount: 'Freemium',
+            logo: ''
+        },
+        {
+            id: 'khanacademy',
+            name: 'Khan Academy',
+            category: 'education',
+            type: 'free',
+            url: 'https://www.khanacademy.org/',
+            tutorialUrl: '#',
+            description: 'Aprendizado gratuito com aulas, exercícios e trilhas em diversas áreas.',
+            features: ['Vídeo-aulas', 'Exercícios', 'Trilhas guiadas'],
+            originalPrice: 'Grátis',
+            studentPrice: 'Grátis',
+            discount: '100% Gratuito',
+            logo: ''
+        },
+        {
+            id: 'duolingo',
+            name: 'Duolingo for Schools',
+            category: 'education',
+            type: 'free',
+            url: 'https://schools.duolingo.com/',
+            tutorialUrl: '#',
+            description: 'Plataforma de idiomas com recursos para aulas, acompanhamento e prática diária.',
+            features: ['Idiomas', 'Turmas', 'Gamificação'],
+            originalPrice: 'Grátis',
+            studentPrice: 'Grátis para escolas',
+            discount: '100% Gratuito',
+            logo: ''
+        },
+        {
+            id: 'grammarly',
+            name: 'Grammarly Education',
+            category: 'productivity',
+            type: 'discount',
+            url: 'https://www.grammarly.com/edu',
+            tutorialUrl: '#',
+            description: 'Assistente de escrita para revisar textos acadêmicos, e-mails e relatórios.',
+            features: ['Revisão de texto', 'Tom de escrita', 'Sugestões'],
+            originalPrice: 'Plano premium',
+            studentPrice: 'Plano educacional disponível',
+            discount: 'Desconto Educacional',
+            logo: ''
+        },
+        {
+            id: 'copilot',
+            name: 'Microsoft Copilot',
+            category: 'productivity',
+            type: 'free',
+            url: 'https://copilot.microsoft.com/',
+            tutorialUrl: '#',
+            description: 'Assistente de IA para apoiar estudos, escrita, resumo e produtividade geral.',
+            features: ['IA generativa', 'Resumo', 'Pesquisa'],
+            originalPrice: 'Plano pago',
+            studentPrice: 'Plano gratuito disponível',
+            discount: 'Freemium',
+            logo: ''
+        },
+        {
+            id: 'postman',
+            name: 'Postman',
+            category: 'development',
+            type: 'free',
+            url: 'https://www.postman.com/',
+            tutorialUrl: '#',
+            description: 'Ferramenta para testar APIs, organizar coleções e colaborar em projetos de backend.',
+            features: ['Testes de API', 'Coleções', 'Documentação'],
+            originalPrice: 'Plano pago',
+            studentPrice: 'Plano gratuito disponível',
+            discount: 'Freemium',
+            logo: ''
+        },
+        {
+            id: 'overleaf',
+            name: 'Overleaf',
+            category: 'education',
+            type: 'free',
+            url: 'https://www.overleaf.com/',
+            tutorialUrl: '#',
+            description: 'Editor colaborativo de LaTeX para artigos, TCCs e materiais acadêmicos.',
+            features: ['LaTeX online', 'Colaboração', 'Modelos acadêmicos'],
+            originalPrice: 'Plano pago',
+            studentPrice: 'Plano gratuito disponível',
+            discount: 'Freemium',
+            logo: ''
+        },
+        {
+            id: 'asana',
+            name: 'Asana for Education',
+            category: 'productivity',
+            type: 'free',
+            url: 'https://asana.com/education',
+            tutorialUrl: '#',
+            description: 'Gestão de tarefas e projetos para equipes de estudo, TCC e trabalhos em grupo.',
+            features: ['Kanban', 'Tarefas', 'Cronogramas'],
+            originalPrice: 'Plano pago',
+            studentPrice: 'Grátis para educação',
+            discount: '100% Gratuito',
+            logo: ''
+        },
+        {
+            id: 'figjam',
+            name: 'FigJam for Education',
+            category: 'design',
+            type: 'free',
+            url: 'https://www.figma.com/figjam/',
+            tutorialUrl: '#',
+            description: 'Quadro colaborativo para brainstorming, fluxos e ideação visual em equipe.',
+            features: ['Brainstorming', 'Fluxos', 'Colaboração'],
+            originalPrice: 'Plano pago',
+            studentPrice: 'Plano educacional disponível',
+            discount: 'Desconto Educacional',
+            logo: ''
+        },
+        {
+            id: 'dropbox',
+            name: 'Dropbox Education',
+            category: 'cloud',
+            type: 'free',
+            url: 'https://www.dropbox.com/education',
+            tutorialUrl: '#',
+            description: 'Armazenamento e sincronização de arquivos para estudos, portfólios e trabalhos.',
+            features: ['Backup', 'Compartilhamento', 'Sincronização'],
+            originalPrice: 'Plano pago',
+            studentPrice: 'Plano gratuito disponível',
+            discount: 'Freemium',
+            logo: ''
+        },
+        {
+            id: 'skillshare',
+            name: 'Skillshare Student',
+            category: 'education',
+            type: 'discount',
+            url: 'https://www.skillshare.com/',
+            tutorialUrl: '#',
+            description: 'Cursos práticos de design, criatividade, negócios e tecnologia para estudantes.',
+            features: ['Cursos criativos', 'Projetos práticos', 'Comunidade'],
+            originalPrice: 'Plano premium',
+            studentPrice: 'Desconto estudantil',
+            discount: 'Desconto Educacional',
+            logo: ''
         }
     ],
     favorites: readStoredList('platformFavorites'),
@@ -556,21 +918,20 @@ function resetToFirstPage() {
  */
 function createPlatformCard(platform) {
     const isFavorite = platformState.favorites.includes(platform.id);
-    
+    const platformIcon = getPlatformIcon(platform);
+    const categoryClass = getPlatformCategoryClass(platform.category);
+
     const card = document.createElement('div');
-    card.className = `platform-card ${platform.type}`;
+    card.className = `platform-card ${platform.type} ${categoryClass}`;
     card.setAttribute('data-category', platform.category);
     card.setAttribute('data-favorite', isFavorite);
-    
-    const placeholderLogo = createPlaceholderLogo(platform.category);
-    const logoHtml = platform.logo && platform.logo.trim() !== ''
-        ? `<img src="${platform.logo}" alt="${platform.name}" class="platform-logo platform-logo-image" onerror="this.style.display='none'; if (this.nextElementSibling) this.nextElementSibling.style.display='flex';"><div style="display:none;">${placeholderLogo}</div>`
-        : placeholderLogo;
-    
+
+    const logoHtml = createPlatformMedia(platform, platformIcon, categoryClass);
+
     const featuresHtml = platform.features.map(feature => 
         `<span class="feature-tag">${feature}</span>`
     ).join('');
-    
+
     card.innerHTML = `
         <div class="card-header">
             ${logoHtml}
@@ -578,8 +939,8 @@ function createPlatformCard(platform) {
                 <h3 class="platform-title">${platform.name}</h3>
                 <span class="discount-badge">${platform.discount}</span>
             </div>
-            <button class="favorite-btn ${isFavorite ? 'active' : ''}" data-platform="${platform.id}">
-                <i data-lucide="star" ${isFavorite ? 'style="color: #fbbf24;"' : ''}></i>
+            <button class="favorite-btn ${isFavorite ? 'active' : ''}" data-platform="${platform.id}" aria-pressed="${isFavorite}">
+                <i data-lucide="${isFavorite ? 'bookmark-check' : 'bookmark'}" class="favorite-icon"></i>
             </button>
         </div>
         <div class="card-content">
@@ -597,40 +958,53 @@ function createPlatformCard(platform) {
                 <i data-lucide="external-link"></i>
                 Acessar Plataforma
             </button>
-            <button class="btn btn-secondary" data-action="open-tutorial" data-platform="${platform.id}">
-                <i data-lucide="book-open"></i>
-                Tutorial
-            </button>
         </div>
     `;
-    
+
     return card;
 }
 
 /**
- * Cria placeholder de logo baseado na categoria
+ * Cria o bloco visual do card com ícone padronizado
  */
-function createPlaceholderLogo(category) {
+function createPlatformMedia(platform, icon, categoryClass) {
+    const logoPath = platform.logo || platformLogoMap[platform.id];
+
+    if (logoPath) {
+        return `<img src="${logoPath}" alt="${platform.name}" class="platform-logo">`;
+    }
+
+    return `<div class="platform-logo-placeholder ${categoryClass}" aria-hidden="true">
+        <i data-lucide="${icon}"></i>
+    </div>`;
+}
+
+function getPlatformIcon(platform) {
+    return platform.icon || platformIconMap[platform.id] || getCategoryIcon(platform.category);
+}
+
+
+
+function getCategoryIcon(category) {
     const icons = {
         productivity: 'file-text',
         design: 'palette',
-        development: 'code',
+        development: 'code-2',
         education: 'graduation-cap',
         cloud: 'cloud',
         music: 'music'
     };
-    
-    const icon = icons[category] || 'monitor';
-    const categoryClass = category === 'design' ? 'design' : 
-                         category === 'education' ? 'education' :
-                         category === 'development' ? 'development' :
-                         category === 'productivity' ? 'productivity' :
-                         category === 'cloud' ? 'cloud' :
-                         category === 'music' ? 'music' : '';
-    
-    return `<div class="platform-logo-placeholder ${categoryClass}">
-        <i data-lucide="${icon}"></i>
-    </div>`;
+
+    return icons[category] || 'monitor';
+}
+
+function getPlatformCategoryClass(category) {
+    return category === 'design' ? 'design' :
+        category === 'education' ? 'education' :
+        category === 'development' ? 'development' :
+        category === 'productivity' ? 'productivity' :
+        category === 'cloud' ? 'cloud' :
+        category === 'music' ? 'music' : '';
 }
 
 /**
@@ -733,15 +1107,6 @@ function handleActionClick(event) {
         case 'open-platform':
             if (platformId) openPlatform(platformId);
             break;
-        case 'open-tutorial':
-            if (platformId) openTutorial(platformId);
-            break;
-        case 'open-suggest':
-            openSuggestPlatformModal();
-            break;
-        case 'submit-suggestion':
-            submitSuggestion();
-            break;
         case 'clear-filters':
             clearFilters();
             break;
@@ -759,14 +1124,14 @@ function handleActionClick(event) {
 function toggleFavorite(platformId, button) {
     const index = platformState.favorites.indexOf(platformId);
     const icon = button.querySelector('i');
+    const isFavorite = index === -1;
     
     if (index > -1) {
         // Remover dos favoritos
         platformState.favorites.splice(index, 1);
         button.classList.remove('active');
         if (icon) {
-            icon.setAttribute('data-lucide', 'star');
-            icon.style.color = '';
+            icon.setAttribute('data-lucide', 'bookmark');
         }
         showToast('Removido dos favoritos', 'info');
     } else {
@@ -774,11 +1139,12 @@ function toggleFavorite(platformId, button) {
         platformState.favorites.push(platformId);
         button.classList.add('active');
         if (icon) {
-            icon.setAttribute('data-lucide', 'star');
-            icon.style.color = '#fbbf24';
+            icon.setAttribute('data-lucide', 'bookmark-check');
         }
         showToast('Adicionado aos favoritos', 'success');
     }
+
+    button.setAttribute('aria-pressed', String(isFavorite));
     
     // Salvar no localStorage
     writeStoredList('platformFavorites', platformState.favorites);
@@ -789,7 +1155,7 @@ function toggleFavorite(platformId, button) {
         button.style.transform = 'scale(1)';
     }, 200);
     
-    // Re-inicializar ícones para atualizar o ícone da estrela
+    // Re-inicializar ícones para atualizar o ícone do favorito
     setTimeout(() => {
         if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') {
             lucide.createIcons();
@@ -820,46 +1186,6 @@ function openPlatform(platformId) {
 }
 
 /**
- * Abre tutorial da plataforma
- */
-function openTutorial(platformId) {
-    const platform = platformState.platforms.find(p => p.id === platformId);
-    if (!platform) return;
-    
-    const modal = document.getElementById('tutorialModal');
-    const title = document.getElementById('tutorialTitle');
-    const body = document.getElementById('tutorialBody');
-    const confirmBtn = document.getElementById('tutorialConfirm');
-    
-    if (modal && title && body && confirmBtn) {
-        // Atualizar conteúdo do modal
-        title.textContent = `Tutorial: ${platform.name}`;
-        confirmBtn.onclick = () => {
-            closeTutorialModal();
-            openPlatform(platformId);
-        };
-        
-        // Mostrar modal
-        modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-        
-        // Re-inicializar ícones
-        setTimeout(() => {
-            if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') {
-                lucide.createIcons();
-            }
-        }, 100);
-        
-        // Feedback visual
-        showToast(`Tutorial para ${platform.name}`, 'info');
-    }
-}
-
-
-
-
-
-/**
  * Configura listeners de modal
  */
 function setupModalListeners() {
@@ -882,40 +1208,6 @@ function setupModalListeners() {
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && modal.style.display === 'flex') {
             closeModal();
-        }
-    });
-
-    // Modal de sugestão
-    const suggestModal = document.getElementById('suggestPlatformModal');
-    const suggestModalClose = document.getElementById('suggestModalClose');
-    const suggestModalCancel = document.getElementById('suggestModalCancel');
-    const suggestModalOverlay = suggestModal.querySelector('.modal-overlay');
-    
-    suggestModalClose.addEventListener('click', closeSuggestModal);
-    suggestModalCancel.addEventListener('click', closeSuggestModal);
-    suggestModalOverlay.addEventListener('click', closeSuggestModal);
-    
-    // ESC para fechar modal de sugestão
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && suggestModal.style.display === 'flex') {
-            closeSuggestModal();
-        }
-    });
-    
-    // Modal de tutorial
-    const tutorialModal = document.getElementById('tutorialModal');
-    const tutorialClose = document.getElementById('tutorialClose');
-    const tutorialCancel = document.getElementById('tutorialCancel');
-    const tutorialOverlay = tutorialModal.querySelector('.modal-overlay');
-    
-    tutorialClose.addEventListener('click', closeTutorialModal);
-    tutorialCancel.addEventListener('click', closeTutorialModal);
-    tutorialOverlay.addEventListener('click', closeTutorialModal);
-    
-    // ESC para fechar modal de tutorial
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && tutorialModal.style.display === 'flex') {
-            closeTutorialModal();
         }
     });
 }
@@ -991,98 +1283,6 @@ function getToastIcon(type) {
 }
 
 /**
- * Função global para limpar filtros (usada no HTML)
- */
-window.clearFilters = clearFilters;
-
-/**
- * Função global para abrir plataforma (usada no HTML)
- */
-
-/**
- * Função global para abrir tutorial (usada no HTML)
- */
-
-
-
-/**
- * Função global para abrir modal de sugestão (usada no HTML)
- */
-
-/**
- * Abre modal para sugerir nova plataforma
- */
-function openSuggestPlatformModal() {
-    const modal = document.getElementById('suggestPlatformModal');
-    if (modal) {
-        modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    }
-}
-
-/**
- * Envia sugestão de plataforma
- */
-function submitSuggestion() {
-    const form = document.getElementById('suggestPlatformForm');
-    if (!form) return;
-    const formData = new FormData(form);
-    
-    // Validação básica
-    if (!formData.get('platformName') || !formData.get('platformUrl') || 
-        !formData.get('platformCategory') || !formData.get('platformBenefits')) {
-        showToast('Por favor, preencha todos os campos obrigatórios', 'error');
-        return;
-    }
-    
-    // Simular envio (em uma aplicação real, aqui seria feita a requisição para o servidor)
-    const suggestion = {
-        platformName: formData.get('platformName'),
-        platformUrl: formData.get('platformUrl'),
-        platformCategory: formData.get('platformCategory'),
-        platformBenefits: formData.get('platformBenefits'),
-        yourName: formData.get('yourName') || 'Anônimo',
-        timestamp: new Date().toISOString()
-    };
-    
-    // Salvar no localStorage para demonstração
-    let suggestions = readStoredList('platformSuggestions');
-    suggestions.push(suggestion);
-    writeStoredList('platformSuggestions', suggestions);
-    
-    // Fechar modal
-    closeSuggestModal();
-    
-    // Feedback
-    showToast('Sugestão enviada com sucesso! Obrigado pela contribuição.', 'success');
-    
-    // Resetar formulário
-    form.reset();
-}
-
-/**
- * Fecha modal de sugestão
- */
-function closeSuggestModal() {
-    const modal = document.getElementById('suggestPlatformModal');
-    if (modal) {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
-}
-
-/**
- * Fecha modal de tutorial
- */
-function closeTutorialModal() {
-    const modal = document.getElementById('tutorialModal');
-    if (modal) {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
-}
-
-/**
  * Rola a página para o topo suavemente
  */
 function scrollToTop() {
@@ -1110,3 +1310,5 @@ function scrollToTop() {
 function handlePaginationClick() {
     // A delegaÃ§Ã£o de paginaÃ§Ã£o principal Ã© configurada em setupPaginationListeners().
 }
+
+

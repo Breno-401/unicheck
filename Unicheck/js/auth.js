@@ -35,7 +35,6 @@
             id: user?.id || "",
             nome,
             email: user?.email || "",
-            ra: metadata.ra || "",
             birthDate: metadata.birth_date || "",
             avatarText: getInitials(nome, user?.email),
             foto_url: fotoUrl,
@@ -173,7 +172,7 @@
         return null;
     }
 
-    async function register({ fullName, email, password, ra, birthDate }) {
+    async function register({ fullName, email, password, birthDate }) {
         const client = getClient();
         const { data, error } = await client.auth.signUp({
             email,
@@ -181,7 +180,6 @@
             options: {
                 data: {
                     full_name: fullName,
-                    ra,
                     birth_date: birthDate
                 }
             }
@@ -192,7 +190,7 @@
         return data;
     }
 
-    async function login({ email, password, ra }) {
+    async function login({ email, password }) {
         const client = getClient();
         const { data, error } = await client.auth.signInWithPassword({
             email,
@@ -200,18 +198,6 @@
         });
 
         if (error) throw error;
-
-        const registeredRa = data.user?.user_metadata?.ra;
-        if (ra && registeredRa && ra.trim() !== registeredRa.trim()) {
-            try {
-                await client.auth.signOut();
-            } catch (error) {
-                console.warn("[UniCheckAuth] Falha ao encerrar sessao por mismatch de RA", error);
-            }
-            clearProfile();
-            clearSupabaseAuthStorage();
-            throw new Error("O RA informado nao corresponde ao cadastro deste usuario.");
-        }
 
         if (data.user) saveProfile(data.user);
         return data;

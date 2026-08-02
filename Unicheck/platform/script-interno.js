@@ -303,6 +303,119 @@ function setupMenuActiveState() {
     });
 }
 
+function getStoredProfile() {
+    try {
+        const key = window.UniCheckConfig?.STORAGE_KEYS?.USER_PROFILE || 'userProfile';
+        const rawProfile = localStorage.getItem(key);
+        return rawProfile ? JSON.parse(rawProfile) : null;
+    } catch (error) {
+        console.warn('Erro ao ler perfil armazenado:', error);
+        return null;
+    }
+}
+
+function getChecklistProgressKey(userId) {
+    return `unicheck_checklist_progress_v2:${userId || 'anonymous'}`;
+}
+
+function getStoredChecklistProgress(userId) {
+    if (!userId) return {};
+
+    try {
+        const raw = localStorage.getItem(getChecklistProgressKey(userId));
+        return raw ? JSON.parse(raw) : {};
+    } catch (error) {
+        console.warn('Erro ao ler progresso dos checklists do dashboard:', error);
+        return {};
+    }
+}
+
+function countCompletedChecklists(progressMap = {}) {
+    return Object.values(progressMap).reduce((total, checklistState) => {
+        const tasks = checklistState?.tasks || {};
+        const taskValues = Object.values(tasks);
+
+        if (!taskValues.length) {
+            return total;
+        }
+
+        return taskValues.every(Boolean) ? total + 1 : total;
+    }, 0);
+}
+
+function getStoredFavoritesCount(userId) {
+    if (!userId) return 0;
+
+    try {
+        const key = `platformFavorites:${userId}`;
+        const raw = localStorage.getItem(key);
+        const favorites = raw ? JSON.parse(raw) : [];
+        return Array.isArray(favorites) ? favorites.length : 0;
+    } catch (error) {
+        console.warn('Erro ao ler favoritos da plataforma:', error);
+        return 0;
+    }
+}
+
+async function updateDashboardMetrics() {
+    const completedCountEl = document.getElementById('completedChecklistsCount');
+    const notificationsCountEl = document.getElementById('newNotificationsCount');
+    const favoritesCountEl = document.getElementById('favoritePlatformsCount');
+
+    if (!completedCountEl && !notificationsCountEl && !favoritesCountEl) return;
+
+    try {
+        const profile = getStoredProfile();
+        const authSnapshot = await window.UniCheckAuth?.getAuthDebugSnapshot?.('dashboard-metrics');
+        const user = authSnapshot?.user || authSnapshot?.session?.user || profile;
+        const userId = user?.id || profile?.id || null;
+        const progress = getStoredChecklistProgress(userId);
+
+        const completedCount = countCompletedChecklists(progress);
+        const favoritesCount = getStoredFavoritesCount(userId);
+
+        if (completedCountEl) completedCountEl.textContent = String(completedCount);
+        if (notificationsCountEl) notificationsCountEl.textContent = '0';
+        if (favoritesCountEl) favoritesCountEl.textContent = String(favoritesCount);
+    } catch (error) {
+        console.warn('Erro ao atualizar métricas do dashboard:', error);
+        if (notificationsCountEl) notificationsCountEl.textContent = '0';
+        if (favoritesCountEl && favoritesCountEl.textContent.trim() === '') {
+            favoritesCountEl.textContent = '0';
+        }
+        if (completedCountEl && completedCountEl.textContent.trim() === '') {
+            completedCountEl.textContent = '0';
+        }
+    }
+}
+
+function setupDashboardStatActions() {
+    document.querySelectorAll('[data-dashboard-action]').forEach(button => {
+        if (!(button instanceof HTMLElement)) return;
+
+        button.addEventListener('click', () => {
+            const action = button.getAttribute('data-dashboard-action');
+
+            if (action === 'open-checklists') {
+                window.location.href = 'CHECKLIST ACADEMICO/checklist-academico.html';
+                return;
+            }
+
+            if (action === 'open-platforms') {
+                window.location.href = 'PLATAFORMAS/plataformas-gratuitas.html';
+                return;
+            }
+
+            if (action === 'open-activity') {
+                const activitySection = document.querySelector('.activity-section');
+                if (activitySection) {
+                    activitySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+        });
+    });
+}
+
 /**
  * Define o item ativo do menu baseado na página atual
  */
@@ -732,6 +845,11 @@ function initializeDashboard() {
         if (window.ProfileManager && typeof window.ProfileManager.bindAutoSync === 'function') {
             window.ProfileManager.bindAutoSync();
         }
+
+        setupDashboardStatActions();
+        updateDashboardMetrics();
+        window.addEventListener('focus', updateDashboardMetrics);
+        window.addEventListener('storage', updateDashboardMetrics);
         
         // Configurar redimensionamento da janela
         window.addEventListener('resize', function() {

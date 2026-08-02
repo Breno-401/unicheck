@@ -327,17 +327,13 @@ body {
    ========================== */
 .form-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: var(--spacing-lg);
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-}
-
-.form-group.full-width {
-  grid-column: 1 / -1;
 }
 
 .form-label {
@@ -348,8 +344,7 @@ body {
 }
 
 .form-input,
-.form-select,
-.form-textarea {
+.form-select {
   padding: var(--spacing-md);
   border: 2px solid var(--border-color);
   border-radius: var(--radius-md);
@@ -361,23 +356,10 @@ body {
 }
 
 .form-input:focus,
-.form-select:focus,
-.form-textarea:focus {
+.form-select:focus {
   outline: none;
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(108, 189, 181, 0.1);
-}
-
-.form-textarea {
-  resize: vertical;
-  min-height: 120px;
-  font-family: inherit;
-}
-
-.form-hint {
-  font-size: 0.875rem;
-  color: var(--text-muted);
-  margin-top: var(--spacing-xs);
 }
 
 /* ==========================
@@ -762,7 +744,6 @@ input:checked + .slider:before {
 .btn:focus,
 .form-input:focus,
 .form-select:focus,
-.form-textarea:focus,
 .profile-menu-link:focus {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
@@ -791,8 +772,7 @@ input:checked + .slider:before {
 }
 
 .form-input:hover,
-.form-select:hover,
-.form-textarea:hover {
+.form-select:hover {
   border-color: var(--primary-light);
 }
 
@@ -804,8 +784,7 @@ input:checked + .slider:before {
    MELHORIAS DE ACESSIBILIDADE
    ========================== */
 .form-input:focus,
-.form-select:focus,
-.form-textarea:focus {
+.form-select:focus {
   outline: none;
   border-color: var(--unicheck-primary);
   box-shadow: 0 0 0 3px rgba(108, 189, 181, 0.2);
