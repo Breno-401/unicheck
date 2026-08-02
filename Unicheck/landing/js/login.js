@@ -13,7 +13,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-    const raRegex = /^[A-Za-z0-9._-]{4,20}$/;
 
     let toastTimeout = null;
 
@@ -66,23 +65,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function validateLogin() {
         const emailInput = document.getElementById("loginEmail");
-        const raInput = document.getElementById("matriculasenha");
         const passwordInput = document.getElementById("loginSenha");
 
         if (!(emailInput instanceof HTMLInputElement)) return false;
-        if (!(raInput instanceof HTMLInputElement)) return false;
         if (!(passwordInput instanceof HTMLInputElement)) return false;
 
         let valid = true;
         clearFieldError(emailInput);
-        clearFieldError(raInput);
         clearFieldError(passwordInput);
 
         if (!emailInput.value.trim()) valid = setFieldError(emailInput, "Informe seu e-mail.");
         else if (!emailRegex.test(emailInput.value.trim())) valid = setFieldError(emailInput, "Informe um e-mail valido.");
-
-        if (!raInput.value.trim()) valid = setFieldError(raInput, "Informe seu registro academico.");
-        else if (!raRegex.test(raInput.value.trim())) valid = setFieldError(raInput, "RA invalido. Use 4 a 20 caracteres.");
 
         if (!passwordInput.value) valid = setFieldError(passwordInput, "Informe sua senha.");
         else if (!passwordRegex.test(passwordInput.value)) valid = setFieldError(passwordInput, "Senha deve ter 8+ caracteres, letra maiuscula e numero.");
@@ -94,22 +87,19 @@ document.addEventListener("DOMContentLoaded", () => {
         const nomeInput = document.getElementById("nomeCadastro");
         const emailInput = document.getElementById("emailCadastro");
         const nascimentoInput = document.getElementById("nascimentoCadastro");
-        const raInput = document.getElementById("matriculaCadastro");
         const senhaInput = document.getElementById("senhaCadastro");
 
         if (!(nomeInput instanceof HTMLInputElement)) return false;
         if (!(emailInput instanceof HTMLInputElement)) return false;
         if (!(nascimentoInput instanceof HTMLInputElement)) return false;
-        if (!(raInput instanceof HTMLInputElement)) return false;
         if (!(senhaInput instanceof HTMLInputElement)) return false;
 
         let valid = true;
-        [nomeInput, emailInput, nascimentoInput, raInput, senhaInput].forEach(clearFieldError);
+        [nomeInput, emailInput, nascimentoInput, senhaInput].forEach(clearFieldError);
 
         if (nomeInput.value.trim().length < 3) valid = setFieldError(nomeInput, "Informe seu nome completo.");
         if (!emailRegex.test(emailInput.value.trim())) valid = setFieldError(emailInput, "Informe um e-mail valido.");
         if (!nascimentoInput.value) valid = setFieldError(nascimentoInput, "Informe sua data de nascimento.");
-        if (!raRegex.test(raInput.value.trim())) valid = setFieldError(raInput, "RA invalido. Use 4 a 20 caracteres.");
         if (!passwordRegex.test(senhaInput.value)) valid = setFieldError(senhaInput, "Senha fraca. Use 8+ caracteres, maiuscula e numero.");
 
         return valid;
@@ -198,12 +188,10 @@ document.addEventListener("DOMContentLoaded", () => {
             setSubmitLoading(submitButton, true);
             try {
                 const emailInput = document.getElementById("loginEmail");
-                const raInput = document.getElementById("matriculasenha");
                 const passwordInput = document.getElementById("loginSenha");
 
                 await auth.login({
                     email: emailInput.value.trim(),
-                    ra: raInput.value.trim(),
                     password: passwordInput.value
                 });
 
@@ -233,14 +221,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 const nomeInput = document.getElementById("nomeCadastro");
                 const emailInput = document.getElementById("emailCadastro");
                 const nascimentoInput = document.getElementById("nascimentoCadastro");
-                const raInput = document.getElementById("matriculaCadastro");
                 const senhaInput = document.getElementById("senhaCadastro");
 
                 const result = await auth.register({
                     fullName: nomeInput.value.trim(),
                     email: emailInput.value.trim(),
                     birthDate: nascimentoInput.value,
-                    ra: raInput.value.trim(),
                     password: senhaInput.value
                 });
 

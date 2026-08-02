@@ -81,19 +81,6 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link" data-tooltip="Notificações">
-                            <i data-lucide="bell"></i>
-                            <span>Notificações</span>
-                            <span class="notification-badge">3</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link" data-tooltip="Plataformas">
-                            <i data-lucide="layers"></i>
-                            <span>Plataformas</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
                         <a href="#" class="nav-link" data-tooltip="Ajuda/Suporte">
                             <i data-lucide="help-circle"></i>
                             <span>Ajuda/Suporte</span>
@@ -127,8 +114,9 @@
                     </div>
                     
                     <div class="welcome-section">
+                        <p class="dashboard-eyebrow">Área interna UniCheck</p>
                         <h1 class="welcome-title">Bem-vindo ao UniCheck</h1>
-                        <p class="welcome-subtitle">Sua confiança começa agora. UniCheck: A plataforma que valida a originalidade e enriquece a qualidade da sua informação.</p>
+                        <p class="welcome-subtitle">Um painel mais limpo para acompanhar seus checklists, plataformas e atalhos da rotina acadêmica.</p>
                     </div>
                 </div>
 
@@ -148,6 +136,9 @@
                     <div class="header-actions-enhanced">
                         <button class="theme-toggle-mobile" id="themeToggleMobile">
                             <i data-lucide="moon"></i>
+                        </button>
+                        <button class="header-notification-button" type="button" aria-label="Notificações">
+                            <i data-lucide="bell"></i>
                         </button>
                         <div class="user-menu">
                             <button class="user-menu-trigger" id="userMenuTrigger">
@@ -202,33 +193,42 @@
             <!-- Estatísticas Rápidas -->
             <section class="stats-section">
                 <div class="stats-grid">
-                    <div class="stat-card">
+                    <button class="stat-card stat-card-action stat-card-complete" type="button" data-dashboard-action="open-checklists" aria-label="Abrir checklists completos">
                         <div class="stat-icon">
                             <i data-lucide="check-circle"></i>
                         </div>
                         <div class="stat-content">
-                            <h3>24</h3>
-                            <p>Checklists Completos</p>
+                            <span class="stat-eyebrow">Progresso acadêmico</span>
+                            <h3 id="completedChecklistsCount">0</h3>
+                            <p>Checklists completos</p>
+                            <span class="stat-note">Abrir área de checklists</span>
                         </div>
-                    </div>
-                    <div class="stat-card">
+                        <i data-lucide="arrow-up-right" class="stat-arrow"></i>
+                    </button>
+                    <button class="stat-card stat-card-action stat-card-alert" type="button" data-dashboard-action="open-activity" aria-label="Ver atividade recente">
                         <div class="stat-icon">
                             <i data-lucide="bell"></i>
                         </div>
                         <div class="stat-content">
-                            <h3>3</h3>
-                            <p>Notificações Novas</p>
+                            <span class="stat-eyebrow">Central de alertas</span>
+                            <h3 id="newNotificationsCount">0</h3>
+                            <p>Notificações novas</p>
+                            <span class="stat-note">Ainda sem notificações funcionais</span>
                         </div>
-                    </div>
-                    <div class="stat-card">
+                        <i data-lucide="arrow-up-right" class="stat-arrow"></i>
+                    </button>
+                    <button class="stat-card stat-card-action stat-card-favorites" type="button" data-dashboard-action="open-platforms" aria-label="Abrir plataformas favoritadas">
                         <div class="stat-icon">
-                            <i data-lucide="layers"></i>
+                            <i data-lucide="star"></i>
                         </div>
                         <div class="stat-content">
-                            <h3>12</h3>
-                            <p>Plataformas Ativas</p>
+                            <span class="stat-eyebrow">Biblioteca salva</span>
+                            <h3 id="favoritePlatformsCount">0</h3>
+                            <p>Plataformas favoritadas</p>
+                            <span class="stat-note">Ver plataformas salvas</span>
                         </div>
-                    </div>
+                        <i data-lucide="arrow-up-right" class="stat-arrow"></i>
+                    </button>
                 </div>
             </section>
 
@@ -284,17 +284,17 @@
                             <div class="card-stats">
                                 <span class="card-stat highlight">
                                     <i data-lucide="alert-circle"></i>
-                                    3 novas
+                                    0 novas
                                 </span>
                                 <span class="card-stat">
                                     <i data-lucide="eye"></i>
-                                    Todas vistas
+                                    Resumo no painel
                                 </span>
                             </div>
-                            <button class="card-action">
-                                <span>Ver Notificações</span>
+                            <a href="#activity-section" class="card-action">
+                                <span>Ver atividade recente</span>
                                 <i data-lucide="arrow-right"></i>
-                            </button>
+                            </a>
                         </div>
                     </div>
 
@@ -315,11 +315,11 @@
                             <div class="card-stats">
                                 <span class="card-stat">
                                     <i data-lucide="star"></i>
-                                    12 ativas
+                                    Favoritadas
                                 </span>
                                 <span class="card-stat">
                                     <i data-lucide="zap"></i>
-                                    Descontos
+                                    Atalhos rápidos
                                 </span>
                             </div>
                             <button class="card-action" data-action="navigate-platforms">
@@ -329,41 +329,11 @@
                         </div>
                     </div>
 
-                    <!-- Card 4: Central de Documentos -->
-                    <div class="content-card">
-                        <div class="card-image">
-                            <!-- IMAGEM COERENTE: Biblioteca de documentos -->
-                            <img src="img-interno/biblioteca-documentos.jpg" 
-                                 alt="Biblioteca de documentos acadêmicos" 
-                                 class="card-bg-image">
-                            <div class="card-image-overlay">
-                                <i data-lucide="file-text" class="card-icon"></i>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <h3 class="card-title">Central de Documentos</h3>
-                            <p class="card-description">Acesse certificados, históricos e todos os seus documentos acadêmicos organizados.</p>
-                            <div class="card-stats">
-                                <span class="card-stat">
-                                    <i data-lucide="folder"></i>
-                                    18 documentos
-                                </span>
-                                <span class="card-stat">
-                                    <i data-lucide="download"></i>
-                                    Download
-                                </span>
-                            </div>
-                            <button class="card-action">
-                                <span>Acessar Documentos</span>
-                                <i data-lucide="arrow-right"></i>
-                            </button>
-                        </div>
-                    </div>
                 </div>
             </section>
 
             <!-- Atividade Recente -->
-            <section class="activity-section">
+            <section class="activity-section" id="activity-section">
                 <div class="section-header">
                     <h2>Atividade Recente</h2>
                     <button class="view-all-btn">

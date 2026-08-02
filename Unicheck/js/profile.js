@@ -20,7 +20,7 @@
         }
 
         const debug = await auth.getAuthDebugSnapshot?.("profile.getCurrentUser");
-        const user = debug?.user || await auth.getUser?.();
+        const user = debug?.user || debug?.session?.user || await auth.getUser?.();
 
         if (!user) {
             throw new Error("Nenhum usuario autenticado.");
@@ -43,6 +43,16 @@
 
     function getStorageKey() {
         return window.UniCheckConfig?.STORAGE_KEYS?.USER_PROFILE || STORAGE_KEY;
+    }
+
+    function getStoredProfile() {
+        try {
+            const rawProfile = localStorage.getItem(getStorageKey());
+            return rawProfile ? JSON.parse(rawProfile) : null;
+        } catch (error) {
+            console.warn("[UniCheckProfile] Falha ao ler perfil em cache", error);
+            return null;
+        }
     }
 
     function normalizeProfile(row, user) {
@@ -70,25 +80,41 @@
 
     async function ensureProfileRow() {
         const client = getClient();
-        const user = await getCurrentUser();
+        const cachedProfile = getStoredProfile();
+        const user = await getCurrentUser().catch(error => {
+            if (cachedProfile?.id) {
+                console.warn("[UniCheckProfile] Usuario autenticado indisponivel, usando perfil em cache.", error);
+                return { id: cachedProfile.id, email: cachedProfile.email || "", user_metadata: cachedProfile };
+            }
+            throw error;
+        });
 
         console.info("[UniCheckProfile] Buscando perfil no Supabase", {
             userId: user.id || null,
             email: user.email || null
         });
 
-        const { data, error } = await client
-            .from(PROFILE_TABLE)
-            .select("nome, email, foto_url")
-            .eq(PROFILE_USER_ID_COLUMN, user.id)
-            .maybeSingle();
+        let data = null;
+        let error = null;
+
+        try {
+            ({ data, error } = await client
+                .from(PROFILE_TABLE)
+                .select("nome, email, foto_url")
+                .eq(PROFILE_USER_ID_COLUMN, user.id)
+                .maybeSingle());
+        } catch (queryError) {
+            error = queryError;
+        }
 
         if (error) {
             console.error("[UniCheckProfile] Erro ao consultar users_profile", {
                 userId: user.id || null,
                 message: error?.message || error
             });
-            throw error;
+            const fallbackProfile = normalizeProfile(cachedProfile, user);
+            persistLocalProfile(fallbackProfile);
+            return fallbackProfile;
         }
 
         if (data) {
@@ -120,7 +146,9 @@
                 userId: user.id || null,
                 message: insertError?.message || insertError
             });
-            throw insertError;
+            const fallbackProfile = normalizeProfile(cachedProfile || baseProfile, user);
+            persistLocalProfile(fallbackProfile);
+            return fallbackProfile;
         }
 
         const profile = normalizeProfile(inserted, user);
@@ -173,27 +201,33 @@
             throw authError;
         }
 
-        const { data, error } = await client
-            .from(PROFILE_TABLE)
-            .upsert(
-                {
-                    [PROFILE_USER_ID_COLUMN]: user.id,
-                    ...cleanProfile
-                },
-                { onConflict: PROFILE_USER_ID_COLUMN }
-            )
-            .select("nome, email, foto_url")
-            .single();
+        let data = null;
+        let tableError = null;
 
-        if (error) {
-            console.error("[UniCheckProfile] Erro ao atualizar users_profile", {
-                userId: user.id || null,
-                message: error?.message || error
-            });
-            throw error;
+        try {
+            ({ data, error: tableError } = await client
+                .from(PROFILE_TABLE)
+                .upsert(
+                    {
+                        [PROFILE_USER_ID_COLUMN]: user.id,
+                        ...cleanProfile
+                    },
+                    { onConflict: PROFILE_USER_ID_COLUMN }
+                )
+                .select("nome, email, foto_url")
+                .single());
+        } catch (queryError) {
+            tableError = queryError;
         }
 
-        const profile = normalizeProfile(data, {
+        if (tableError) {
+            console.warn("[UniCheckProfile] Falha ao atualizar users_profile, mantendo perfil local.", {
+                userId: user.id || null,
+                message: tableError?.message || tableError
+            });
+        }
+
+        const profile = normalizeProfile(data || cleanProfile, {
             ...user,
             email: cleanProfile.email || user.email,
             user_metadata: {
