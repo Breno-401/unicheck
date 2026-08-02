@@ -213,6 +213,8 @@ Fluxo:
 - salva favoritos no `localStorage` com ícone padronizado de bookmark;
 - mostra modais de detalhes e tutorial;
 - abre links externos em nova aba;
+- exibe cards simples com a logo real da plataforma quando disponivel, badge de desconto e a informacao essencial para leitura rapida;
+- nao exibe botao de tutorial por plataforma;
 - a pagina foi ajustada para ser responsiva em desktop, tablet e mobile, com header em grade, filtros com rolagem horizontal em telas pequenas, cards em coluna unica e modais adaptados.
 
 Esta pagina tambem depende da infraestrutura de dashboard e autenticacao, porque reaproveita sidebar, tema, logout e sincronizacao de perfil.

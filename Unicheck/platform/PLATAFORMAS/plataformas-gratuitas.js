@@ -40,9 +40,9 @@ const platformIconMap = {
     azure: 'cloud',
     canva: 'palette',
     github: 'github',
-    notion: 'file-text',
+    notion: 'notebook-pen',
     coursera: 'graduation-cap',
-    adobe: 'camera',
+    adobe: 'pen-tool',
     google: 'folder',
     gemini: 'sparkles',
     perplexity: 'search',
@@ -53,12 +53,12 @@ const platformIconMap = {
     trello: 'layout-grid',
     zoom: 'video',
     stackoverflow: 'message-circle',
-    microsoft365: 'mail',
+    microsoft365: 'monitor',
     miro: 'workflow',
     slack: 'messages-square',
     replit: 'terminal',
     vscode: 'code-2',
-    vercel: 'globe',
+    vercel: 'rocket',
     netlify: 'rocket',
     oraclecloud: 'server',
     freecodecamp: 'book-check',
@@ -74,7 +74,46 @@ const platformIconMap = {
     asana: 'clipboard-list',
     figjam: 'pen-tool',
     dropbox: 'cloud',
-    skillshare: 'graduation-cap'
+    skillshare: 'graduation-cap',
+    outlook: 'mail'
+};
+
+const platformLogoMap = {
+    jetbrains: '../img-interno/jetbrains-logo.png',
+    spotify: '../img-interno/spotify-logo.png',
+    azure: '../img-interno/azure-logo.png',
+    canva: '../img-interno/canva_logo.png',
+    github: '../img-interno/github_logo.png',
+    notion: '../img-interno/notion_logo.png',
+    coursera: '../img-interno/coursera_logo.png',
+    adobe: '../img-interno/adobe_logo.png',
+    google: '../img-interno/google_workspace_logo.png',
+    gemini: '../img-interno/gemini_logo_3.png',
+    perplexity: '../img-interno/perplexity_logo_2.png',
+    figma: '../img-interno/figma_logo_2.png',
+    discord: '../img-interno/discord_logo_5.jpg',
+    aws: '../img-interno/aws_logo_2.png',
+    mongodb: '../img-interno/mongodb_logo_1.png',
+    trello: '../img-interno/trello_logo_8.png',
+    zoom: '../img-interno/zoom_logo_2.jpg',
+    stackoverflow: '../img-interno/stackoverflow_logo_6.png',
+    microsoft365: '../img-interno/MicrosoftT.png',
+    outlook: '../img-interno/outlook.png'
+};
+
+const platformTypeLabels = {
+    free: 'Grátis',
+    discount: 'Desconto',
+    premium: 'Premium'
+};
+
+const platformCategoryLabels = {
+    productivity: 'Produtividade',
+    design: 'Design',
+    development: 'Desenvolvimento',
+    education: 'Educação',
+    cloud: 'Cloud',
+    music: 'Música'
 };
 
 const platformState = {
@@ -881,18 +920,18 @@ function createPlatformCard(platform) {
     const isFavorite = platformState.favorites.includes(platform.id);
     const platformIcon = getPlatformIcon(platform);
     const categoryClass = getPlatformCategoryClass(platform.category);
-    
+
     const card = document.createElement('div');
     card.className = `platform-card ${platform.type} ${categoryClass}`;
     card.setAttribute('data-category', platform.category);
     card.setAttribute('data-favorite', isFavorite);
-    
+
     const logoHtml = createPlatformMedia(platform, platformIcon, categoryClass);
-    
+
     const featuresHtml = platform.features.map(feature => 
         `<span class="feature-tag">${feature}</span>`
     ).join('');
-    
+
     card.innerHTML = `
         <div class="card-header">
             ${logoHtml}
@@ -919,13 +958,9 @@ function createPlatformCard(platform) {
                 <i data-lucide="external-link"></i>
                 Acessar Plataforma
             </button>
-            <button class="btn btn-secondary" data-action="open-tutorial" data-platform="${platform.id}">
-                <i data-lucide="book-open"></i>
-                Tutorial
-            </button>
         </div>
     `;
-    
+
     return card;
 }
 
@@ -933,6 +968,12 @@ function createPlatformCard(platform) {
  * Cria o bloco visual do card com ícone padronizado
  */
 function createPlatformMedia(platform, icon, categoryClass) {
+    const logoPath = platform.logo || platformLogoMap[platform.id];
+
+    if (logoPath) {
+        return `<img src="${logoPath}" alt="${platform.name}" class="platform-logo">`;
+    }
+
     return `<div class="platform-logo-placeholder ${categoryClass}" aria-hidden="true">
         <i data-lucide="${icon}"></i>
     </div>`;
@@ -941,6 +982,8 @@ function createPlatformMedia(platform, icon, categoryClass) {
 function getPlatformIcon(platform) {
     return platform.icon || platformIconMap[platform.id] || getCategoryIcon(platform.category);
 }
+
+
 
 function getCategoryIcon(category) {
     const icons = {
@@ -1064,9 +1107,6 @@ function handleActionClick(event) {
         case 'open-platform':
             if (platformId) openPlatform(platformId);
             break;
-        case 'open-tutorial':
-            if (platformId) openTutorial(platformId);
-            break;
         case 'clear-filters':
             clearFilters();
             break;
@@ -1146,46 +1186,6 @@ function openPlatform(platformId) {
 }
 
 /**
- * Abre tutorial da plataforma
- */
-function openTutorial(platformId) {
-    const platform = platformState.platforms.find(p => p.id === platformId);
-    if (!platform) return;
-    
-    const modal = document.getElementById('tutorialModal');
-    const title = document.getElementById('tutorialTitle');
-    const body = document.getElementById('tutorialBody');
-    const confirmBtn = document.getElementById('tutorialConfirm');
-    
-    if (modal && title && body && confirmBtn) {
-        // Atualizar conteúdo do modal
-        title.textContent = `Tutorial: ${platform.name}`;
-        confirmBtn.onclick = () => {
-            closeTutorialModal();
-            openPlatform(platformId);
-        };
-        
-        // Mostrar modal
-        modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-        
-        // Re-inicializar ícones
-        setTimeout(() => {
-            if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') {
-                lucide.createIcons();
-            }
-        }, 100);
-        
-        // Feedback visual
-        showToast(`Tutorial para ${platform.name}`, 'info');
-    }
-}
-
-
-
-
-
-/**
  * Configura listeners de modal
  */
 function setupModalListeners() {
@@ -1208,22 +1208,6 @@ function setupModalListeners() {
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && modal.style.display === 'flex') {
             closeModal();
-        }
-    });
-    // Modal de tutorial
-    const tutorialModal = document.getElementById('tutorialModal');
-    const tutorialClose = document.getElementById('tutorialClose');
-    const tutorialCancel = document.getElementById('tutorialCancel');
-    const tutorialOverlay = tutorialModal.querySelector('.modal-overlay');
-    
-    tutorialClose.addEventListener('click', closeTutorialModal);
-    tutorialCancel.addEventListener('click', closeTutorialModal);
-    tutorialOverlay.addEventListener('click', closeTutorialModal);
-    
-    // ESC para fechar modal de tutorial
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && tutorialModal.style.display === 'flex') {
-            closeTutorialModal();
         }
     });
 }
@@ -1299,17 +1283,6 @@ function getToastIcon(type) {
 }
 
 /**
- * Fecha modal de tutorial
- */
-function closeTutorialModal() {
-    const modal = document.getElementById('tutorialModal');
-    if (modal) {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
-}
-
-/**
  * Rola a página para o topo suavemente
  */
 function scrollToTop() {
@@ -1337,3 +1310,5 @@ function scrollToTop() {
 function handlePaginationClick() {
     // A delegaÃ§Ã£o de paginaÃ§Ã£o principal Ã© configurada em setupPaginationListeners().
 }
+
+
