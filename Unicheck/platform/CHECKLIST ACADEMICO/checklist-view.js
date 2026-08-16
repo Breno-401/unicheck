@@ -624,6 +624,30 @@
         card?.classList.add(input.checked ? "task-press-complete" : "task-press-reopen");
     }
 
+    function showXpFeedback(rewards, anchor) {
+        if (!Array.isArray(rewards) || !rewards.length) return;
+        let stack = anchor?.querySelector(":scope > .xp-feedback-stack--inline") || document.querySelector("body > .xp-feedback-stack");
+        if (!stack) {
+            stack = document.createElement("div");
+            stack.className = `xp-feedback-stack${anchor ? " xp-feedback-stack--inline" : ""}`;
+            stack.setAttribute("role", "status");
+            stack.setAttribute("aria-live", "polite");
+            (anchor || document.body).appendChild(stack);
+        }
+
+        rewards.forEach(reward => {
+            const feedback = document.createElement("div");
+            feedback.className = `xp-feedback xp-feedback--${reward.type}`;
+            feedback.innerHTML = `<i data-lucide="sparkles" aria-hidden="true"></i><span><strong>+${reward.xp} XP</strong>${reward.label}</span>`;
+            stack.appendChild(feedback);
+            window.setTimeout(() => {
+                feedback.remove();
+                if (!stack.children.length) stack.remove();
+            }, 1750);
+        });
+        window.lucide?.createIcons?.();
+    }
+
     function updateTaskState(checklistId, taskId, completed) {
         const current = state.progress[checklistId] || { tasks: {} };
 
@@ -637,6 +661,7 @@
     }
 
     function toggleTask(checklistId, taskId, completed) {
+        const progressionBefore = window.UniCheckProgression?.calculateFromChecklists?.(state.checklists);
         const before = getChecklistById(checklistId);
         const checklistIndex = state.checklists.findIndex(item => item.id === checklistId);
         const nextBefore = state.checklists[checklistIndex + 1] || null;
@@ -650,6 +675,21 @@
         }
         syncVisibleView();
         animateChecklistTransition(before, after, taskId, completed);
+
+        const taskWasCompleted = before?.tasks?.find(task => task.id === taskId)?.completed === true;
+        const rewards = window.UniCheckProgression?.getChecklistCompletionRewards?.({
+            taskCompleted: Boolean(completed && !taskWasCompleted),
+            phaseCompleted: Boolean(before && after && !before.completed && after.completed)
+        }) || [];
+        const taskCard = refs.detailContent?.querySelector(`[data-task-card][data-task-id="${taskId}"]`);
+        showXpFeedback(rewards, taskCard);
+        window.dispatchEvent(new CustomEvent("unicheck:progression-updated", {
+            detail: {
+                checklists: state.checklists,
+                announceLevelChange: Boolean(completed),
+                previousLevel: progressionBefore?.currentLevel?.level
+            }
+        }));
 
         // A interface ja reflete o novo estado. Em seguida, persiste no cache
         // por usuario e deixa a escrita remota exclusivamente em background.
@@ -782,6 +822,7 @@
             saveStoredProgress(state.user.id);
 
             hydrateChecklists();
+            window.UniCheckProgressionProfile?.renderFromChecklists?.(state.checklists);
             syncFromLocation();
             renderListView();
         } catch (error) {
@@ -905,6 +946,7 @@
         state.progress = getStoredProgress(state.user.id);
         setupEventListeners();
         hydrateChecklists();
+        window.UniCheckProgressionProfile?.renderFromChecklists?.(state.checklists);
         syncFromLocation();
         renderListView();
 

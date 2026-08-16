@@ -157,18 +157,20 @@ O painel inicial da dashboard renderiza primeiro o estado local do usuario e o r
 - percentual geral calculado por tarefas concluidas sobre o total de tarefas da estrutura local;
 - fases concluidas, fase atual e primeira tarefa pendente dessa fase;
 - CTA que abre diretamente a fase atual por hash de rota;
-- quantidade de plataformas favoritadas a partir do `localStorage`;
-- ate cinco atividades recentes do historico por usuario.
+- mapa visual das sete fases, derivado do progresso real, com estados concluida, em andamento, proxima e bloqueada;
+- XP, nivel atual e avanco para o proximo nivel calculados deterministicamente a partir das tarefas e fases concluidas.
 
-Na abertura, o cache de progresso e de atividades e exibido assim que a sessao identifica o `user_id`. Em paralelo, o dashboard tenta esvaziar filas pendentes e faz uma consulta consolidada a `user_checklist_item_progress` e uma consulta aos eventos recentes de `user_activity`. Os resultados remotos atualizam cache e UI sem bloquear a primeira renderizacao. Alteracoes de progresso que continuem na fila local prevalecem durante a reconciliacao.
+A Home usa uma hierarquia enxuta: cabecalho compartilhado, um bloco principal de progresso, a visao compacta `Sua Jornada` com o contexto das sete fases e uma faixa institucional secundaria da Fundacao Bradesco / Escola Virtual. Nivel, XP e avanco para o proximo nivel ficam associados ao perfil na sidebar compartilhada, em vez de ocuparem um bloco proprio na Home. Os antigos cards grandes de gerenciamento de checklists, notificacoes e biblioteca de plataformas, assim como os tres atalhos estatisticos redundantes, nao fazem mais parte da Home; as funcionalidades continuam disponiveis na sidebar, no sino e nas paginas proprias. A Home nao exibe busca enquanto nao houver uma acao real para ela; as buscas funcionais continuam preservadas nas paginas especificas.
 
-O historico e implementado por [`js/activity.js`](./js/activity.js). Eventos sao registrados apenas em interacoes efetivas do checklist e dos favoritos (tarefa concluida, fase concluida, fase desbloqueada, plataforma favoritada ou removida). Cada evento recebe UUID estavel, entra imediatamente em `unicheck_activity:<user_id>` e em `unicheck_activity_sync_queue:<user_id>`, e e enviado em background para `user_activity`. A fila usa insercao idempotente pelo UUID, e falhas de rede nunca removem o cache. O modulo mantem no maximo 100 eventos no cache por usuario; o dashboard exibe os cinco mais recentes e nunca cria eventos durante renderizacao.
+Na abertura, o cache de progresso e carregado e alimenta imediatamente o bloco principal e `Sua Jornada` assim que a sessao identifica o `user_id`. Em paralelo, o dashboard tenta esvaziar filas pendentes e faz uma consulta consolidada a `user_checklist_item_progress`; a restauracao dos eventos recentes de `user_activity` continua ativa em background, embora eles nao sejam exibidos na Home. Os resultados remotos atualizam os caches e a UI de progresso sem bloquear a primeira renderizacao. Alteracoes de progresso que continuem na fila local prevalecem durante a reconciliacao.
+
+O historico e implementado por [`js/activity.js`](./js/activity.js). Eventos sao registrados apenas em interacoes efetivas do checklist e dos favoritos (tarefa concluida, fase concluida, fase desbloqueada, plataforma favoritada ou removida). Cada evento recebe UUID estavel, entra imediatamente em `unicheck_activity:<user_id>` e em `unicheck_activity_sync_queue:<user_id>`, e e enviado em background para `user_activity`. A fila usa insercao idempotente pelo UUID, e falhas de rede nunca removem o cache. O modulo mantem no maximo 100 eventos no cache por usuario. A Home nao renderiza mais o historico como secao principal, mas sua restauracao, cache, fila e sincronizacao cross-device continuam ativos para uso futuro em uma superficie dedicada.
 
 O sino das paginas internas e gerenciado centralmente por [`js/notifications.js`](./js/notifications.js). O modulo valida a sessao, renderiza `unicheck_notifications:<user_id>` imediatamente e executa uma unica restauracao remota por carregamento de pagina. O painel diferencia itens lidos e nao lidos, mostra contador, permite marcar todos como lidos e resolve destinos internos sem depender da profundidade da pagina atual. Clique fora e `Escape` fecham o painel.
 
 Notificacao e atividade possuem papeis distintos. A conclusao de uma tarefa/fase continua no historico; uma notificacao e criada quando a fase seguinte e desbloqueada ou quando toda a jornada e concluida. Chaves semanticas como `phase_unlocked:<checklist_id>` impedem que a mesma comunicacao seja criada novamente por re-renderizacao ou reconclusao.
 
-Esses cards funcionam como atalhos para as areas principais da plataforma.
+A faixa de parceiro educacional apresenta somente Fundacao Bradesco / Escola Virtual, com CTA externo para `https://www.ev.org.br/` aberto em nova aba com `noopener noreferrer`; ela nao participa de progresso, atividade ou persistencia.
 
 O dashboard tambem usa:
 
@@ -208,6 +210,7 @@ Fluxo local-first:
 - ao marcar ou desmarcar, atualiza UI e `localStorage` imediatamente e sincroniza o Supabase em background;
 - a camada de apresentacao interpola barra, percentual, contador, checkbox e estado do card usando o estado local anterior e o novo, sem aguardar o Supabase;
 - ao concluir uma fase, a interface destaca a conclusao e sinaliza visualmente o desbloqueio da fase seguinte quando a lista e exibida;
+- ao concluir uma tarefa, mostra feedback visual curto de `+10 XP`; quando a mesma acao conclui a fase, mostra tambem `+50 XP`, sem persistir um contador de XP;
 - falhas remotas nao revertem a UI: a alteracao permanece numa fila `unicheck_checklist_pending_sync_v1:<user_id>`, tentada novamente em uma nova alteracao ou quando o navegador volta a ficar online;
 - libera a fase seguinte quando a atual e finalizada.
 
@@ -318,6 +321,15 @@ A sidebar do dashboard usa `ajuda/ajuda-suporte.html`; checklists e plataformas 
 - sincroniza filas em oportunidades naturais de inicializacao, nova notificacao e evento `online`;
 - nao usa polling, realtime, consulta em `focus` ou `service_role`.
 
+### `js/progression.js`
+
+- centraliza as recompensas de 10 XP por tarefa e 50 XP por fase completa;
+- calcula XP exclusivamente a partir do estado atual do progresso, sem tabela ou chave de armazenamento propria;
+- centraliza os cinco niveis e thresholds: Calouro (0), Explorador (90), Conectado (180), Veterano (360) e Expert Academico (540);
+- informa nivel atual, proximo nivel, XP restante e percentual dentro do nivel;
+- aceita campos futuros de secoes concluidas e bonus do Manual do Aluno, mantidos com peso zero ate o recurso ser implementado;
+- fornece as recompensas visuais do clique, mas nao cria atividades nem notificacoes.
+
 ### `platform/js/core-config.js`
 
 - centraliza chaves de `localStorage`;
@@ -329,6 +341,14 @@ A sidebar do dashboard usa `ajuda/ajuda-suporte.html`; checklists e plataformas 
 - sincroniza o perfil cacheado entre paginas da area interna;
 - atualiza avatar, nome e email em varios pontos da UI;
 - reage a `focus` e ao evento `storage`.
+
+### `platform/js/progression-profile.js`
+
+- injeta a representacao compacta de nivel, XP e barra abaixo do perfil nas sidebars das paginas internas que usam esse layout;
+- calcula a apresentacao usando `js/progression.js`, a estrutura local do checklist e o cache de progresso da conta, sem armazenar XP ou nivel;
+- na sidebar recolhida, oculta textos e barra, mantendo somente um indicador numerico com tooltip acessivel;
+- reage ao cache alterado por outra aba e ao evento local `unicheck:progression-updated` emitido imediatamente pelo checklist;
+- mostra um toast transitorio somente quando uma interacao local atravessa um threshold de nivel; nao cria notificacao nem atividade.
 
 ### `platform/js/loading-navigation.js`
 
@@ -382,9 +402,11 @@ A sidebar do dashboard usa `ajuda/ajuda-suporte.html`; checklists e plataformas 
 10. `platform/script-profile-sync.js`
 11. `platform/script-page-state.js` quando a pagina usa esse utilitario
 12. `js/checklist.js` e modulos do checklist quando a pagina e de checklist
-13. `platform/PLATAFORMAS/plataformas-gratuitas.js` quando a pagina e de plataformas
-14. `platform/CONFIGURACOES PERFIL/configuracoes.js` quando a pagina e de configuracoes
-15. `platform/ajuda/support-config.js` e `platform/ajuda/ajuda-suporte.js` quando a pagina e de ajuda; ambos operam apenas com conteudo local
+13. `js/progression.js` antes dos consumidores de XP
+14. `platform/js/progression-profile.js` depois de checklist, progressao e autenticacao nas paginas com sidebar compartilhada
+15. `platform/PLATAFORMAS/plataformas-gratuitas.js` quando a pagina e de plataformas
+16. `platform/CONFIGURACOES PERFIL/configuracoes.js` quando a pagina e de configuracoes
+17. `platform/ajuda/support-config.js` e `platform/ajuda/ajuda-suporte.js` quando a pagina e de ajuda; ambos operam apenas com conteudo local
 
 ## 9. Dados e armazenamento
 
@@ -439,6 +461,8 @@ Distincao de persistencia:
 - Progresso pode vir do banco ou do cache local.
 - A estrutura do checklist e um modulo local versionado e nao usa cache nem consulta estrutural remota; o progresso continua obrigatoriamente separado por `user_id`.
 - Alteracoes de tarefa atualizam primeiro a UI e o cache por usuario e depois sincronizam com Supabase.
+- XP e a funcao `tarefas concluidas * 10 + fases completas * 50`; desmarcar e remarcar nunca acumula pontos fora do estado atual.
+- Nao existe `user_xp`: em outro dispositivo, o mesmo progresso restaurado produz o mesmo XP e nivel.
 - O dashboard calcula imediatamente progresso e proxima acao usando `js/checklist-data.js` e o cache `unicheck_checklist_progress_v2:<user_id>`, depois reconcilia esse cache com `user_checklist_item_progress` em background.
 - Atividades recentes sao isoladas por `user_id`, persistidas em `user_activity` e mantidas em cache/fila local para operacao offline.
 - Notificacoes sao isoladas por `user_id`, persistidas em `user_notifications` e usam cache/fila local-first; atividade recente e notificacao nao sao tratadas como o mesmo registro.
@@ -461,6 +485,7 @@ O projeto funciona, mas existem inconsistencias tecnicas que precisam ser conhec
 - [`supabase/20260816_create_user_platform_favorites.sql`](./supabase/20260816_create_user_platform_favorites.sql) cria `user_platform_favorites` com chave primaria composta, FK para `auth.users`, RLS e policies proprias de `SELECT`, `INSERT` e `DELETE`. A migration deve ser executada manualmente.
 - [`supabase/checklist_rls_policies.sql`](./supabase/checklist_rls_policies.sql) restaura policies explicitas: usuarios autenticados leem as definicoes e cada usuario le e grava somente o proprio progresso. O arquivo precisa ser aplicado manualmente no projeto remoto.
 - [`js/profile.js`](./js/profile.js) e [`supabase/users_profile_policies.sql`](./supabase/users_profile_policies.sql) estao alinhados em `users_profile.user_id` como chave de relacionamento com `auth.users`.
+- O total atual e 630 XP para 28 tarefas e 7 fases. Novas fontes devem ser adicionadas na configuracao de [`js/progression.js`](./js/progression.js), sem espalhar valores pelos consumidores.
 - Alguns documentos auxiliares em `platform/PLATAFORMAS/` e `platform/CHECKLIST ACADEMICO/` descrevem funcionalidades de forma mais antiga do que o comportamento atual do codigo.
 
 Isto nao invalida a arquitetura geral, mas significa que este `architecture.md` deve ser tratado como a fonte de contexto mais fiel do estado atual do projeto.
@@ -473,6 +498,7 @@ Se for preciso mudar alguma parte do sistema, a leitura correta e esta:
 - alteracao em auth mexe com sessao, cadastro, login e logout;
 - alteracao em profile mexe com toda a area interna que exibe nome, avatar e email;
 - alteracao em checklist mexe com persistencia, bloqueio de fases, navegacao de detalhe e integracao com Supabase;
+- alteracao nas regras de XP, niveis ou futuras fontes de progressao deve ser centralizada em `js/progression.js`;
 - alteracao em plataformas mexe com filtros, favoritos, modais, cache local, fila offline e persistencia remota por conta;
 - alteracao em configuracoes mexe com perfil, senha e preferencia visual;
 - alteracao em qualquer rota interna pode quebrar links relativos entre pastas.
