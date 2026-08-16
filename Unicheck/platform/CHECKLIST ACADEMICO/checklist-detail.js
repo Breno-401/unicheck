@@ -314,9 +314,9 @@
         const accent = getPhaseAccent(checklist);
 
         return `
-            <div class="detail-progress-orb" style="--progress-angle: ${angle}deg; --phase-accent: ${accent.gradient}; --phase-accent-color: ${accent.color};">
+            <div class="detail-progress-orb" data-progress-orb style="--progress-angle: ${angle}deg; --phase-accent: ${accent.gradient}; --phase-accent-color: ${accent.color};">
                 <div class="detail-progress-orb-inner">
-                    <strong>${checklist.progress}%</strong>
+                    <strong data-progress-number>${checklist.progress}%</strong>
                     <span>concluido</span>
                 </div>
             </div>
@@ -336,7 +336,7 @@
         return `
             <div class="detail-trail-list">
                 ${checklist.tasks.map((task, index) => `
-                    <label class="detail-trail-card ${task.completed ? "is-completed" : ""}">
+                    <label class="detail-trail-card ${task.completed ? "is-completed" : ""}" data-task-card data-task-id="${escapeHtml(task.id)}">
                         <input
                             type="checkbox"
                             data-action="toggle-task"
@@ -375,15 +375,15 @@
                     <div class="detail-summary-head">
                         ${buildProgressOrb(checklist)}
                         <div class="detail-summary-copy">
-                            <strong class="detail-summary-value">${checklist.progress}%</strong>
+                            <strong class="detail-summary-value" data-progress-number>${checklist.progress}%</strong>
                             <p class="detail-summary-lead">${escapeHtml(copy.summaryLead)}</p>
                         </div>
                     </div>
                     <div class="detail-progress">
                         <div class="detail-progress-bar">
-                            <div class="detail-progress-fill" style="width: ${checklist.progress}%"></div>
+                            <div class="detail-progress-fill" data-progress-fill style="width: ${checklist.progress}%"></div>
                         </div>
-                        <span class="detail-progress-text">${completedTasks}/${totalTasks} itens concluidos</span>
+                        <span class="detail-progress-text" data-progress-count>${completedTasks}/${totalTasks} itens concluidos</span>
                     </div>
                     <div class="detail-summary-status ${checklist.completed ? "is-completed" : ""}">
                         ${checklist.completed ? "Checklist concluido" : copy.summaryStatus}

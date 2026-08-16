@@ -82,6 +82,7 @@
         user: null,
         currentChecklistId: null,
         syncInFlight: false,
+        recentlyUnlockedChecklistId: null,
         initialized: false
     };
 
@@ -121,6 +122,10 @@
             return {};
         }
 
+        if (window.UniCheckChecklist?.readCachedProgress) {
+            return window.UniCheckChecklist.readCachedProgress(userId);
+        }
+
         try {
             const raw = localStorage.getItem(getStoredProgressKey(userId));
             return raw ? JSON.parse(raw) : {};
@@ -136,6 +141,10 @@
         }
 
         try {
+            if (window.UniCheckChecklist?.writeCachedProgress) {
+                window.UniCheckChecklist.writeCachedProgress(userId, state.progress);
+                return;
+            }
             localStorage.setItem(getStoredProgressKey(userId), JSON.stringify(state.progress));
         } catch (error) {
             console.error("Erro ao salvar progresso dos checklists:", error);
@@ -198,8 +207,12 @@
         state.syncInFlight = true;
         let synced = false;
         try {
-            await window.UniCheckChecklist.saveProgressBatch(entries);
-            entries.forEach(entry => clearPendingSync(entry.taskId, entry.completed));
+            if (window.UniCheckChecklist.flushPendingProgress) {
+                await window.UniCheckChecklist.flushPendingProgress(userId);
+            } else {
+                await window.UniCheckChecklist.saveProgressBatch(entries);
+                entries.forEach(entry => clearPendingSync(entry.taskId, entry.completed));
+            }
             synced = true;
         } catch (error) {
             console.error("[UniCheckChecklistView] Sincronizacao remota pendente; progresso local preservado", {
@@ -217,6 +230,13 @@
     }
 
     function mergeProgressMaps(remoteMap = {}, localMap = {}) {
+        if (window.UniCheckChecklist?.reconcileProgressMaps) {
+            return window.UniCheckChecklist.reconcileProgressMaps(
+                remoteMap,
+                localMap,
+                getPendingSync(state.user?.id)
+            );
+        }
         const merged = { ...remoteMap };
 
         // O estado local e atualizado antes da chamada remota. Ele prevalece
@@ -353,7 +373,7 @@
 
         return `
             <article
-                class="platform-card checklist-card ${checklist.locked ? "locked" : ""} ${checklist.completed ? "completed" : ""}"
+                class="platform-card checklist-card ${checklist.locked ? "locked" : ""} ${checklist.completed ? "completed" : ""} ${state.recentlyUnlockedChecklistId === checklist.id ? "just-unlocked" : ""}"
                 style="--phase-accent: ${checklist.accent.gradient}; --phase-accent-color: ${checklist.accent.color};"
                 data-action="${checklist.locked ? "" : "open-checklist"}"
                 data-checklist-id="${escapeHtml(checklist.id)}"
@@ -397,10 +417,10 @@
                         <div class="progress-bar">
                             <div class="progress-fill" style="width: ${checklist.progress}%"></div>
                         </div>
-                        <span class="progress-text">${checklist.progress}%</span>
+                        <span class="progress-text" data-progress-number>${checklist.progress}%</span>
                     </div>
                     <div class="card-status-row">
-                        <span class="card-status-meta">${stats.completedTasks}/${stats.totalTasks} itens</span>
+                        <span class="card-status-meta" data-progress-count>${stats.completedTasks}/${stats.totalTasks} itens</span>
                         <span class="card-status-meta">${checklist.completed ? "Proxima fase liberada" : nextChecklist ? `Desbloqueia ${escapeHtml(nextChecklist.title)}` : "Bloqueio ativo"}</span>
                     </div>
                 </div>
@@ -480,6 +500,16 @@
         if (typeof lucide !== "undefined") {
             lucide.createIcons();
         }
+
+        if (state.recentlyUnlockedChecklistId) {
+            const unlockedId = state.recentlyUnlockedChecklistId;
+            window.setTimeout(() => {
+                refs.grid?.querySelector(`[data-checklist-id="${unlockedId}"].just-unlocked`)?.classList.remove("just-unlocked");
+                if (state.recentlyUnlockedChecklistId === unlockedId) {
+                    state.recentlyUnlockedChecklistId = null;
+                }
+            }, prefersReducedMotion() ? 0 : 650);
+        }
     }
 
     function renderDetailView() {
@@ -517,7 +547,84 @@
         }
     }
 
-    function persistTaskState(checklistId, taskId, completed) {
+    function prefersReducedMotion() {
+        return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
+    }
+
+    function animateNumber(element, from, to, formatter, duration = 420) {
+        if (!element) return;
+        if (prefersReducedMotion() || from === to) {
+            element.textContent = formatter(to);
+            return;
+        }
+        const startedAt = performance.now();
+        const tick = now => {
+            const elapsed = Math.min((now - startedAt) / duration, 1);
+            const eased = 1 - Math.pow(1 - elapsed, 3);
+            element.textContent = formatter(Math.round(from + (to - from) * eased));
+            if (elapsed < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+    }
+
+    function animateChecklistTransition(before, after, taskId, completed) {
+        if (!before || !after) return;
+        const scope = refs.detailContent;
+        if (!scope) return;
+
+        const beforeCount = before.tasks.filter(task => task.completed).length;
+        const afterCount = after.tasks.filter(task => task.completed).length;
+        const total = after.tasks.length;
+
+        scope.querySelectorAll("[data-progress-fill]").forEach(fill => {
+            fill.style.transition = "none";
+            fill.style.width = `${before.progress}%`;
+            void fill.offsetWidth;
+            requestAnimationFrame(() => {
+                fill.style.transition = prefersReducedMotion() ? "none" : "width 480ms cubic-bezier(0.22, 1, 0.36, 1)";
+                fill.style.width = `${after.progress}%`;
+            });
+        });
+
+        scope.querySelectorAll("[data-progress-number]").forEach(element => {
+            animateNumber(element, before.progress, after.progress, value => `${value}%`);
+        });
+        scope.querySelectorAll("[data-progress-count]").forEach(element => {
+            animateNumber(element, beforeCount, afterCount, value => `${value}/${total} itens concluidos`, 320);
+        });
+
+        const orb = scope.querySelector("[data-progress-orb]");
+        if (orb && !prefersReducedMotion()) {
+            const fromAngle = before.progress * 3.6;
+            const toAngle = after.progress * 3.6;
+            const startedAt = performance.now();
+            const animateOrb = now => {
+                const elapsed = Math.min((now - startedAt) / 480, 1);
+                const eased = 1 - Math.pow(1 - elapsed, 3);
+                orb.style.setProperty("--progress-angle", `${fromAngle + (toAngle - fromAngle) * eased}deg`);
+                if (elapsed < 1) requestAnimationFrame(animateOrb);
+            };
+            requestAnimationFrame(animateOrb);
+        }
+
+        const taskCard = scope.querySelector(`[data-task-card][data-task-id="${taskId}"]`);
+        if (taskCard && !prefersReducedMotion()) {
+            taskCard.classList.add(completed ? "just-completed" : "just-reopened");
+        }
+
+        if (!before.completed && after.completed && !prefersReducedMotion()) {
+            scope.querySelector(".checklist-detail-shell")?.classList.add("phase-completed-feedback");
+            scope.querySelector(".detail-summary-card")?.classList.add("phase-complete-pulse");
+        }
+    }
+
+    function primeTaskInteraction(input) {
+        if (prefersReducedMotion()) return;
+        const card = input.closest("[data-task-card]");
+        card?.classList.add(input.checked ? "task-press-complete" : "task-press-reopen");
+    }
+
+    function updateTaskState(checklistId, taskId, completed) {
         const current = state.progress[checklistId] || { tasks: {} };
 
         state.progress[checklistId] = {
@@ -527,19 +634,72 @@
                 [taskId]: completed
             }
         };
-
-        saveStoredProgress(state.user?.id);
     }
 
     function toggleTask(checklistId, taskId, completed) {
-        persistTaskState(checklistId, taskId, completed);
-        queuePendingSync(checklistId, taskId, completed);
+        const before = getChecklistById(checklistId);
+        const checklistIndex = state.checklists.findIndex(item => item.id === checklistId);
+        const nextBefore = state.checklists[checklistIndex + 1] || null;
+        updateTaskState(checklistId, taskId, completed);
         hydrateChecklists();
+        const after = getChecklistById(checklistId);
+        const nextAfter = state.checklists[checklistIndex + 1] || null;
+
+        if (before && after && !before.completed && after.completed && nextBefore?.locked && nextAfter && !nextAfter.locked) {
+            state.recentlyUnlockedChecklistId = nextAfter.id;
+        }
         syncVisibleView();
+        animateChecklistTransition(before, after, taskId, completed);
+
+        // A interface ja reflete o novo estado. Em seguida, persiste no cache
+        // por usuario e deixa a escrita remota exclusivamente em background.
+        saveStoredProgress(state.user?.id);
+        queuePendingSync(checklistId, taskId, completed);
+
+        if (state.user?.id && completed && before && after) {
+            const completedTask = after.tasks.find(task => task.id === taskId);
+            window.UniCheckActivity?.record?.(state.user.id, {
+                type: "checklist_task_completed",
+                title: `Concluiu "${completedTask?.text || "Tarefa do checklist"}"`,
+                context: after.title
+            });
+
+            if (!before.completed && after.completed) {
+                window.UniCheckActivity?.record?.(state.user.id, {
+                    type: "checklist_phase_completed",
+                    title: `Concluiu a fase "${after.title}"`,
+                    context: `${after.tasks.length}/${after.tasks.length} tarefas concluídas`
+                });
+                if (nextBefore?.locked && nextAfter && !nextAfter.locked) {
+                    window.UniCheckActivity?.record?.(state.user.id, {
+                        type: "checklist_phase_unlocked",
+                        title: `Desbloqueou "${nextAfter.title}"`,
+                        context: "Próxima fase disponível"
+                    });
+                    window.UniCheckNotifications?.record?.(state.user.id, {
+                        eventKey: `phase_unlocked:${nextAfter.id}`,
+                        type: "phase_unlocked",
+                        title: "Nova fase desbloqueada",
+                        message: `${nextAfter.title} está disponível.`,
+                        destination: `checklist:${nextAfter.id}`
+                    });
+                } else if (!nextAfter) {
+                    window.UniCheckNotifications?.record?.(state.user.id, {
+                        eventKey: "journey_completed:v1",
+                        type: "journey_completed",
+                        title: "Jornada acadêmica concluída",
+                        message: "Você concluiu todas as fases do Checklist Acadêmico.",
+                        destination: `checklist:${after.id}`
+                    });
+                }
+            }
+        }
 
         if (state.user?.id) {
             void flushPendingSync();
         }
+
+        return { before, after };
     }
 
     function openChecklist(checklistId, shouldPushState = true) {
@@ -589,6 +749,8 @@
 
         const notification = document.createElement("div");
         notification.className = `profile-notification notification-${type}`;
+        notification.setAttribute("role", "status");
+        notification.setAttribute("aria-live", "polite");
         notification.innerHTML = `
             <div class="notification-content">
                 <i data-lucide="${icons[type] || icons.info}"></i>
@@ -694,9 +856,8 @@
             return;
         }
 
-        const before = getChecklistById(checklistId);
-        toggleTask(checklistId, taskId, target.checked);
-        const after = getChecklistById(checklistId);
+        primeTaskInteraction(target);
+        const { before, after } = toggleTask(checklistId, taskId, target.checked);
 
         if (before && after && before.completed !== after.completed && after.completed) {
             showNotification(`"${after.title}" concluido. Proxima fase liberada.`, "success");

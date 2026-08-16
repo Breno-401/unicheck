@@ -1,5 +1,7 @@
 (function () {
     const CHECKLIST_PROGRESS_TABLE = "user_checklist_item_progress";
+    const PROGRESS_STORAGE_PREFIX = "unicheck_checklist_progress_v2";
+    const PENDING_STORAGE_PREFIX = "unicheck_checklist_pending_sync_v1";
     const REQUEST_TIMEOUT_MS = 30000;
 
     // Conexão com o cliente Supabase configurado globalmente
@@ -54,6 +56,76 @@
             accumulator[checklistId].tasks[itemId] = Boolean(completed);
             return accumulator;
         }, {});
+    }
+
+    function getProgressStorageKey(userId) {
+        return `${PROGRESS_STORAGE_PREFIX}:${userId}`;
+    }
+
+    function readCachedProgress(userId) {
+        if (!userId) return {};
+        try {
+            const raw = localStorage.getItem(getProgressStorageKey(userId));
+            return raw ? JSON.parse(raw) : {};
+        } catch (error) {
+            console.warn("[UniCheckChecklist] Cache local de progresso invalido", error);
+            return {};
+        }
+    }
+
+    function writeCachedProgress(userId, progressMap) {
+        if (!userId) return;
+        try {
+            localStorage.setItem(getProgressStorageKey(userId), JSON.stringify(progressMap || {}));
+        } catch (error) {
+            console.warn("[UniCheckChecklist] Nao foi possivel atualizar o cache de progresso", error);
+        }
+    }
+
+    function readPendingProgress(userId) {
+        if (!userId) return {};
+        try {
+            const raw = localStorage.getItem(`${PENDING_STORAGE_PREFIX}:${userId}`);
+            return raw ? JSON.parse(raw) : {};
+        } catch (error) {
+            console.warn("[UniCheckChecklist] Fila local de progresso invalida", error);
+            return {};
+        }
+    }
+
+    function writePendingProgress(userId, pendingMap) {
+        if (!userId) return;
+        try {
+            localStorage.setItem(`${PENDING_STORAGE_PREFIX}:${userId}`, JSON.stringify(pendingMap || {}));
+        } catch (error) {
+            console.warn("[UniCheckChecklist] Nao foi possivel atualizar a fila de progresso", error);
+        }
+    }
+
+    function reconcileProgressMaps(remoteMap = {}, localMap = {}, pendingMap = {}) {
+        const merged = {};
+        const checklistIds = new Set([...Object.keys(localMap), ...Object.keys(remoteMap)]);
+
+        checklistIds.forEach(checklistId => {
+            merged[checklistId] = {
+                ...(localMap[checklistId] || {}),
+                ...(remoteMap[checklistId] || {}),
+                tasks: {
+                    ...(localMap[checklistId]?.tasks || {}),
+                    ...(remoteMap[checklistId]?.tasks || {})
+                }
+            };
+        });
+
+        Object.entries(pendingMap).forEach(([taskId, pending]) => {
+            const checklistId = pending?.checklistId;
+            if (!checklistId) return;
+            merged[checklistId] ||= { tasks: {} };
+            merged[checklistId].tasks ||= {};
+            merged[checklistId].tasks[taskId] = Boolean(pending.completed);
+        });
+
+        return merged;
     }
 
     async function getCurrentUser() {
@@ -133,6 +205,28 @@
         return payload;
     }
 
+    async function flushPendingProgress(userId) {
+        const snapshot = readPendingProgress(userId);
+        const entries = Object.entries(snapshot).map(([taskId, value]) => ({
+            userId,
+            checklistId: value.checklistId,
+            taskId,
+            completed: Boolean(value.completed)
+        }));
+        if (!entries.length) return [];
+
+        await saveProgressBatch(entries);
+        const current = readPendingProgress(userId);
+        entries.forEach(entry => {
+            const queued = current[entry.taskId];
+            if (queued?.checklistId === entry.checklistId && Boolean(queued.completed) === entry.completed) {
+                delete current[entry.taskId];
+            }
+        });
+        writePendingProgress(userId, current);
+        return entries;
+    }
+
     /**
      * Calcula o progresso e gerencia o bloqueio (Lógica de Fase)
      */
@@ -177,6 +271,11 @@
         fetchUserProgressMap,
         saveTaskProgress,
         saveProgressBatch,
+        readCachedProgress,
+        writeCachedProgress,
+        readPendingProgress,
+        flushPendingProgress,
+        reconcileProgressMaps,
         getCurrentUser,
         applyProgress
     };

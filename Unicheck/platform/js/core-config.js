@@ -8,7 +8,8 @@
 
     const ROUTES = {
         LANDING: '../landing/index.html',
-        PLATFORMS: 'PLATAFORMAS/plataformas-gratuitas.html'
+        PLATFORMS: 'PLATAFORMAS/plataformas-gratuitas.html',
+        HELP: 'ajuda/ajuda-suporte.html'
     };
 
     function normalizePath(pathname) {

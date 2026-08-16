@@ -1154,6 +1154,13 @@ function toggleFavorite(platformId, button) {
     
     // Salvar no localStorage
     writeStoredList('platformFavorites', platformState.favorites);
+    window.UniCheckActivity?.record?.(getCurrentUserStorageSuffix(), {
+        type: isFavorite ? 'platform_favorited' : 'platform_unfavorited',
+        title: isFavorite
+            ? `Favoritou "${platformName}"`
+            : `Removeu "${platformName}" dos favoritos`,
+        context: 'Plataformas gratuitas'
+    });
     
     // Animação no botão
     button.classList.remove('favorite-pop');

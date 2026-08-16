@@ -10,16 +10,22 @@
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <link rel="stylesheet" href="../css-interno/variaveis.css">
     <link rel="stylesheet" href="configuracoes.css">
+    <link rel="stylesheet" href="../css-interno/notifications.css">
 </head>
 <body>
     <div class="profile-settings-container">
         <div class="profile-header">
             <h1 class="profile-title">Configurações de Perfil</h1>
-            
-            <a href="../index-interno.html" class="back-button">
-                <i data-lucide="arrow-left"></i>
-                <span>Voltar ao Dashboard</span>
-            </a>
+            <div class="profile-header-actions">
+                <a href="../ajuda/ajuda-suporte.html" class="back-button">
+                    <i data-lucide="help-circle"></i>
+                    <span>Ajuda e Suporte</span>
+                </a>
+                <a href="../index-interno.html" class="back-button">
+                    <i data-lucide="arrow-left"></i>
+                    <span>Voltar ao Dashboard</span>
+                </a>
+            </div>
         </div>
 
         <div class="profile-content">
@@ -224,6 +230,7 @@
     <script src="../../js/config.js"></script>
     <script src="../../js/auth.js"></script>
     <script src="../../js/profile.js"></script>
+    <script src="../../js/notifications.js"></script>
     <script src="../script-interno.js"></script>
     <script src="../script-profile-sync.js"></script>
     <script src="../script-page-state.js"></script>
