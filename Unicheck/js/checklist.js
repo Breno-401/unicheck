@@ -1,7 +1,6 @@
 (function () {
-    const CHECKLISTS_TABLE = "checklists";
-    const CHECKLIST_ITEMS_TABLE = "checklist_items";
     const CHECKLIST_PROGRESS_TABLE = "user_checklist_item_progress";
+    const REQUEST_TIMEOUT_MS = 30000;
 
     // Conexão com o cliente Supabase configurado globalmente
     function getClient() {
@@ -12,44 +11,30 @@
         return client;
     }
 
-    // Converte valores para número com segurança
-    function toNumber(value, fallback = 0) {
-        const parsed = Number(value);
-        return Number.isFinite(parsed) ? parsed : fallback;
+    function logSupabaseError(context, error, extra = {}) {
+        console.error(`[UniCheckChecklist] ${context}`, {
+            message: error?.message || String(error),
+            code: error?.code || null,
+            details: error?.details || null,
+            hint: error?.hint || null,
+            ...extra
+        });
     }
 
-    /**
-     * DOCUMENTAÇÃO: Transforma os dados do banco (Português) 
-     * para o formato esperado pela interface (Inglês).
-     */
-    function normalizeChecklist(row) {
-        return {
-            id: row.id,
-            // MAPEAMENTO: A coluna 'ordem' do banco vira a nossa 'phase' (Fase)
-            phase: toNumber(row.ordem, 0), 
-            // MAPEAMENTO: 'titulo' vira 'title'
-            title: row.titulo || `Checklist ${row.id}`,
-            // MAPEAMENTO: 'descricao' vira 'description'
-            description: row.descricao || "",
-            imageUrl: row.image_url || null,
-            tutorialUrl: row.tutorial_url || null,
-            locked: false, // Será calculado na função applyProgress
-            completed: false,
-            progress: 0,
-            tasks: []
-        };
-    }
+    async function withTimeout(query, context) {
+        const controller = new AbortController();
+        const timeoutId = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
-    function normalizeChecklistItem(row) {
-        return {
-            id: row.id,
-            checklistId: row.checklist_id,
-            // MAPEAMENTO: 'titulo' vira 'text'
-            text: row.titulo || "Item sem descrição",
-            completed: row.concluido || false,
-            // MAPEAMENTO: 'ordem' vira 'order'
-            order: toNumber(row.ordem, 0)
-        };
+        try {
+            return await query.abortSignal(controller.signal);
+        } catch (error) {
+            if (controller.signal.aborted) {
+                throw new Error(`${context} excedeu ${REQUEST_TIMEOUT_MS / 1000} segundos.`);
+            }
+            throw error;
+        } finally {
+            window.clearTimeout(timeoutId);
+        }
     }
 
     function normalizeProgressRows(rows) {
@@ -77,87 +62,14 @@
             throw new Error("Modulo de autenticacao nao encontrado.");
         }
 
-        const debug = await auth.getAuthDebugSnapshot?.("checklist.getCurrentUser");
-        const user = debug?.user || await auth.getUser?.();
+        const session = await auth.getSession?.();
+        const user = session?.user || null;
 
         if (!user) {
             throw new Error("Nenhum usuario autenticado.");
         }
 
-        console.info("[UniCheckChecklist] Usuario autenticado confirmado", {
-            userId: user.id || null,
-            email: user.email || null,
-            hasSession: Boolean(debug?.session)
-        });
-
         return user;
-    }
-
-    /**
-     * Busca os itens de um checklist específico ordenados pela coluna 'ordem'
-     */
-    async function fetchChecklistItems(checklistId) {
-        const client = getClient();
-        const { data, error } = await client
-            .from(CHECKLIST_ITEMS_TABLE)
-            .select("*")
-            .eq("checklist_id", checklistId)
-            .order("ordem", { ascending: true }); // Ordenação via Banco
-
-        if (error) {
-            console.error("Erro ao buscar itens:", error);
-            return [];
-        }
-
-        return (data || []).map(normalizeChecklistItem);
-    }
-
-    /**
-     * Busca todos os checklists ordenados pela coluna 'ordem'
-     */
-    async function fetchAllChecklists() {
-        const client = getClient();
-        const { data, error } = await client
-            .from(CHECKLISTS_TABLE)
-            .select("*")
-            .order("ordem", { ascending: true }); // Ordenação via Banco (Fase 1, 2, 3...)
-
-        if (error) {
-            throw error;
-        }
-
-        const checklists = (data || []).map(normalizeChecklist);
-        
-        // Para cada checklist, busca as suas respectivas tarefas
-        const checklistsWithItems = await Promise.all(
-            checklists.map(async checklist => ({
-                ...checklist,
-                tasks: await fetchChecklistItems(checklist.id)
-            }))
-        );
-
-        return checklistsWithItems;
-    }
-
-    async function fetchChecklistByPhase(phaseOrder) {
-        const client = getClient();
-        const { data, error } = await client
-            .from(CHECKLISTS_TABLE)
-            .select("*")
-            .eq("ordem", phaseOrder)
-            .maybeSingle();
-
-        if (error) {
-            throw error;
-        }
-
-        if (!data) {
-            return null;
-        }
-
-        const checklist = normalizeChecklist(data);
-        checklist.tasks = await fetchChecklistItems(checklist.id);
-        return checklist;
     }
 
     async function fetchUserProgressMap(userId) {
@@ -166,21 +78,14 @@
         }
 
         const client = getClient();
-        console.info("[UniCheckChecklist] Buscando progresso remoto", {
-            userId
-        });
-
-        const { data, error } = await client
+        const { data, error } = await withTimeout(client
             .from(CHECKLIST_PROGRESS_TABLE)
             .select("checklist_id, checklist_item_id, completed")
-            .eq("user_id", userId);
+            .eq("user_id", userId), "Consulta de progresso");
 
         if (error) {
-            console.error("[UniCheckChecklist] Erro ao buscar progresso do usuario:", {
-                userId,
-                message: error?.message || error
-            });
-            return {};
+            logSupabaseError("Erro ao buscar progresso do usuario", error, { userId });
+            throw error;
         }
 
         return normalizeProgressRows(data);
@@ -199,26 +104,32 @@
             completed: Boolean(completed)
         };
 
-        const { error } = await client
+        const { error } = await withTimeout(client
             .from(CHECKLIST_PROGRESS_TABLE)
-            .upsert(payload, { onConflict: "user_id,checklist_item_id" });
+            .upsert(payload, { onConflict: "user_id,checklist_item_id" }), "Persistencia de progresso");
 
         if (error) {
-            console.error("[UniCheckChecklist] Erro ao salvar progresso", {
-                userId,
-                checklistId,
-                taskId,
-                message: error?.message || error
-            });
+            logSupabaseError("Erro ao salvar progresso", error, { userId, checklistId, taskId });
             throw error;
         }
+        return payload;
+    }
 
-        console.info("[UniCheckChecklist] Progresso salvo", {
-            userId,
-            checklistId,
-            taskId,
+    async function saveProgressBatch(entries) {
+        if (!Array.isArray(entries) || !entries.length) return [];
+        const payload = entries.map(({ userId, checklistId, taskId, completed }) => ({
+            user_id: userId,
+            checklist_id: checklistId,
+            checklist_item_id: taskId,
             completed: Boolean(completed)
-        });
+        }));
+        const { error } = await withTimeout(getClient()
+            .from(CHECKLIST_PROGRESS_TABLE)
+            .upsert(payload, { onConflict: "user_id,checklist_item_id" }), "Sincronizacao da fila de progresso");
+        if (error) {
+            logSupabaseError("Erro ao sincronizar fila de progresso", error, { itemCount: payload.length });
+            throw error;
+        }
         return payload;
     }
 
@@ -262,14 +173,10 @@
 
     // Disponibiliza as funções globalmente para o sistema
     window.UniCheckChecklist = {
-        CHECKLISTS_TABLE,
-        CHECKLIST_ITEMS_TABLE,
         CHECKLIST_PROGRESS_TABLE,
-        fetchAllChecklists,
-        fetchChecklistByPhase,
-        fetchChecklistItems,
         fetchUserProgressMap,
         saveTaskProgress,
+        saveProgressBatch,
         getCurrentUser,
         applyProgress
     };

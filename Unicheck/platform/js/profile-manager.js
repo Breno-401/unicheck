@@ -13,8 +13,8 @@
 
     async function getCurrentAuthUserId() {
         try {
-            const debug = await window.UniCheckAuth?.getAuthDebugSnapshot?.('profile-manager');
-            return debug?.user?.id || null;
+            const session = await window.UniCheckAuth?.getSession?.();
+            return session?.user?.id || null;
         } catch (error) {
             console.warn('Erro ao validar usuario autenticado:', error);
             return null;
