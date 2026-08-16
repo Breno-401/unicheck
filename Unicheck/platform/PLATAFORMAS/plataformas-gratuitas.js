@@ -6,6 +6,7 @@
     const FAVORITES_QUEUE_KEY = 'unicheck_favorites_sync_queue';
     const FAVORITES_REMOTE_READY_KEY = 'unicheck_favorites_remote_ready';
     const FAVORITES_REQUEST_TIMEOUT_MS = 15000;
+    const BENEFITS_PER_PAGE = 12;
     const data = window.UniCheckBenefitsData || { benefits: [], categories: [] };
     const state = {
         benefits: [...data.benefits],
@@ -13,11 +14,11 @@
         category: 'all',
         benefitType: 'all',
         search: '',
-        favoritesOnly: false
+        favoritesOnly: false,
+        currentPage: getPageFromUrl()
     };
     let favoriteUserId = null;
     let favoriteSyncInFlight = false;
-    let searchTimer = null;
     let lastFocusedElement = null;
 
     const elements = {};
@@ -41,6 +42,8 @@
         elements.categoryFilters = document.getElementById('categoryFilters');
         elements.resultsTitle = document.getElementById('resultsTitle');
         elements.resultsSummary = document.getElementById('resultsSummary');
+        elements.resultsHeading = document.querySelector('.results-heading');
+        elements.pagination = document.getElementById('benefitsPagination');
         elements.favoritesFilter = document.getElementById('favoritesFilter');
         elements.modal = document.getElementById('platformModal');
         elements.modalContent = elements.modal?.querySelector('.modal-content');
@@ -51,25 +54,30 @@
     }
 
     function bindEvents() {
-        elements.search?.addEventListener('input', event => {
-            state.search = event.target.value.trim();
+        const handleSearch = event => {
+            state.search = event.currentTarget.value.trim();
+            resetPagination();
             elements.clearSearch.hidden = !state.search;
-            clearTimeout(searchTimer);
-            searchTimer = window.setTimeout(renderBenefits, 180);
-        });
+            renderBenefits();
+        };
+        elements.search?.addEventListener('input', handleSearch);
+        elements.search?.addEventListener('search', handleSearch);
         elements.clearSearch?.addEventListener('click', () => {
             elements.search.value = '';
             elements.clearSearch.hidden = true;
             state.search = '';
+            resetPagination();
             renderBenefits();
             elements.search.focus();
         });
         elements.typeFilter?.addEventListener('change', event => {
             state.benefitType = event.target.value;
+            resetPagination();
             renderBenefits();
         });
         elements.favoritesFilter?.addEventListener('click', () => {
             state.favoritesOnly = !state.favoritesOnly;
+            resetPagination();
             elements.favoritesFilter.setAttribute('aria-pressed', String(state.favoritesOnly));
             elements.favoritesFilter.classList.toggle('active', state.favoritesOnly);
             renderBenefits();
@@ -78,10 +86,12 @@
             const button = event.target.closest('[data-category]');
             if (!button) return;
             state.category = button.dataset.category;
+            resetPagination();
             renderCategoryFilters();
             renderBenefits();
         });
         elements.grid?.addEventListener('click', handleGridClick);
+        elements.pagination?.addEventListener('click', handlePaginationClick);
         elements.modal?.addEventListener('click', event => {
             if (event.target.closest('[data-action="close-modal"]')) closeModal();
         });
@@ -89,6 +99,11 @@
             if (!elements.modal || elements.modal.hidden) return;
             if (event.key === 'Escape') closeModal();
             if (event.key === 'Tab') trapModalFocus(event);
+        });
+        window.addEventListener('popstate', () => {
+            state.currentPage = getPageFromUrl();
+            renderBenefits();
+            scrollToResults();
         });
     }
 
@@ -104,9 +119,17 @@
 
     function renderBenefits() {
         const filtered = getFilteredBenefits();
+        const totalPages = Math.max(1, Math.ceil(filtered.length / BENEFITS_PER_PAGE));
+        const validPage = Math.min(Math.max(1, state.currentPage), totalPages);
+        if (validPage !== state.currentPage) {
+            state.currentPage = validPage;
+            updatePageUrl(validPage, 'replace');
+        }
+        const firstIndex = (state.currentPage - 1) * BENEFITS_PER_PAGE;
+        const visibleBenefits = filtered.slice(firstIndex, firstIndex + BENEFITS_PER_PAGE);
         const query = state.search.trim();
         elements.resultsTitle.textContent = query ? `Resultados para “${query}”` : 'Benefícios verificados';
-        elements.resultsSummary.textContent = `${filtered.length} ${filtered.length === 1 ? 'benefício encontrado' : 'benefícios encontrados'}`;
+        elements.resultsSummary.textContent = getResultsSummary(filtered.length, firstIndex, visibleBenefits.length);
 
         if (!filtered.length) {
             elements.grid.innerHTML = `
@@ -117,9 +140,83 @@
                     <button class="btn btn-secondary" type="button" data-action="clear-filters">Limpar filtros</button>
                 </div>`;
         } else {
-            elements.grid.innerHTML = filtered.map(createBenefitCard).join('');
+            elements.grid.innerHTML = visibleBenefits.map(createBenefitCard).join('');
         }
+        renderPagination(filtered.length, totalPages);
         refreshIcons();
+    }
+
+    function getResultsSummary(total, firstIndex, visibleCount) {
+        const countLabel = `${total} ${total === 1 ? 'benefício encontrado' : 'benefícios encontrados'}`;
+        if (!total) return countLabel;
+        return `${countLabel} · Mostrando ${firstIndex + 1}–${firstIndex + visibleCount} de ${total}`;
+    }
+
+    function renderPagination(total, totalPages) {
+        if (!elements.pagination) return;
+        if (!total || totalPages <= 1) {
+            elements.pagination.innerHTML = '';
+            return;
+        }
+        const items = getPaginationItems(state.currentPage, totalPages);
+        elements.pagination.innerHTML = `
+            <nav class="pagination-nav" aria-label="Paginação de benefícios">
+                <button class="pagination-btn pagination-arrow" type="button" data-page="${state.currentPage - 1}" aria-label="Página anterior" ${state.currentPage === 1 ? 'disabled' : ''}><i data-lucide="chevron-left" aria-hidden="true"></i></button>
+                <div class="pagination-pages">
+                    ${items.map(item => item === 'ellipsis'
+                        ? '<span class="pagination-ellipsis" aria-hidden="true">…</span>'
+                        : `<button class="pagination-btn${item === state.currentPage ? ' active' : ''}" type="button" data-page="${item}" aria-label="Página ${item}" ${item === state.currentPage ? 'aria-current="page"' : ''}>${item}</button>`).join('')}
+                </div>
+                <span class="pagination-mobile-status">Página ${state.currentPage} de ${totalPages}</span>
+                <button class="pagination-btn pagination-arrow" type="button" data-page="${state.currentPage + 1}" aria-label="Próxima página" ${state.currentPage === totalPages ? 'disabled' : ''}><i data-lucide="chevron-right" aria-hidden="true"></i></button>
+            </nav>`;
+    }
+
+    function getPaginationItems(current, total) {
+        if (total <= 5) return Array.from({ length: total }, (_, index) => index + 1);
+        const pages = new Set([1, total, current - 1, current, current + 1]);
+        const ordered = [...pages].filter(page => page >= 1 && page <= total).sort((a, b) => a - b);
+        const items = [];
+        ordered.forEach((page, index) => {
+            if (index && page - ordered[index - 1] > 1) items.push('ellipsis');
+            items.push(page);
+        });
+        return items;
+    }
+
+    function handlePaginationClick(event) {
+        const button = event.target.closest('[data-page]');
+        if (!button || button.disabled) return;
+        const page = Number(button.dataset.page);
+        if (!Number.isInteger(page) || page < 1 || page === state.currentPage) return;
+        state.currentPage = page;
+        updatePageUrl(page, 'push');
+        renderBenefits();
+        scrollToResults();
+    }
+
+    function resetPagination() {
+        state.currentPage = 1;
+        updatePageUrl(1, 'replace');
+    }
+
+    function getPageFromUrl() {
+        const page = Number(new URL(window.location.href).searchParams.get('page'));
+        return Number.isInteger(page) && page > 0 ? page : 1;
+    }
+
+    function updatePageUrl(page, mode) {
+        const url = new URL(window.location.href);
+        if (page > 1) url.searchParams.set('page', String(page));
+        else url.searchParams.delete('page');
+        window.history[mode === 'push' ? 'pushState' : 'replaceState']({}, '', url);
+    }
+
+    function scrollToResults() {
+        if (!elements.resultsHeading) return;
+        const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+        elements.resultsTitle?.focus?.({ preventScroll: true });
+        elements.resultsHeading.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' });
     }
 
     function createBenefitCard(benefit) {
@@ -244,6 +341,7 @@
         state.benefitType = 'all';
         state.search = '';
         state.favoritesOnly = false;
+        resetPagination();
         elements.search.value = '';
         elements.clearSearch.hidden = true;
         elements.typeFilter.value = 'all';

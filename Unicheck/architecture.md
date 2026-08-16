@@ -256,6 +256,8 @@ Fluxo:
 - exibe cards com hierarquia para beneficio, publico elegivel, tags, data de verificacao e favorito, sem afirmar gratuidade universal quando ha dependencia institucional; o CTA `Ver detalhes` e explicito e permanece alinhado no rodape;
 - logos comerciais sao assets locais leves: primeiro reutilizam arquivos existentes, depois usam SVGs da biblioteca Simple Icons; quando uma marca nao esta disponivel, o card usa fallback tipografico consistente. Direitos publicos e mobilidade usam apenas icones semanticos, sem logotipos inventados;
 - beneficios governamentais registram `sourceChannel: government`; beneficios regionais registram disponibilidade e badge territorial, como o Cartao Transcol Escolar no Espirito Santo;
+- a listagem aplica busca, categoria, tipo e favoritos antes de paginar localmente os resultados em lotes fixos de 12; filtros e novas buscas retornam a pagina 1, enquanto remocoes no modo Favoritados ajustam apenas paginas que deixarem de existir;
+- a pagina atual e refletida em `?page=N`, restaurada no recarregamento e integrada ao historico do navegador; a navegacao explicita informa o intervalo visivel, usa `aria-current` e retorna ao inicio da secao de resultados respeitando `prefers-reduced-motion`;
 - a pagina usa quatro colunas apenas em desktop amplo com espaco confortavel, tres em notebooks, duas em tablets e uma no mobile; filtros possuem rolagem horizontal e o modal se reorganiza em uma coluna.
 
 Esta pagina tambem depende da infraestrutura de dashboard e autenticacao, porque reaproveita sidebar, tema, logout e sincronizacao de perfil.
