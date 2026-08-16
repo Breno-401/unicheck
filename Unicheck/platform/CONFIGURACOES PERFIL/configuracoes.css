@@ -126,6 +126,12 @@ body {
   font-family: 'Poppins', sans-serif;
 }
 
+.profile-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
 .back-button {
   display: inline-flex;
   align-items: center;

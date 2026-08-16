@@ -22,6 +22,7 @@
     <link rel="stylesheet" href="css-interno/variaveis.css">
     <link rel="stylesheet" href="css-interno/style.css">
     <link rel="stylesheet" href="css-interno/ui-polish.css">
+    <link rel="stylesheet" href="css-interno/notifications.css">
 </head>
 <body class="page-dashboard">
     <!-- Container Principal do Dashboard -->
@@ -82,9 +83,9 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link" data-tooltip="Ajuda/Suporte">
+                        <a href="ajuda/ajuda-suporte.html" class="nav-link" data-tooltip="Ajuda e Suporte">
                             <i data-lucide="help-circle"></i>
-                            <span>Ajuda/Suporte</span>
+                            <span>Ajuda e Suporte</span>
                         </a>
                     </li>
                 </ul>
@@ -176,10 +177,10 @@
                                         <span>Assinatura</span>
                                     </button>
                                     <div class="user-dropdown-divider"></div>
-                                    <button class="user-dropdown-item">
+                                    <a href="ajuda/ajuda-suporte.html" class="user-dropdown-item">
                                         <i data-lucide="help-circle"></i>
                                         <span>Ajuda & Suporte</span>
-                                    </button>
+                                    </a>
                                     <button class="user-dropdown-item logout-action" data-action="logout">
                                         <i data-lucide="log-out"></i>
                                         <span>Sair</span>
@@ -191,6 +192,33 @@
                 </div>
             </header>
 
+            <section class="academic-progress-section" aria-labelledby="academicProgressTitle">
+                <div class="academic-progress-card">
+                    <div class="academic-progress-main">
+                        <span class="dashboard-eyebrow">Sua jornada agora</span>
+                        <div class="academic-progress-heading">
+                            <div>
+                                <h2 id="academicProgressTitle">Seu progresso acadêmico</h2>
+                                <p id="academicProgressPhases">0 de 7 fases concluídas</p>
+                            </div>
+                            <strong class="academic-progress-value" id="academicProgressPercent">0%</strong>
+                        </div>
+                        <div class="academic-progress-track" role="progressbar" aria-label="Progresso geral dos checklists" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="academicProgressBar">
+                            <span class="academic-progress-fill" id="academicProgressFill"></span>
+                        </div>
+                    </div>
+                    <div class="academic-next-action">
+                        <span class="academic-next-label">Próxima etapa</span>
+                        <strong id="academicCurrentPhase">Primeiros passos na faculdade</strong>
+                        <p id="academicNextTask">Continue de onde parou.</p>
+                        <a class="academic-continue-button" id="academicContinueButton" href="CHECKLIST ACADEMICO/checklist-academico.html">
+                            <span>Continuar</span>
+                            <i data-lucide="arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
             <!-- Estatísticas Rápidas -->
             <section class="stats-section">
                 <div class="stats-grid">
@@ -200,8 +228,8 @@
                         </div>
                         <div class="stat-content">
                             <span class="stat-eyebrow">Progresso acadêmico</span>
-                            <h3 id="completedChecklistsCount">0</h3>
-                            <p>Checklists completos</p>
+                            <h3 id="completedChecklistsCount">0/7</h3>
+                            <p>Fases concluídas</p>
                             <span class="stat-note">Abrir área de checklists</span>
                         </div>
                         <i data-lucide="arrow-up-right" class="stat-arrow"></i>
@@ -211,10 +239,10 @@
                             <i data-lucide="bell"></i>
                         </div>
                         <div class="stat-content">
-                            <span class="stat-eyebrow">Central de alertas</span>
+                            <span class="stat-eyebrow">Histórico local</span>
                             <h3 id="newNotificationsCount">0</h3>
-                            <p>Notificações novas</p>
-                            <span class="stat-note">Ainda sem notificações funcionais</span>
+                            <p>Atividades recentes</p>
+                            <span class="stat-note">Ver seus últimos avanços</span>
                         </div>
                         <i data-lucide="arrow-up-right" class="stat-arrow"></i>
                     </button>
@@ -253,11 +281,11 @@
                             <div class="card-stats">
                                 <span class="card-stat">
                                     <i data-lucide="check-circle"></i>
-                                    24 checklists
+                                    <span id="dashboardChecklistTasks">0 de 28 tarefas</span>
                                 </span>
                                 <span class="card-stat">
                                     <i data-lucide="clock"></i>
-                                    3 pendentes
+                                    <span id="dashboardPendingPhases">7 fases restantes</span>
                                 </span>
                             </div>
                             <a href="CHECKLIST ACADEMICO/checklist-academico.html" class="card-action">
@@ -337,38 +365,12 @@
             <section class="activity-section" id="activity-section">
                 <div class="section-header">
                     <h2>Atividade Recente</h2>
-                    <button class="view-all-btn">
-                        <span>Ver Tudo</span>
-                        <i data-lucide="arrow-right"></i>
-                    </button>
+                    <span class="activity-limit-label">Últimas 5</span>
                 </div>
-                <div class="activity-timeline">
-                    <div class="activity-item">
-                        <div class="activity-icon">
-                            <i data-lucide="check-circle"></i>
-                        </div>
-                        <div class="activity-content">
-                            <h4>Checklist "Documentos para Formatura" concluído</h4>
-                            <p>Há 2 horas</p>
-                        </div>
-                    </div>
-                    <div class="activity-item">
-                        <div class="activity-icon">
-                            <i data-lucide="bell"></i>
-                        </div>
-                        <div class="activity-content">
-                            <h4>Nova notificação: Prazo para inscrição no TCC</h4>
-                            <p>Há 4 horas</p>
-                        </div>
-                    </div>
-                    <div class="activity-item">
-                        <div class="activity-icon">
-                            <i data-lucide="star"></i>
-                        </div>
-                        <div class="activity-content">
-                            <h4>Plataforma "LinkedIn Learning" adicionada aos favoritos</h4>
-                            <p>Ontem</p>
-                        </div>
+                <div class="activity-timeline" id="activityTimeline" aria-live="polite">
+                    <div class="activity-empty-state">
+                        <i data-lucide="history"></i>
+                        <p>Suas atividades recentes aparecerão aqui conforme você avançar.</p>
                     </div>
                 </div>
             </section>
@@ -409,6 +411,10 @@
     <script src="../js/config.js"></script>
     <script src="../js/auth.js"></script>
     <script src="../js/profile.js"></script>
+    <script src="../js/checklist-data.js"></script>
+    <script src="../js/checklist.js"></script>
+    <script src="../js/activity.js"></script>
+    <script src="../js/notifications.js"></script>
     <script src="js/core-config.js"></script>
     <script src="js/profile-manager.js"></script>
     <script src="js/loading-navigation.js"></script>

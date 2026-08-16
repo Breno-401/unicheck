@@ -330,17 +330,35 @@ function getStoredChecklistProgress(userId) {
     }
 }
 
-function countCompletedChecklists(progressMap = {}) {
-    return Object.values(progressMap).reduce((total, checklistState) => {
-        const tasks = checklistState?.tasks || {};
-        const taskValues = Object.values(tasks);
+function getDashboardChecklistSummary(progressMap = {}) {
+    const checklists = window.UniCheckChecklistData?.getChecklists?.() || [];
+    const phases = checklists.map(checklist => {
+        const tasks = Array.isArray(checklist.items) ? checklist.items : (checklist.tasks || []);
+        const storedTasks = progressMap[checklist.id]?.tasks || {};
+        const completedTasks = tasks.filter(task => storedTasks[task.id] === true).length;
 
-        if (!taskValues.length) {
-            return total;
-        }
+        return {
+            ...checklist,
+            tasks,
+            completedTasks,
+            completed: tasks.length > 0 && completedTasks === tasks.length
+        };
+    });
+    const totalTasks = phases.reduce((total, phase) => total + phase.tasks.length, 0);
+    const completedTasks = phases.reduce((total, phase) => total + phase.completedTasks, 0);
+    const completedPhases = phases.filter(phase => phase.completed).length;
+    const currentPhase = phases.find(phase => !phase.completed) || null;
+    const nextTask = currentPhase?.tasks.find(task => progressMap[currentPhase.id]?.tasks?.[task.id] !== true) || null;
 
-        return taskValues.every(Boolean) ? total + 1 : total;
-    }, 0);
+    return {
+        phases,
+        totalTasks,
+        completedTasks,
+        completedPhases,
+        currentPhase,
+        nextTask,
+        percentage: totalTasks ? Math.round((completedTasks / totalTasks) * 100) : 0
+    };
 }
 
 function getStoredFavoritesCount(userId) {
@@ -357,7 +375,7 @@ function getStoredFavoritesCount(userId) {
     }
 }
 
-async function updateDashboardMetrics() {
+async function updateDashboardMetrics(syncRemote = false) {
     const completedCountEl = document.getElementById('completedChecklistsCount');
     const notificationsCountEl = document.getElementById('newNotificationsCount');
     const favoritesCountEl = document.getElementById('favoritePlatformsCount');
@@ -365,18 +383,14 @@ async function updateDashboardMetrics() {
     if (!completedCountEl && !notificationsCountEl && !favoritesCountEl) return;
 
     try {
-        const profile = getStoredProfile();
         const session = await window.UniCheckAuth?.getSession?.();
-        const user = session?.user || profile;
-        const userId = user?.id || profile?.id || null;
-        const progress = getStoredChecklistProgress(userId);
-
-        const completedCount = countCompletedChecklists(progress);
-        const favoritesCount = getStoredFavoritesCount(userId);
-
-        if (completedCountEl) completedCountEl.textContent = String(completedCount);
-        if (notificationsCountEl) notificationsCountEl.textContent = '0';
-        if (favoritesCountEl) favoritesCountEl.textContent = String(favoritesCount);
+        const sessionUserId = session?.user?.id || null;
+        if (sessionUserId) {
+            renderDashboardForUser(sessionUserId);
+            if (syncRemote === true) {
+                void reconcileDashboardRemote(sessionUserId);
+            }
+        }
     } catch (error) {
         console.warn('Erro ao atualizar métricas do dashboard:', error);
         if (notificationsCountEl) notificationsCountEl.textContent = '0';
@@ -387,6 +401,152 @@ async function updateDashboardMetrics() {
             completedCountEl.textContent = '0';
         }
     }
+}
+
+async function reconcileDashboardRemote(userId) {
+    const progressRequest = syncAndFetchDashboardProgress(userId);
+    const activityRequest = window.UniCheckActivity?.restore?.(userId);
+    const [progressResult, activityResult] = await Promise.allSettled([
+        progressRequest || Promise.resolve(null),
+        activityRequest || Promise.resolve(null)
+    ]);
+
+    if (progressResult.status === 'fulfilled' && progressResult.value) {
+        const localProgress = window.UniCheckChecklist.readCachedProgress(userId);
+        const pendingProgress = window.UniCheckChecklist.readPendingProgress(userId);
+        const reconciled = window.UniCheckChecklist.reconcileProgressMaps(
+            progressResult.value,
+            localProgress,
+            pendingProgress
+        );
+        window.UniCheckChecklist.writeCachedProgress(userId, reconciled);
+    } else if (progressResult.status === 'rejected') {
+        console.error('[UniCheckDashboard] Progresso remoto indisponivel; cache local preservado', {
+            message: progressResult.reason?.message || String(progressResult.reason),
+            userId
+        });
+    }
+
+    if (activityResult.status === 'rejected') {
+        console.error('[UniCheckDashboard] Atividades remotas indisponiveis; cache local preservado', {
+            message: activityResult.reason?.message || String(activityResult.reason),
+            userId
+        });
+    }
+
+    renderDashboardForUser(userId);
+}
+
+async function syncAndFetchDashboardProgress(userId) {
+    try {
+        await window.UniCheckChecklist?.flushPendingProgress?.(userId);
+    } catch (error) {
+        console.error('[UniCheckDashboard] Fila de progresso continua pendente; reconciliando sem apagar o cache', {
+            message: error?.message || String(error),
+            userId
+        });
+    }
+    return window.UniCheckChecklist?.fetchUserProgressMap?.(userId) || null;
+}
+
+function renderAcademicProgress(summary) {
+    const phasesEl = document.getElementById('academicProgressPhases');
+    const percentEl = document.getElementById('academicProgressPercent');
+    const barEl = document.getElementById('academicProgressBar');
+    const fillEl = document.getElementById('academicProgressFill');
+    const currentEl = document.getElementById('academicCurrentPhase');
+    const nextTaskEl = document.getElementById('academicNextTask');
+    const continueButton = document.getElementById('academicContinueButton');
+    const tasksEl = document.getElementById('dashboardChecklistTasks');
+    const pendingEl = document.getElementById('dashboardPendingPhases');
+    const totalPhases = summary.phases.length;
+    const remainingPhases = Math.max(0, totalPhases - summary.completedPhases);
+
+    if (phasesEl) phasesEl.textContent = `${summary.completedPhases} de ${totalPhases} fases concluídas`;
+    if (percentEl) percentEl.textContent = `${summary.percentage}%`;
+    if (fillEl) fillEl.style.width = `${summary.percentage}%`;
+    if (barEl) barEl.setAttribute('aria-valuenow', String(summary.percentage));
+    if (tasksEl) tasksEl.textContent = `${summary.completedTasks} de ${summary.totalTasks} tarefas`;
+    if (pendingEl) pendingEl.textContent = remainingPhases ? `${remainingPhases} fases restantes` : 'Todas as fases concluídas';
+
+    if (!summary.currentPhase) {
+        if (currentEl) currentEl.textContent = 'Jornada acadêmica concluída';
+        if (nextTaskEl) nextTaskEl.textContent = 'Revise suas fases sempre que precisar.';
+        if (continueButton) {
+            continueButton.href = 'CHECKLIST ACADEMICO/checklist-academico.html';
+            continueButton.querySelector('span').textContent = 'Revisar checklists';
+        }
+        return;
+    }
+
+    if (currentEl) currentEl.textContent = summary.currentPhase.title;
+    if (nextTaskEl) nextTaskEl.textContent = summary.nextTask?.title || summary.nextTask?.text || 'Continue de onde parou.';
+    if (continueButton) {
+        continueButton.href = `CHECKLIST ACADEMICO/checklist-academico.html#checklist=${encodeURIComponent(summary.currentPhase.id)}`;
+        continueButton.querySelector('span').textContent = 'Continuar';
+    }
+}
+
+function renderDashboardForUser(userId) {
+    const progress = getStoredChecklistProgress(userId);
+    const summary = getDashboardChecklistSummary(progress);
+    const activities = window.UniCheckActivity?.read?.(userId, 100) || [];
+    const completedCountEl = document.getElementById('completedChecklistsCount');
+    const notificationsCountEl = document.getElementById('newNotificationsCount');
+    const favoritesCountEl = document.getElementById('favoritePlatformsCount');
+
+    if (completedCountEl) completedCountEl.textContent = `${summary.completedPhases}/${summary.phases.length}`;
+    if (notificationsCountEl) notificationsCountEl.textContent = String(activities.length);
+    if (favoritesCountEl) favoritesCountEl.textContent = String(getStoredFavoritesCount(userId));
+    renderAcademicProgress(summary);
+    renderRecentActivity(activities.slice(0, 5));
+}
+
+function escapeDashboardHtml(value) {
+    const element = document.createElement('span');
+    element.textContent = String(value || '');
+    return element.innerHTML;
+}
+
+function formatRelativeActivityTime(timestamp) {
+    const elapsed = Math.max(0, Date.now() - new Date(timestamp).getTime());
+    const minutes = Math.floor(elapsed / 60000);
+    if (minutes < 1) return 'agora';
+    if (minutes < 60) return `há ${minutes} min`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `há ${hours} h`;
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `há ${days} d`;
+    return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' }).format(new Date(timestamp));
+}
+
+function renderRecentActivity(activities) {
+    const timeline = document.getElementById('activityTimeline');
+    if (!timeline) return;
+    if (!activities.length) {
+        timeline.innerHTML = `<div class="activity-empty-state"><i data-lucide="history"></i><p>Suas atividades recentes aparecerão aqui conforme você avançar.</p></div>`;
+        initializeIcons();
+        return;
+    }
+
+    const iconByType = {
+        checklist_task_completed: 'check-circle',
+        checklist_phase_completed: 'trophy',
+        checklist_phase_unlocked: 'unlock',
+        platform_favorited: 'star',
+        platform_unfavorited: 'bookmark-minus'
+    };
+    timeline.innerHTML = activities.map(activity => `
+        <article class="activity-entry activity-entry--${escapeDashboardHtml(activity.type)}">
+            <span class="activity-entry-icon" aria-hidden="true"><i data-lucide="${iconByType[activity.type] || 'activity'}"></i></span>
+            <div class="activity-entry-copy">
+                <strong>${escapeDashboardHtml(activity.title)}</strong>
+                ${activity.context ? `<span>${escapeDashboardHtml(activity.context)}</span>` : ''}
+            </div>
+            <time datetime="${escapeDashboardHtml(activity.timestamp)}">${formatRelativeActivityTime(activity.timestamp)}</time>
+        </article>
+    `).join('');
+    initializeIcons();
 }
 
 function setupDashboardStatActions() {
@@ -789,6 +949,7 @@ function improveAccessibility() {
 function initializeDashboard() {
     try {
         console.log('🚀 Inicializando Dashboard UniCheck...');
+        window.UniCheckNotifications?.init?.();
         
         // Inicializar tema
         initializeTheme();
@@ -849,9 +1010,10 @@ function initializeDashboard() {
         }
 
         setupDashboardStatActions();
-        updateDashboardMetrics();
-        window.addEventListener('focus', updateDashboardMetrics);
-        window.addEventListener('storage', updateDashboardMetrics);
+        updateDashboardMetrics(true);
+        window.addEventListener('focus', () => updateDashboardMetrics(false));
+        window.addEventListener('storage', () => updateDashboardMetrics(false));
+        window.addEventListener('unicheck:activity', () => updateDashboardMetrics(false));
         
         // Configurar redimensionamento da janela
         window.addEventListener('resize', function() {

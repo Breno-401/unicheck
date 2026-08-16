@@ -996,3 +996,92 @@
         gap: 0.75rem;
     }
 }
+
+/* Feedback de progresso local-first. As classes sao aplicadas logo apos a
+   renderizacao local e nunca aguardam a sincronizacao remota. */
+.progress-fill,
+.detail-progress-fill {
+    transition: width 480ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: width;
+}
+
+[data-progress-number],
+[data-progress-count] {
+    font-variant-numeric: tabular-nums;
+}
+
+.detail-trail-card.just-completed {
+    animation: taskComplete 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.detail-trail-card.just-reopened {
+    animation: taskReopen 280ms ease-out;
+}
+
+.detail-trail-card.just-completed .detail-trail-step {
+    animation: checkboxComplete 360ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.detail-trail-card.just-completed .detail-task-state {
+    animation: statusReveal 360ms ease-out;
+}
+
+.phase-completed-feedback .detail-phase-badge--muted,
+.phase-completed-feedback .detail-summary-status.is-completed {
+    animation: statusReveal 480ms ease-out;
+}
+
+.phase-complete-pulse {
+    animation: phaseComplete 580ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.checklist-card.just-unlocked {
+    animation: phaseUnlock 600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes taskComplete {
+    0% { transform: scale(0.985); }
+    45% { border-color: color-mix(in srgb, var(--success, #10b981) 72%, transparent); }
+    100% { transform: scale(1); }
+}
+
+@keyframes taskReopen {
+    from { transform: scale(0.99); opacity: 0.88; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes checkboxComplete {
+    0% { transform: scale(0.72); }
+    65% { transform: scale(1.16); }
+    100% { transform: scale(1); }
+}
+
+@keyframes statusReveal {
+    from { opacity: 0.45; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes phaseComplete {
+    0% { transform: scale(0.99); }
+    45% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--success, #10b981) 16%, transparent); }
+    100% { transform: scale(1); }
+}
+
+@keyframes phaseUnlock {
+    0% { opacity: 0.78; transform: translateY(5px); filter: saturate(0.55); }
+    55% { border-color: color-mix(in srgb, var(--phase-accent-color) 75%, transparent); }
+    100% { opacity: 1; transform: translateY(0); filter: saturate(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .progress-fill,
+    .detail-progress-fill,
+    .detail-trail-card,
+    .detail-trail-step,
+    .detail-task-state,
+    .detail-summary-card,
+    .checklist-card {
+        animation: none !important;
+        transition-duration: 0.01ms !important;
+    }
+}

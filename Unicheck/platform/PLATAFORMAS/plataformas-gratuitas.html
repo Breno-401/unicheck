@@ -22,6 +22,7 @@
     <link rel="stylesheet" href="plataformas-gratuitas.css">
     <link rel="stylesheet" href="platform-styles.css">
     <link rel="stylesheet" href="../css-interno/ui-polish.css">
+    <link rel="stylesheet" href="../css-interno/notifications.css">
 </head>
 <body class="page-platforms">
     <!-- Container Principal do Dashboard -->
@@ -80,7 +81,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link" data-tooltip="Ajuda & Suporte">
+                        <a href="../ajuda/ajuda-suporte.html" class="nav-link" data-tooltip="Ajuda e Suporte">
                             <i data-lucide="help-circle"></i>
                             <span>Ajuda & Suporte</span>
                         </a>
@@ -180,10 +181,10 @@
                                         <span>Assinatura</span>
                                     </button>
                                     <div class="user-dropdown-divider"></div>
-                                    <button class="user-dropdown-item">
+                                    <a href="../ajuda/ajuda-suporte.html" class="user-dropdown-item">
                                         <i data-lucide="help-circle"></i>
                                         <span>Ajuda & Suporte</span>
-                                    </button>
+                                    </a>
                                     <button class="user-dropdown-item logout-action" data-action="logout">
                                         <i data-lucide="log-out"></i>
                                         <span>Sair</span>
@@ -553,6 +554,8 @@
     <script src="../../js/config.js"></script>
     <script src="../../js/auth.js"></script>
     <script src="../../js/profile.js"></script>
+    <script src="../../js/activity.js"></script>
+    <script src="../../js/notifications.js"></script>
     <script src="../script-interno.js"></script>
     <script src="../script-profile-sync.js"></script>
     <script src="../script-page-state.js"></script>

@@ -9,7 +9,7 @@ O UniCheck e uma aplicacao web sem framework de build, composta por paginas HTML
 - `landing/` como camada externa de apresentacao, captura e entrada do usuario.
 - `platform/` como area interna autenticada, onde ficam dashboard, checklists, configuracoes de perfil e paginas de recursos.
 
-O projeto usa Supabase como backend para autenticacao, persistencia de perfil e progresso remoto dos checklists. A definicao estrutural dos checklists do MVP e local no frontend. O restante do estado de interface usa `localStorage` para preferencia de tema, perfil em cache, favoritos, progresso local por usuario e fila de sincronizacao.
+O projeto usa Supabase como backend para autenticacao e persistencia dos dados individuais importantes: perfil, progresso, atividade e notificacoes. A definicao estrutural dos checklists do MVP e local no frontend. `localStorage` funciona como cache local-first, fila offline e armazenamento de preferencias de interface.
 
 Nao existe etapa de bundling, transpile ou framework SPA. A navegacao e feita por arquivos estaticos, links relativos e algumas rotinas de redirecionamento e restauracao de estado.
 
@@ -46,6 +46,7 @@ Na pratica, a landing explica o produto e leva o usuario para autenticacao. A ar
   - [`platform/CHECKLIST ACADEMICO/checklist-academico.html`](./platform/CHECKLIST%20ACADEMICO/checklist-academico.html)
   - [`platform/PLATAFORMAS/plataformas-gratuitas.html`](./platform/PLATAFORMAS/plataformas-gratuitas.html)
   - [`platform/CONFIGURACOES PERFIL/configuracoes.html`](./platform/CONFIGURACOES%20PERFIL/configuracoes.html)
+  - [`platform/ajuda/ajuda-suporte.html`](./platform/ajuda/ajuda-suporte.html)
 
 ## 4. Stack e dependencias
 
@@ -84,9 +85,11 @@ Na pratica, a landing explica o produto e leva o usuario para autenticacao. A ar
 - [`platform/js/`](./platform/js) guarda configuracoes compartilhadas da area interna.
 - [`platform/css-interno/`](./platform/css-interno) guarda estilos base e componentes reutilizados.
 - [`platform/css-interno/ui-polish.css`](./platform/css-interno/ui-polish.css) e a camada final compartilhada de temas, estados interativos e breakpoints das paginas internas principais.
+- [`platform/css-interno/notifications.css`](./platform/css-interno/notifications.css) estiliza o painel compartilhado de notificacoes, incluindo estados lido/nao lido e adaptacao mobile.
 - [`platform/CHECKLIST ACADEMICO/`](./platform/CHECKLIST%20ACADEMICO) guarda o modulo de checklist academico.
 - [`platform/PLATAFORMAS/`](./platform/PLATAFORMAS) guarda o modulo de plataformas gratuitas.
 - [`platform/CONFIGURACOES PERFIL/`](./platform/CONFIGURACOES%20PERFIL) guarda o modulo de configuracao de perfil.
+- [`platform/ajuda/`](./platform/ajuda) guarda a central interna de Ajuda e Suporte, seu FAQ e a configuracao vazia dos futuros canais institucionais.
 
 ### Backend e banco
 
@@ -148,11 +151,21 @@ O script principal e [`platform/script-interno.js`](./platform/script-interno.js
 - logout;
 - sincronizacao com o perfil local.
 
-O painel inicial da dashboard tambem exibe cards de resumo derivados do estado real do usuario:
+O painel inicial da dashboard renderiza primeiro o estado local do usuario e o reconcilia em background com a persistencia remota:
 
-- quantidade de checklists concluídos a partir do progresso salvo;
-- notificacoes novas mantidas em zero enquanto o fluxo nao existir;
-- quantidade de plataformas favoritadas a partir do `localStorage`.
+- percentual geral calculado por tarefas concluidas sobre o total de tarefas da estrutura local;
+- fases concluidas, fase atual e primeira tarefa pendente dessa fase;
+- CTA que abre diretamente a fase atual por hash de rota;
+- quantidade de plataformas favoritadas a partir do `localStorage`;
+- ate cinco atividades recentes do historico por usuario.
+
+Na abertura, o cache de progresso e de atividades e exibido assim que a sessao identifica o `user_id`. Em paralelo, o dashboard tenta esvaziar filas pendentes e faz uma consulta consolidada a `user_checklist_item_progress` e uma consulta aos eventos recentes de `user_activity`. Os resultados remotos atualizam cache e UI sem bloquear a primeira renderizacao. Alteracoes de progresso que continuem na fila local prevalecem durante a reconciliacao.
+
+O historico e implementado por [`js/activity.js`](./js/activity.js). Eventos sao registrados apenas em interacoes efetivas do checklist e dos favoritos (tarefa concluida, fase concluida, fase desbloqueada, plataforma favoritada ou removida). Cada evento recebe UUID estavel, entra imediatamente em `unicheck_activity:<user_id>` e em `unicheck_activity_sync_queue:<user_id>`, e e enviado em background para `user_activity`. A fila usa insercao idempotente pelo UUID, e falhas de rede nunca removem o cache. O modulo mantem no maximo 100 eventos no cache por usuario; o dashboard exibe os cinco mais recentes e nunca cria eventos durante renderizacao.
+
+O sino das paginas internas e gerenciado centralmente por [`js/notifications.js`](./js/notifications.js). O modulo valida a sessao, renderiza `unicheck_notifications:<user_id>` imediatamente e executa uma unica restauracao remota por carregamento de pagina. O painel diferencia itens lidos e nao lidos, mostra contador, permite marcar todos como lidos e resolve destinos internos sem depender da profundidade da pagina atual. Clique fora e `Escape` fecham o painel.
+
+Notificacao e atividade possuem papeis distintos. A conclusao de uma tarefa/fase continua no historico; uma notificacao e criada quando a fase seguinte e desbloqueada ou quando toda a jornada e concluida. Chaves semanticas como `phase_unlocked:<checklist_id>` impedem que a mesma comunicacao seja criada novamente por re-renderizacao ou reconclusao.
 
 Esses cards funcionam como atalhos para as areas principais da plataforma.
 
@@ -192,6 +205,8 @@ Fluxo local-first:
 - trabalha com fases ja estruturadas com tarefas reais, de forma que o desbloqueio entre fases possa ser testado de ponta a ponta;
 - permite marcar itens como concluido;
 - ao marcar ou desmarcar, atualiza UI e `localStorage` imediatamente e sincroniza o Supabase em background;
+- a camada de apresentacao interpola barra, percentual, contador, checkbox e estado do card usando o estado local anterior e o novo, sem aguardar o Supabase;
+- ao concluir uma fase, a interface destaca a conclusao e sinaliza visualmente o desbloqueio da fase seguinte quando a lista e exibida;
 - falhas remotas nao revertem a UI: a alteracao permanece numa fila `unicheck_checklist_pending_sync_v1:<user_id>`, tentada novamente em uma nova alteracao ou quando o navegador volta a ficar online;
 - libera a fase seguinte quando a atual e finalizada.
 
@@ -243,6 +258,27 @@ Fluxo:
 - permite alterar senha via Supabase Auth;
 - permite alternar entre secoes internas de configuracao.
 
+### 6.7 Ajuda e Suporte
+
+Arquivos principais:
+
+- [`platform/ajuda/ajuda-suporte.html`](./platform/ajuda/ajuda-suporte.html)
+- [`platform/ajuda/ajuda-suporte.css`](./platform/ajuda/ajuda-suporte.css)
+- [`platform/ajuda/ajuda-suporte.js`](./platform/ajuda/ajuda-suporte.js)
+- [`platform/ajuda/support-config.js`](./platform/ajuda/support-config.js)
+
+Fluxo:
+
+- reutiliza a sidebar, o header, o perfil, o sino de notificacoes, os controles de tema e o menu mobile da area interna;
+- oferece busca local por pergunta, resposta e categoria, sem requisicao remota;
+- permite selecionar uma das oito categorias e rola para o FAQ ja filtrado;
+- renderiza um accordion acessivel com estado por `aria-expanded`, relacao por `aria-controls` e controles nativos de teclado;
+- explica conta, checklist, plataformas, perfil e sincronizacao somente conforme os comportamentos existentes no projeto;
+- mantem email (`atendimento@salesiano.br`), WhatsApp (`(27) 9 8123 4566`) e portal UniSales centralizados em [`platform/ajuda/support-config.js`](./platform/ajuda/support-config.js); email abre o cliente de email e os dois canais web abrem em nova aba com isolamento da pagina de origem;
+- usa a rota interna `platform/ajuda/ajuda-suporte.html`, sem espacos, para reduzir ambiguidades em links relativos.
+
+A sidebar do dashboard usa `ajuda/ajuda-suporte.html`; checklists e plataformas usam `../ajuda/ajuda-suporte.html`. A pagina de configuracoes, que possui layout proprio sem a sidebar global, oferece um atalho equivalente no cabecalho. A central de ajuda retorna para dashboard, checklists, plataformas e configuracoes por links relativos proprios e marca Ajuda e Suporte como item ativo.
+
 ## 7. Modulos compartilhados
 
 ### `js/config.js`
@@ -268,6 +304,14 @@ Fluxo:
 - sincroniza nome, email e foto;
 - atualiza o cache local de perfil.
 - a interface interna renderiza primeiro o perfil cacheado e atualiza em background quando a consulta remota termina.
+
+### `js/notifications.js`
+
+- centraliza cache, fila, restauracao remota e UI do sino;
+- persiste em `user_notifications` com UUID e `event_key` idempotente;
+- grava localmente antes de sincronizar em background;
+- sincroniza filas em oportunidades naturais de inicializacao, nova notificacao e evento `online`;
+- nao usa polling, realtime, consulta em `focus` ou `service_role`.
 
 ### `platform/js/core-config.js`
 
@@ -325,15 +369,17 @@ Fluxo:
 2. `js/config.js`
 3. `js/auth.js`
 4. `js/profile.js`
-5. `platform/js/core-config.js`
-6. `platform/js/profile-manager.js`
-7. `platform/js/loading-navigation.js`
-8. `platform/script-interno.js`
-9. `platform/script-profile-sync.js`
-10. `platform/script-page-state.js` quando a pagina usa esse utilitario
-11. `js/checklist.js` e modulos do checklist quando a pagina e de checklist
-12. `platform/PLATAFORMAS/plataformas-gratuitas.js` quando a pagina e de plataformas
-13. `platform/CONFIGURACOES PERFIL/configuracoes.js` quando a pagina e de configuracoes
+5. `js/notifications.js`
+6. `platform/js/core-config.js`
+7. `platform/js/profile-manager.js`
+8. `platform/js/loading-navigation.js`
+9. `platform/script-interno.js`
+10. `platform/script-profile-sync.js`
+11. `platform/script-page-state.js` quando a pagina usa esse utilitario
+12. `js/checklist.js` e modulos do checklist quando a pagina e de checklist
+13. `platform/PLATAFORMAS/plataformas-gratuitas.js` quando a pagina e de plataformas
+14. `platform/CONFIGURACOES PERFIL/configuracoes.js` quando a pagina e de configuracoes
+15. `platform/ajuda/support-config.js` e `platform/ajuda/ajuda-suporte.js` quando a pagina e de ajuda; ambos operam apenas com conteudo local
 
 ## 9. Dados e armazenamento
 
@@ -346,6 +392,10 @@ Chaves relevantes atualmente:
 - `userProfile`
 - `platformFavorites:<user_id>`
 - `unicheck_checklist_progress_v2:<user_id>`
+- `unicheck_activity:<user_id>` (historico local, limitado a 100 eventos; dashboard exibe os 5 mais recentes)
+- `unicheck_activity_sync_queue:<user_id>` (eventos com UUID aguardando persistencia remota)
+- `unicheck_notifications:<user_id>` (cache das notificacoes da conta)
+- `unicheck_notifications_sync_queue:<user_id>` (insercoes e marcacoes de leitura pendentes)
 
 ### Supabase Auth
 
@@ -363,7 +413,16 @@ O projeto depende de pelo menos estas estruturas conceituais:
 - `checklists`
 - `checklist_items`
 - `users_profile`
-- tabela de progresso de checklist por usuario e item
+- `user_checklist_item_progress`
+- `user_activity` (eventos duraveis da jornada, com SELECT/INSERT restritos ao proprio usuario por RLS)
+- `user_notifications` (comunicacoes duraveis, com SELECT/INSERT e UPDATE apenas da coluna `read`, protegidos por RLS)
+
+Distincao de persistencia:
+
+- dados estruturais relativamente estaticos, como fases, textos, ordem e tarefas, ficam versionados no frontend;
+- estado individual importante, como progresso e atividade, tem o Supabase como persistencia duravel e fonte para restauracao entre dispositivos;
+- `localStorage` e cache local-first, fila de escrita e fallback offline, nunca a unica copia pretendida desses dados individuais;
+- favoritos continuam locais nesta etapa, embora os eventos de favoritar e remover sejam persistidos em `user_activity`.
 
 ## 10. Regras de negocio importantes
 
@@ -372,6 +431,9 @@ O projeto depende de pelo menos estas estruturas conceituais:
 - Progresso pode vir do banco ou do cache local.
 - A estrutura do checklist e um modulo local versionado e nao usa cache nem consulta estrutural remota; o progresso continua obrigatoriamente separado por `user_id`.
 - Alteracoes de tarefa atualizam primeiro a UI e o cache por usuario e depois sincronizam com Supabase.
+- O dashboard calcula imediatamente progresso e proxima acao usando `js/checklist-data.js` e o cache `unicheck_checklist_progress_v2:<user_id>`, depois reconcilia esse cache com `user_checklist_item_progress` em background.
+- Atividades recentes sao isoladas por `user_id`, persistidas em `user_activity` e mantidas em cache/fila local para operacao offline.
+- Notificacoes sao isoladas por `user_id`, persistidas em `user_notifications` e usam cache/fila local-first; atividade recente e notificacao nao sao tratadas como o mesmo registro.
 - Falha de sincronizacao do progresso nao impede a estrutura local do checklist de aparecer nem o usuario de continuar marcando tarefas.
 - Perfil e refletido em varias telas internas.
 - Logout deve limpar sessao e redirecionar para a area publica.
@@ -385,6 +447,9 @@ O projeto funciona, mas existem inconsistencias tecnicas que precisam ser conhec
 - [`js/checklist.js`](./js/checklist.js) e [`supabase/checklist_progress_and_seed.sql`](./supabase/checklist_progress_and_seed.sql) agora estao alinhados em `user_checklist_item_progress`, com `user_id` e `checklist_item_id`.
 - O cache local do checklist e separado por usuario autenticado para evitar vazamento de progresso entre contas no mesmo navegador.
 - Consultas do checklist possuem timeout de 30 segundos e registram `message`, `code`, `details` e `hint` no console quando o Supabase retorna erro.
+- Consultas e gravacoes de atividade possuem timeout de 15 segundos, sem polling ou retries agressivos; novas oportunidades ocorrem na inicializacao, em novas interacoes e no evento `online`.
+- [`supabase/20260816_create_user_activity.sql`](./supabase/20260816_create_user_activity.sql) cria `user_activity`, indice de leitura recente e policies RLS somente para `SELECT` e `INSERT` do proprio usuario. A migration deve ser executada manualmente.
+- [`supabase/20260816_create_user_notifications.sql`](./supabase/20260816_create_user_notifications.sql) cria `user_notifications`, indice, idempotencia por evento e policies RLS para leitura/insercao proprias e atualizacao exclusiva de `read`. A migration deve ser executada manualmente.
 - [`supabase/checklist_rls_policies.sql`](./supabase/checklist_rls_policies.sql) restaura policies explicitas: usuarios autenticados leem as definicoes e cada usuario le e grava somente o proprio progresso. O arquivo precisa ser aplicado manualmente no projeto remoto.
 - [`js/profile.js`](./js/profile.js) e [`supabase/users_profile_policies.sql`](./supabase/users_profile_policies.sql) estao alinhados em `users_profile.user_id` como chave de relacionamento com `auth.users`.
 - Alguns documentos auxiliares em `platform/PLATAFORMAS/` e `platform/CHECKLIST ACADEMICO/` descrevem funcionalidades de forma mais antiga do que o comportamento atual do codigo.
