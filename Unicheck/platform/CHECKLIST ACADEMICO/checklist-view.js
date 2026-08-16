@@ -1,5 +1,6 @@
 (function () {
     const STORAGE_KEY = "unicheck_checklist_progress_v2";
+    const PENDING_SYNC_KEY = "unicheck_checklist_pending_sync_v1";
     const ROUTE_PREFIX = "#checklist=";
     const FALLBACK_IMAGE = "../img-interno/logo.png";
     const PHASE_ACCENTS = [
@@ -80,6 +81,7 @@
         searchTerm: "",
         user: null,
         currentChecklistId: null,
+        syncInFlight: false,
         initialized: false
     };
 
@@ -140,10 +142,87 @@
         }
     }
 
-    function mergeProgressMaps(remoteMap = {}, localMap = {}) {
-        const merged = { ...localMap };
+    function getPendingSyncKey(userId) {
+        return `${PENDING_SYNC_KEY}:${userId}`;
+    }
 
-        Object.entries(remoteMap).forEach(([checklistId, value]) => {
+    function getPendingSync(userId) {
+        if (!userId) return {};
+        try {
+            const raw = localStorage.getItem(getPendingSyncKey(userId));
+            return raw ? JSON.parse(raw) : {};
+        } catch (error) {
+            console.error("[UniCheckChecklistView] Erro ao ler fila de sincronizacao", error);
+            return {};
+        }
+    }
+
+    function savePendingSync(userId, pending) {
+        if (!userId) return;
+        try {
+            localStorage.setItem(getPendingSyncKey(userId), JSON.stringify(pending));
+        } catch (error) {
+            console.error("[UniCheckChecklistView] Erro ao salvar fila de sincronizacao", error);
+        }
+    }
+
+    function queuePendingSync(checklistId, taskId, completed) {
+        const userId = state.user?.id;
+        if (!userId) return;
+        const pending = getPendingSync(userId);
+        pending[taskId] = { checklistId, completed: Boolean(completed) };
+        savePendingSync(userId, pending);
+    }
+
+    function clearPendingSync(taskId, completed) {
+        const userId = state.user?.id;
+        if (!userId) return;
+        const pending = getPendingSync(userId);
+        if (pending[taskId]?.completed !== Boolean(completed)) return;
+        delete pending[taskId];
+        savePendingSync(userId, pending);
+    }
+
+    async function flushPendingSync() {
+        const userId = state.user?.id;
+        if (!userId || state.syncInFlight) return;
+        const snapshot = getPendingSync(userId);
+        const entries = Object.entries(snapshot).map(([taskId, value]) => ({
+            userId,
+            checklistId: value.checklistId,
+            taskId,
+            completed: value.completed
+        }));
+        if (!entries.length) return;
+
+        state.syncInFlight = true;
+        let synced = false;
+        try {
+            await window.UniCheckChecklist.saveProgressBatch(entries);
+            entries.forEach(entry => clearPendingSync(entry.taskId, entry.completed));
+            synced = true;
+        } catch (error) {
+            console.error("[UniCheckChecklistView] Sincronizacao remota pendente; progresso local preservado", {
+                message: error?.message || String(error),
+                code: error?.code || null,
+                itemCount: entries.length,
+                userId
+            });
+        } finally {
+            state.syncInFlight = false;
+            if (synced && Object.keys(getPendingSync(userId)).length) {
+                void flushPendingSync();
+            }
+        }
+    }
+
+    function mergeProgressMaps(remoteMap = {}, localMap = {}) {
+        const merged = { ...remoteMap };
+
+        // O estado local e atualizado antes da chamada remota. Ele prevalece
+        // para que uma sincronizacao temporariamente indisponivel nao desmarque
+        // uma acao que o usuario acabou de realizar neste navegador.
+        Object.entries(localMap).forEach(([checklistId, value]) => {
             merged[checklistId] = {
                 ...(merged[checklistId] || {}),
                 ...(value || {}),
@@ -452,25 +531,15 @@
         saveStoredProgress(state.user?.id);
     }
 
-    async function toggleTask(checklistId, taskId, completed) {
+    function toggleTask(checklistId, taskId, completed) {
         persistTaskState(checklistId, taskId, completed);
-
-        if (state.user?.id) {
-            try {
-                await window.UniCheckChecklist.saveTaskProgress({
-                    userId: state.user.id,
-                    checklistId,
-                    taskId,
-                    completed
-                });
-            } catch (error) {
-                console.error("Erro ao sincronizar progresso com Supabase:", error);
-                showNotification("Nao foi possivel salvar o progresso no banco.", "error");
-            }
-        }
-
+        queuePendingSync(checklistId, taskId, completed);
         hydrateChecklists();
         syncVisibleView();
+
+        if (state.user?.id) {
+            void flushPendingSync();
+        }
     }
 
     function openChecklist(checklistId, shouldPushState = true) {
@@ -540,54 +609,28 @@
         }, 2200);
     }
 
-    function renderLoadingState() {
-        if (!refs.grid) {
-            return;
-        }
-
-        refs.grid.innerHTML = `
-            <div class="platform-card checklist-card loading-card">
-                <div class="card-content">
-                    <p class="platform-description">Carregando checklists...</p>
-                </div>
-            </div>
-        `;
-    }
-
     async function loadChecklists() {
-        renderLoadingState();
-
         try {
             if (!state.user?.id) {
                 throw new Error("Usuario autenticado nao encontrado para carregar checklists.");
             }
 
-            console.info("[UniCheckChecklistView] Carregando checklists", {
-                userId: state.user.id || null,
-                email: state.user.email || null
-            });
-
             const remoteProgress = await window.UniCheckChecklist.fetchUserProgressMap(state.user.id);
             state.progress = mergeProgressMaps(remoteProgress, state.progress);
             saveStoredProgress(state.user.id);
 
-            state.rawChecklists = await window.UniCheckChecklist.fetchAllChecklists();
             hydrateChecklists();
             syncFromLocation();
             renderListView();
         } catch (error) {
-            console.error("[UniCheckChecklistView] Erro ao carregar checklists:", {
+            console.error("[UniCheckChecklistView] Progresso remoto indisponivel; mantendo progresso local", {
                 message: error?.message || error,
+                code: error?.code || null,
+                details: error?.details || null,
+                hint: error?.hint || null,
                 userId: state.user?.id || null
             });
-            refs.grid.innerHTML = `
-                <div class="platform-card checklist-card">
-                    <div class="card-content">
-                        <p class="platform-description">Nao foi possivel carregar os checklists agora.</p>
-                    </div>
-                </div>
-            `;
-            showNotification("Falha ao carregar checklists.", "error");
+            showNotification("Progresso local carregado; sincronizacao pendente.", "info");
         }
     }
 
@@ -634,7 +677,7 @@
         }
     }
 
-    async function handlePageChange(event) {
+    function handlePageChange(event) {
         const target = event.target;
         if (!(target instanceof HTMLInputElement)) {
             return;
@@ -652,7 +695,7 @@
         }
 
         const before = getChecklistById(checklistId);
-        await toggleTask(checklistId, taskId, target.checked);
+        toggleTask(checklistId, taskId, target.checked);
         const after = getChecklistById(checklistId);
 
         if (before && after && before.completed !== after.completed && after.completed) {
@@ -664,6 +707,7 @@
         refs.pageContent?.addEventListener("click", handlePageClick);
         refs.pageContent?.addEventListener("change", handlePageChange);
         window.addEventListener("popstate", syncFromLocation);
+        window.addEventListener("online", flushPendingSync);
 
         refs.searchInput?.addEventListener("input", event => {
             state.searchTerm = event.target.value.trim();
@@ -679,6 +723,12 @@
         }
         state.initialized = true;
 
+        if (!window.UniCheckChecklistData) {
+            console.error("[UniCheckChecklistView] Estrutura local dos checklists nao foi carregada.");
+            return;
+        }
+        state.rawChecklists = window.UniCheckChecklistData.getChecklists();
+
         // O guard compartilhado de script-interno.js ja protege esta pagina.
         // Aqui apenas recuperamos a mesma sessao para identificar o progresso.
         const authSession = await window.UniCheckAuth?.getSession?.();
@@ -692,13 +742,14 @@
 
         createLayoutIfNeeded();
         state.progress = getStoredProgress(state.user.id);
-        console.info("[UniCheckChecklistView] Usuario carregado para a tela", {
-            userId: state.user.id || null,
-            email: state.user.email || null
-        });
-
         setupEventListeners();
-        await loadChecklists();
+        hydrateChecklists();
+        syncFromLocation();
+        renderListView();
+
+        // A estrutura e o cache local ja estao visiveis. Somente a consulta
+        // unica de progresso continua em background.
+        void loadChecklists();
     }
 
     window.UniCheckChecklistView = {

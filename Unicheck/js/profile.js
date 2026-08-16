@@ -19,18 +19,12 @@
             throw new Error("Modulo de autenticacao nao encontrado.");
         }
 
-        const debug = await auth.getAuthDebugSnapshot?.("profile.getCurrentUser");
-        const user = debug?.user || debug?.session?.user || await auth.getUser?.();
+        const session = await auth.getSession?.();
+        const user = session?.user || null;
 
         if (!user) {
             throw new Error("Nenhum usuario autenticado.");
         }
-
-        console.info("[UniCheckProfile] Usuario autenticado confirmado", {
-            userId: user.id || null,
-            email: user.email || null,
-            hasSession: Boolean(debug?.session)
-        });
 
         return user;
     }

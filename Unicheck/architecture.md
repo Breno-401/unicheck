@@ -9,7 +9,7 @@ O UniCheck e uma aplicacao web sem framework de build, composta por paginas HTML
 - `landing/` como camada externa de apresentacao, captura e entrada do usuario.
 - `platform/` como area interna autenticada, onde ficam dashboard, checklists, configuracoes de perfil e paginas de recursos.
 
-O projeto usa Supabase como backend para autenticacao, persistencia de perfil e progresso dos checklists. O restante do estado de interface usa `localStorage` para preferencia de tema, perfil em cache, favoritos e progresso local auxiliar.
+O projeto usa Supabase como backend para autenticacao, persistencia de perfil e progresso remoto dos checklists. A definicao estrutural dos checklists do MVP e local no frontend. O restante do estado de interface usa `localStorage` para preferencia de tema, perfil em cache, favoritos, progresso local por usuario e fila de sincronizacao.
 
 Nao existe etapa de bundling, transpile ou framework SPA. A navegacao e feita por arquivos estaticos, links relativos e algumas rotinas de redirecionamento e restauracao de estado.
 
@@ -65,8 +65,9 @@ Na pratica, a landing explica o produto e leva o usuario para autenticacao. A ar
 ### Persistencia
 
 - Supabase Auth para sessao
-- tabelas do banco para perfil e checklists
-- `localStorage` para tema, perfil cacheado, favoritos e progresso auxiliar
+- tabelas do banco para perfil e progresso remoto dos checklists
+- `js/checklist-data.js` como fonte estrutural local dos checklists do MVP
+- `localStorage` para tema, perfil cacheado, favoritos, progresso por `user_id` e fila de sincronizacao
 
 ## 5. Estrutura do repositório
 
@@ -169,28 +170,32 @@ Arquivos principais:
 
 - [`platform/CHECKLIST ACADEMICO/checklist-academico.html`](./platform/CHECKLIST%20ACADEMICO/checklist-academico.html)
 - [`js/checklist.js`](./js/checklist.js)
+- [`js/checklist-data.js`](./js/checklist-data.js)
 - [`platform/CHECKLIST ACADEMICO/checklist-view.js`](./platform/CHECKLIST%20ACADEMICO/checklist-view.js)
 - [`platform/CHECKLIST ACADEMICO/checklist-detail.js`](./platform/CHECKLIST%20ACADEMICO/checklist-detail.js)
 - [`platform/CHECKLIST ACADEMICO/checklist-academico.js`](./platform/CHECKLIST%20ACADEMICO/checklist-academico.js)
 
-Fluxo:
+Fluxo local-first:
 
-- carrega os checklists do Supabase;
-- carrega os itens de cada checklist;
-- busca progresso salvo do usuario;
-- combina progresso remoto com progresso local;
+- carrega fases, titulos, descricoes, ordem, tarefas e UUIDs imediatamente de `js/checklist-data.js`;
+- identifica o usuario pela sessao ja validada e le `unicheck_checklist_progress_v2:<user_id>`;
+- renderiza a estrutura e o progresso local sem aguardar a Data API;
+- faz em background uma unica consulta a `user_checklist_item_progress` e combina o resultado com o estado local;
+- nao consulta `checklists` nem `checklist_items` durante a renderizacao;
 - aplica regra de bloqueio entre fases;
 - mostra lista de fases;
 - abre a visao detalhada de uma fase com o mesmo padrao de cards de conclusao para todas as etapas;
 - exibe conteudo informativo especifico por fase dentro da propria tela de checklist;
 - trabalha com fases ja estruturadas com tarefas reais, de forma que o desbloqueio entre fases possa ser testado de ponta a ponta;
 - permite marcar itens como concluido;
-- persiste progresso localmente por usuario e no banco;
+- ao marcar ou desmarcar, atualiza UI e `localStorage` imediatamente e sincroniza o Supabase em background;
+- falhas remotas nao revertem a UI: a alteracao permanece numa fila `unicheck_checklist_pending_sync_v1:<user_id>`, tentada novamente em uma nova alteracao ou quando o navegador volta a ficar online;
 - libera a fase seguinte quando a atual e finalizada.
 
 Regra central do modulo:
 
 - o checklist e ordenado por `ordem`;
+- os UUIDs locais sao os mesmos das tabelas preservadas no Supabase, mantendo compatibilidade com as FKs de `user_checklist_item_progress`;
 - a primeira fase nao e bloqueada;
 - uma fase posterior fica bloqueada ate a anterior estar concluida;
 - a visao de detalhe usa um unico padrao de cards de conclusao, variando apenas o texto e o conteudo de apoio de cada checklist;
@@ -258,6 +263,7 @@ Fluxo:
 - faz upsert do perfil local;
 - sincroniza nome, email e foto;
 - atualiza o cache local de perfil.
+- a interface interna renderiza primeiro o perfil cacheado e atualiza em background quando a consulta remota termina.
 
 ### `platform/js/core-config.js`
 
@@ -352,6 +358,9 @@ O projeto depende de pelo menos estas estruturas conceituais:
 - Checklists seguem ordem de fase.
 - Fase posterior depende da conclusao da anterior.
 - Progresso pode vir do banco ou do cache local.
+- A estrutura do checklist e um modulo local versionado e nao usa cache nem consulta estrutural remota; o progresso continua obrigatoriamente separado por `user_id`.
+- Alteracoes de tarefa atualizam primeiro a UI e o cache por usuario e depois sincronizam com Supabase.
+- Falha de sincronizacao do progresso nao impede a estrutura local do checklist de aparecer nem o usuario de continuar marcando tarefas.
 - Perfil e refletido em varias telas internas.
 - Logout deve limpar sessao e redirecionar para a area publica.
 - Somente a ausencia confirmada de sessao causa redirecionamento de uma pagina interna para o login; erros de perfil, checklist ou rede nao equivalem a logout.
@@ -363,6 +372,8 @@ O projeto funciona, mas existem inconsistencias tecnicas que precisam ser conhec
 
 - [`js/checklist.js`](./js/checklist.js) e [`supabase/checklist_progress_and_seed.sql`](./supabase/checklist_progress_and_seed.sql) agora estao alinhados em `user_checklist_item_progress`, com `user_id` e `checklist_item_id`.
 - O cache local do checklist e separado por usuario autenticado para evitar vazamento de progresso entre contas no mesmo navegador.
+- Consultas do checklist possuem timeout de 30 segundos e registram `message`, `code`, `details` e `hint` no console quando o Supabase retorna erro.
+- [`supabase/checklist_rls_policies.sql`](./supabase/checklist_rls_policies.sql) restaura policies explicitas: usuarios autenticados leem as definicoes e cada usuario le e grava somente o proprio progresso. O arquivo precisa ser aplicado manualmente no projeto remoto.
 - [`js/profile.js`](./js/profile.js) e [`supabase/users_profile_policies.sql`](./supabase/users_profile_policies.sql) estao alinhados em `users_profile.user_id` como chave de relacionamento com `auth.users`.
 - Alguns documentos auxiliares em `platform/PLATAFORMAS/` e `platform/CHECKLIST ACADEMICO/` descrevem funcionalidades de forma mais antiga do que o comportamento atual do codigo.
 

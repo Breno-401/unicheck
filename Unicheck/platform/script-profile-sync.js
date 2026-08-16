@@ -13,8 +13,8 @@
 
     async function getCurrentAuthUserId() {
         try {
-            const debug = await window.UniCheckAuth?.getAuthDebugSnapshot?.('script-profile-sync');
-            return debug?.user?.id || null;
+            const session = await window.UniCheckAuth?.getSession?.();
+            return session?.user?.id || null;
         } catch (error) {
             console.warn('Erro ao validar usuario autenticado:', error);
             return null;
@@ -58,23 +58,17 @@
     }
 
     async function loadProfileData() {
-        try {
-            const currentUserId = await getCurrentAuthUserId();
+        const cachedProfile = getStoredProfile();
+        if (cachedProfile) {
+            updateProfileDisplay(cachedProfile);
+        }
 
+        try {
             if (window.UniCheckProfile && typeof window.UniCheckProfile.getMyProfile === 'function') {
                 const profile = await window.UniCheckProfile.getMyProfile();
-                if (profile && currentUserId && profile.id === currentUserId) {
+                if (profile) {
                     updateProfileDisplay(profile);
                     return;
-                }
-
-                if (profile && currentUserId && profile.id !== currentUserId) {
-                    const key = window.UniCheckConfig?.STORAGE_KEYS?.USER_PROFILE || 'userProfile';
-                    localStorage.removeItem(key);
-                    console.warn('Perfil local ignorado por pertencer a outro usuario.', {
-                        profileId: profile.id || null,
-                        currentUserId
-                    });
                 }
             }
         } catch (error) {
@@ -164,6 +158,8 @@
     }
 
     function initializeProfile() {
+        const cachedProfile = getStoredProfile();
+        if (cachedProfile) updateProfileDisplay(cachedProfile);
         loadProfileData();
 
         window.addEventListener('focus', loadProfileData);

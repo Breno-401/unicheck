@@ -366,8 +366,8 @@ async function updateDashboardMetrics() {
 
     try {
         const profile = getStoredProfile();
-        const authSnapshot = await window.UniCheckAuth?.getAuthDebugSnapshot?.('dashboard-metrics');
-        const user = authSnapshot?.user || authSnapshot?.session?.user || profile;
+        const session = await window.UniCheckAuth?.getSession?.();
+        const user = session?.user || profile;
         const userId = user?.id || profile?.id || null;
         const progress = getStoredChecklistProgress(userId);
 
