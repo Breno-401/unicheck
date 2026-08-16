@@ -361,26 +361,11 @@ function getDashboardChecklistSummary(progressMap = {}) {
     };
 }
 
-function getStoredFavoritesCount(userId) {
-    if (!userId) return 0;
-
-    try {
-        const key = `platformFavorites:${userId}`;
-        const raw = localStorage.getItem(key);
-        const favorites = raw ? JSON.parse(raw) : [];
-        return Array.isArray(favorites) ? favorites.length : 0;
-    } catch (error) {
-        console.warn('Erro ao ler favoritos da plataforma:', error);
-        return 0;
-    }
-}
-
 async function updateDashboardMetrics(syncRemote = false) {
-    const completedCountEl = document.getElementById('completedChecklistsCount');
-    const notificationsCountEl = document.getElementById('newNotificationsCount');
-    const favoritesCountEl = document.getElementById('favoritePlatformsCount');
+    const dashboardSurface = document.getElementById('academicProgressBar')
+        || document.getElementById('journeyTimeline');
 
-    if (!completedCountEl && !notificationsCountEl && !favoritesCountEl) return;
+    if (!dashboardSurface) return;
 
     try {
         const session = await window.UniCheckAuth?.getSession?.();
@@ -393,13 +378,6 @@ async function updateDashboardMetrics(syncRemote = false) {
         }
     } catch (error) {
         console.warn('Erro ao atualizar métricas do dashboard:', error);
-        if (notificationsCountEl) notificationsCountEl.textContent = '0';
-        if (favoritesCountEl && favoritesCountEl.textContent.trim() === '') {
-            favoritesCountEl.textContent = '0';
-        }
-        if (completedCountEl && completedCountEl.textContent.trim() === '') {
-            completedCountEl.textContent = '0';
-        }
     }
 }
 
@@ -457,17 +435,12 @@ function renderAcademicProgress(summary) {
     const currentEl = document.getElementById('academicCurrentPhase');
     const nextTaskEl = document.getElementById('academicNextTask');
     const continueButton = document.getElementById('academicContinueButton');
-    const tasksEl = document.getElementById('dashboardChecklistTasks');
-    const pendingEl = document.getElementById('dashboardPendingPhases');
     const totalPhases = summary.phases.length;
-    const remainingPhases = Math.max(0, totalPhases - summary.completedPhases);
 
     if (phasesEl) phasesEl.textContent = `${summary.completedPhases} de ${totalPhases} fases concluídas`;
     if (percentEl) percentEl.textContent = `${summary.percentage}%`;
     if (fillEl) fillEl.style.width = `${summary.percentage}%`;
     if (barEl) barEl.setAttribute('aria-valuenow', String(summary.percentage));
-    if (tasksEl) tasksEl.textContent = `${summary.completedTasks} de ${summary.totalTasks} tarefas`;
-    if (pendingEl) pendingEl.textContent = remainingPhases ? `${remainingPhases} fases restantes` : 'Todas as fases concluídas';
 
     if (!summary.currentPhase) {
         if (currentEl) currentEl.textContent = 'Jornada acadêmica concluída';
@@ -490,16 +463,10 @@ function renderAcademicProgress(summary) {
 function renderDashboardForUser(userId) {
     const progress = getStoredChecklistProgress(userId);
     const summary = getDashboardChecklistSummary(progress);
-    const activities = window.UniCheckActivity?.read?.(userId, 100) || [];
-    const completedCountEl = document.getElementById('completedChecklistsCount');
-    const notificationsCountEl = document.getElementById('newNotificationsCount');
-    const favoritesCountEl = document.getElementById('favoritePlatformsCount');
 
-    if (completedCountEl) completedCountEl.textContent = `${summary.completedPhases}/${summary.phases.length}`;
-    if (notificationsCountEl) notificationsCountEl.textContent = String(activities.length);
-    if (favoritesCountEl) favoritesCountEl.textContent = String(getStoredFavoritesCount(userId));
     renderAcademicProgress(summary);
-    renderRecentActivity(activities.slice(0, 5));
+    window.UniCheckProgressionProfile?.renderFromCounts?.(summary);
+    renderJourneyTimeline(summary);
 }
 
 function escapeDashboardHtml(value) {
@@ -508,72 +475,51 @@ function escapeDashboardHtml(value) {
     return element.innerHTML;
 }
 
-function formatRelativeActivityTime(timestamp) {
-    const elapsed = Math.max(0, Date.now() - new Date(timestamp).getTime());
-    const minutes = Math.floor(elapsed / 60000);
-    if (minutes < 1) return 'agora';
-    if (minutes < 60) return `há ${minutes} min`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `há ${hours} h`;
-    const days = Math.floor(hours / 24);
-    if (days < 7) return `há ${days} d`;
-    return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' }).format(new Date(timestamp));
-}
-
-function renderRecentActivity(activities) {
-    const timeline = document.getElementById('activityTimeline');
+function renderJourneyTimeline(summary) {
+    const timeline = document.getElementById('journeyTimeline');
     if (!timeline) return;
-    if (!activities.length) {
-        timeline.innerHTML = `<div class="activity-empty-state"><i data-lucide="history"></i><p>Suas atividades recentes aparecerão aqui conforme você avançar.</p></div>`;
-        initializeIcons();
-        return;
-    }
 
-    const iconByType = {
-        checklist_task_completed: 'check-circle',
-        checklist_phase_completed: 'trophy',
-        checklist_phase_unlocked: 'unlock',
-        platform_favorited: 'star',
-        platform_unfavorited: 'bookmark-minus'
-    };
-    timeline.innerHTML = activities.map(activity => `
-        <article class="activity-entry activity-entry--${escapeDashboardHtml(activity.type)}">
-            <span class="activity-entry-icon" aria-hidden="true"><i data-lucide="${iconByType[activity.type] || 'activity'}"></i></span>
-            <div class="activity-entry-copy">
-                <strong>${escapeDashboardHtml(activity.title)}</strong>
-                ${activity.context ? `<span>${escapeDashboardHtml(activity.context)}</span>` : ''}
-            </div>
-            <time datetime="${escapeDashboardHtml(activity.timestamp)}">${formatRelativeActivityTime(activity.timestamp)}</time>
-        </article>
-    `).join('');
+    const currentIndex = summary.phases.findIndex(phase => !phase.completed);
+    timeline.innerHTML = summary.phases.map((phase, index) => {
+        let state = 'locked';
+        let stateLabel = 'Bloqueada';
+        let detail = 'Conclua a fase anterior';
+        let icon = 'lock-keyhole';
+
+        if (phase.completed && (currentIndex === -1 || index < currentIndex)) {
+            state = 'completed';
+            stateLabel = 'Concluída';
+            detail = `${phase.tasks.length} de ${phase.tasks.length} itens`;
+            icon = 'check';
+        } else if (index === currentIndex && phase.completedTasks > 0) {
+            state = 'current';
+            stateLabel = 'Em andamento';
+            detail = `${phase.completedTasks} de ${phase.tasks.length} itens`;
+            icon = 'circle-dot';
+        } else if (index === currentIndex) {
+            state = 'next';
+            stateLabel = 'Próxima';
+            detail = 'Não iniciada';
+            icon = 'circle';
+        }
+
+        const title = escapeDashboardHtml(phase.title);
+        const accessibleLabel = escapeDashboardHtml(`Fase ${index + 1}: ${phase.title}. ${stateLabel}. ${detail}.`);
+        const content = `
+            <span class="journey-phase-marker" aria-hidden="true"><i data-lucide="${icon}"></i></span>
+            <span class="journey-phase-number">Fase ${index + 1}</span>
+            <strong>${title}</strong>
+            <span class="journey-phase-state">${stateLabel}</span>
+            <small>${detail}</small>`;
+
+        if (state === 'locked') {
+            return `<li class="journey-phase journey-phase--locked"><div class="journey-phase-content" aria-label="${accessibleLabel}" aria-disabled="true">${content}</div></li>`;
+        }
+
+        const href = `CHECKLIST ACADEMICO/checklist-academico.html#checklist=${encodeURIComponent(phase.id)}`;
+        return `<li class="journey-phase journey-phase--${state}"><a class="journey-phase-content" href="${href}" aria-label="${accessibleLabel}">${content}</a></li>`;
+    }).join('');
     initializeIcons();
-}
-
-function setupDashboardStatActions() {
-    document.querySelectorAll('[data-dashboard-action]').forEach(button => {
-        if (!(button instanceof HTMLElement)) return;
-
-        button.addEventListener('click', () => {
-            const action = button.getAttribute('data-dashboard-action');
-
-            if (action === 'open-checklists') {
-                window.location.href = 'CHECKLIST ACADEMICO/checklist-academico.html';
-                return;
-            }
-
-            if (action === 'open-platforms') {
-                window.location.href = 'PLATAFORMAS/plataformas-gratuitas.html';
-                return;
-            }
-
-            if (action === 'open-activity') {
-                const activitySection = document.querySelector('.activity-section');
-                if (activitySection) {
-                    activitySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            }
-        });
-    });
 }
 
 /**
@@ -1009,7 +955,6 @@ function initializeDashboard() {
             window.ProfileManager.bindAutoSync();
         }
 
-        setupDashboardStatActions();
         updateDashboardMetrics(true);
         window.addEventListener('focus', () => updateDashboardMetrics(false));
         window.addEventListener('storage', () => updateDashboardMetrics(false));

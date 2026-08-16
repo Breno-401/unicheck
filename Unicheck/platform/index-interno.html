@@ -117,23 +117,12 @@
                     
                     <div class="welcome-section">
                         <p class="dashboard-eyebrow">Área interna UniCheck</p>
-                        <h1 class="welcome-title">Bem-vindo ao UniCheck</h1>
-                        <p class="welcome-subtitle">Um painel mais limpo para acompanhar seus checklists, plataformas e atalhos da rotina acadêmica.</p>
+                        <h1 class="welcome-title">Bem-vindo ao UniCheck.</h1>
+                        <p class="welcome-subtitle">Acompanhe sua jornada acadêmica e continue de onde parou.</p>
                     </div>
                 </div>
 
                 <div class="header-bottom-enhanced">
-                    <!-- Campo de Busca à Esquerda -->
-                    <div class="header-search-enhanced">
-                        <div class="search-box">
-                            <i data-lucide="search" class="search-icon"></i>
-                            <input type="text" placeholder="Buscar relatórios, documentos ou dados..." class="search-input">
-                            <button class="search-filters" type="button" aria-label="Opções de busca">
-                                <i data-lucide="filter"></i>
-                            </button>
-                        </div>
-                    </div>
-
                     <!-- Ações do Usuário à Direita -->
                     <div class="header-actions-enhanced">
                         <button class="theme-toggle-mobile" id="themeToggleMobile" type="button" aria-label="Alternar tema claro ou escuro">
@@ -219,185 +208,31 @@
                 </div>
             </section>
 
-            <!-- Estatísticas Rápidas -->
-            <section class="stats-section">
-                <div class="stats-grid">
-                    <button class="stat-card stat-card-action stat-card-complete" type="button" data-dashboard-action="open-checklists" aria-label="Abrir checklists completos">
-                        <div class="stat-icon">
-                            <i data-lucide="check-circle"></i>
-                        </div>
-                        <div class="stat-content">
-                            <span class="stat-eyebrow">Progresso acadêmico</span>
-                            <h3 id="completedChecklistsCount">0/7</h3>
-                            <p>Fases concluídas</p>
-                            <span class="stat-note">Abrir área de checklists</span>
-                        </div>
-                        <i data-lucide="arrow-up-right" class="stat-arrow"></i>
-                    </button>
-                    <button class="stat-card stat-card-action stat-card-alert" type="button" data-dashboard-action="open-activity" aria-label="Ver atividade recente">
-                        <div class="stat-icon">
-                            <i data-lucide="bell"></i>
-                        </div>
-                        <div class="stat-content">
-                            <span class="stat-eyebrow">Histórico local</span>
-                            <h3 id="newNotificationsCount">0</h3>
-                            <p>Atividades recentes</p>
-                            <span class="stat-note">Ver seus últimos avanços</span>
-                        </div>
-                        <i data-lucide="arrow-up-right" class="stat-arrow"></i>
-                    </button>
-                    <button class="stat-card stat-card-action stat-card-favorites" type="button" data-dashboard-action="open-platforms" aria-label="Abrir plataformas favoritadas">
-                        <div class="stat-icon">
-                            <i data-lucide="star"></i>
-                        </div>
-                        <div class="stat-content">
-                            <span class="stat-eyebrow">Biblioteca salva</span>
-                            <h3 id="favoritePlatformsCount">0</h3>
-                            <p>Plataformas favoritadas</p>
-                            <span class="stat-note">Ver plataformas salvas</span>
-                        </div>
-                        <i data-lucide="arrow-up-right" class="stat-arrow"></i>
-                    </button>
+            <section class="journey-context-section" aria-labelledby="journeyTimelineTitle">
+                <div class="journey-context-heading">
+                    <div>
+                        <span class="dashboard-eyebrow">Mapa da jornada</span>
+                        <h2 id="journeyTimelineTitle">Sua Jornada</h2>
+                    </div>
+                    <p>Veja sua fase atual e o caminho que vem depois.</p>
                 </div>
+                <ol class="journey-timeline" id="journeyTimeline" aria-label="Fases da jornada acadêmica"></ol>
             </section>
 
-            <!-- Grid de Cards Principais -->
-            <section class="cards-section-enhanced">
-                <div class="cards-grid-enhanced">
-                    <!-- Card 1: Gerenciar Checklists -->
-                    <div class="content-card">
-                        <div class="card-image">
-                            <!-- IMAGEM COERENTE: Lista de tarefas/checklists -->
-                            <img src="https://images.unsplash.com/photo-1586281380349-632531db7ed4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                                 alt="Checklists e tarefas organizadas" 
-                                 class="card-bg-image">
-                            <div class="card-image-overlay">
-                                <i data-lucide="check-square" class="card-icon"></i>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <h3 class="card-title">Gerenciar Checklists</h3>
-                            <p class="card-description">Acesse e gerencie todos os seus checklists acadêmicos e de plataformas em um só lugar.</p>
-                            <div class="card-stats">
-                                <span class="card-stat">
-                                    <i data-lucide="check-circle"></i>
-                                    <span id="dashboardChecklistTasks">0 de 28 tarefas</span>
-                                </span>
-                                <span class="card-stat">
-                                    <i data-lucide="clock"></i>
-                                    <span id="dashboardPendingPhases">7 fases restantes</span>
-                                </span>
-                            </div>
-                            <a href="CHECKLIST ACADEMICO/checklist-academico.html" class="card-action">
-                                <span>Acessar Checklists</span>
-                                <i data-lucide="arrow-right"></i>
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- Card 2: Minhas Notificações -->
-                    <div class="content-card">
-                        <div class="card-image">
-                            <!-- IMAGEM COERENTE: Notificações/mensagens -->
-                            <img src="https://images.unsplash.com/photo-1611224923853-80b023f02d71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                                 alt="Notificações e mensagens" 
-                                 class="card-bg-image">
-                            <div class="card-image-overlay">
-                                <i data-lucide="bell" class="card-icon"></i>
-                                <div class="notification-pulse"></div>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <h3 class="card-title">Minhas Notificações</h3>
-                            <p class="card-description">Fique por dentro de todas as novidades, prazos e atualizações importantes.</p>
-                            <div class="card-stats">
-                                <span class="card-stat highlight">
-                                    <i data-lucide="alert-circle"></i>
-                                    0 novas
-                                </span>
-                                <span class="card-stat">
-                                    <i data-lucide="eye"></i>
-                                    Resumo no painel
-                                </span>
-                            </div>
-                            <a href="#activity-section" class="card-action">
-                                <span>Ver atividade recente</span>
-                                <i data-lucide="arrow-right"></i>
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- Card 3: Biblioteca de Plataformas -->
-                    <div class="content-card">
-                        <div class="card-image">
-                            <!-- IMAGEM COERENTE: Plataformas tecnológicas -->
-                            <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                                 alt="Plataformas tecnológicas e serviços digitais" 
-                                 class="card-bg-image">
-                            <div class="card-image-overlay">
-                                <i data-lucide="monitor-play" class="card-icon"></i>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <h3 class="card-title">Biblioteca de Plataformas</h3>
-                            <p class="card-description">Acesso rápido a todas as plataformas educacionais e serviços estudantis.</p>
-                            <div class="card-stats">
-                                <span class="card-stat">
-                                    <i data-lucide="star"></i>
-                                    Favoritadas
-                                </span>
-                                <span class="card-stat">
-                                    <i data-lucide="zap"></i>
-                                    Atalhos rápidos
-                                </span>
-                            </div>
-                            <button class="card-action" data-action="navigate-platforms">
-                                <span>Explorar Plataformas</span>
-                                <i data-lucide="arrow-right"></i>
-                            </button>
-                        </div>
-                    </div>
-
+            <section class="educational-partner" aria-labelledby="educationalPartnerTitle">
+                <div class="educational-partner-logo">
+                    <img src="img-interno/fundacao bradesco.png" alt="Fundação Bradesco">
                 </div>
+                <div class="educational-partner-copy">
+                    <span class="dashboard-eyebrow">Parceiro educacional</span>
+                    <h2 id="educationalPartnerTitle">Fundação Bradesco <small>Escola Virtual</small></h2>
+                    <p>Acesse cursos gratuitos para complementar sua formação.</p>
+                </div>
+                <a class="educational-partner-link" href="https://www.ev.org.br/" target="_blank" rel="noopener noreferrer">
+                    <span>Explorar cursos</span>
+                    <i data-lucide="arrow-up-right"></i>
+                </a>
             </section>
-
-            <!-- Atividade Recente -->
-            <section class="activity-section" id="activity-section">
-                <div class="section-header">
-                    <h2>Atividade Recente</h2>
-                    <span class="activity-limit-label">Últimas 5</span>
-                </div>
-                <div class="activity-timeline" id="activityTimeline" aria-live="polite">
-                    <div class="activity-empty-state">
-                        <i data-lucide="history"></i>
-                        <p>Suas atividades recentes aparecerão aqui conforme você avançar.</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Conteúdo que cresce -->
-            <div class="page-content">
-                <!-- Seção de Parceiros -->
-                <section class="partners-section">
-                    <div class="partners-container">
-                        <h3 class="partners-title">Nossos Parceiros</h3>
-                        <div class="partners-grid">
-                            <div class="partner-card">
-                                <div class="partner-logo-placeholder bradesco-logo">
-                                    <img 
-                                     width="140"
-                                     height="80"
-                                     class="object-contain"
-                                     src="img-interno/fundacao bradesco.png"
-                                     alt="Logo da Fundacao Bradesco">
-                                </div>
-                                <p class="partner-name">Fundação Bradesco</p>
-                                <p class="partner-description">Parceiro educacional que apoia a inovação acadêmica</p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </div>
 
 
         </main>
@@ -413,10 +248,12 @@
     <script src="../js/profile.js"></script>
     <script src="../js/checklist-data.js"></script>
     <script src="../js/checklist.js"></script>
+    <script src="../js/progression.js"></script>
     <script src="../js/activity.js"></script>
     <script src="../js/notifications.js"></script>
     <script src="js/core-config.js"></script>
     <script src="js/profile-manager.js"></script>
+    <script src="js/progression-profile.js"></script>
     <script src="js/loading-navigation.js"></script>
     <script src="script-interno.js"></script>
     <script src="script-profile-sync.js"></script>
