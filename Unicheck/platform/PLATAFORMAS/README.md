@@ -1,74 +1,27 @@
-# Plataformas Gratuitas - UniCheck
+# Benefícios para Estudantes — UniCheck
 
-## Visao geral
+## Visão geral
 
-A tela de Plataformas Gratuitas mostra um catalogo de ferramentas gratuitas e com desconto para estudantes.
-
-## Funcionalidades
-
-- Busca por nome, descricao e features.
-- Filtros por categoria.
-- Favoritos salvos no `localStorage`.
-- Modais de detalhes e tutorial.
-- Abertura de links externos em nova aba.
-- Cards com icones vetoriais padronizados.
-
-## Catálogo
-
-O catalogo atual inclui plataformas como:
-
-- JetBrains Student Pack
-- Spotify Student
-- Microsoft Azure for Students
-- Canva for Education
-- GitHub Student Pack
-- Notion for Students
-- Google Workspace for Education
-- Coursera Plus
-- Adobe Creative Cloud Student
-- Microsoft 365 Education
-- Miro Education
-- Slack for Education
-- Replit
-- Visual Studio Code
-- Vercel
-- Netlify
-- Oracle Cloud Always Free
-- freeCodeCamp
-- edX
-- Khan Academy
-- Duolingo for Schools
-- Grammarly Education
-- Microsoft Copilot
-- Postman
-- Overleaf
-- Asana for Education
-- FigJam for Education
-- Dropbox Education
-- Skillshare Student
+Central local de benefícios estudantis verificados em fontes oficiais. A curadoria inclui ferramentas, educação, tecnologia, entretenimento, compras, direitos públicos e mobilidade.
 
 ## Estrutura
 
-```text
-PLATAFORMAS/
-|-- plataformas-gratuitas.html
-|-- plataformas-gratuitas.css
-|-- plataformas-gratuitas.js
-|-- platform-styles.css
-```
+- `benefits-data.js`: dataset, categorias, canais de acesso e última verificação.
+- `plataformas-gratuitas.js`: busca, filtros, modal e persistência local-first dos favoritos.
+- `plataformas-gratuitas.css`: cards, logos, temas e responsividade.
+- `logos/`: SVGs locais leves de marcas, provenientes da biblioteca Simple Icons.
 
-## Dados
+## Dados e busca
 
-As informacoes principais ficam centralizadas em `platformState.platforms` dentro de `plataformas-gratuitas.js`.
+Os 34 registros são pesquisados localmente por nome, descrição, benefício, categoria, subcategoria, disponibilidade, elegibilidade, tags, canal e método de acesso. Nenhum conteúdo é consultado no Supabase.
 
 ## Favoritos
 
-Os favoritos sao salvos com a chave:
+Favoritos usam `platformFavorites:<user_id>` como cache, fila offline compactada e `user_platform_favorites` como persistência remota. Somente interações explícitas geram atividade.
 
-```javascript
-localStorage.getItem('platformFavorites')
-```
+## Política editorial
 
-## Observacao
-
-Os cards desta tela usam um padrao visual unico para manter os icones no mesmo tamanho e evitar desalinhamento entre plataformas.
+- Fonte oficial prevalece sobre agregadores.
+- Preços, percentuais, créditos e duração promocional usam `lastVerified` e `volatileFields`.
+- Benefícios governamentais e regionais informam claramente público e território.
+- Marcas usam logos locais quando disponíveis; fallbacks tipográficos são usados quando a biblioteca não possui a marca; direitos públicos usam ícones semânticos.

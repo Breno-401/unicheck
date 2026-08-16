@@ -8,6 +8,7 @@
 
     const ROUTES = {
         LANDING: '../landing/index.html',
+        MANUAL: 'manual/manual-aluno.html',
         PLATFORMS: 'PLATAFORMAS/plataformas-gratuitas.html',
         HELP: 'ajuda/ajuda-suporte.html'
     };
