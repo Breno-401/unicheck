@@ -19,7 +19,7 @@ O UniCheck foi construído para orientar estudantes na jornada academica, com fo
 
 - onboarding e primeiros passos na universidade;
 - organizacao de tarefas e fases de checklists;
-- centralizacao de plataformas gratuitas ou com desconto para estudantes;
+- curadoria de ferramentas, programas educacionais e descontos verificaveis para estudantes;
 - sincronizacao basica de perfil;
 - experiencia visual mais guiada e menos dispersa.
 
@@ -44,6 +44,7 @@ Na pratica, a landing explica o produto e leva o usuario para autenticacao. A ar
 - [`platform/index-interno.html`](./platform/index-interno.html) e o dashboard principal.
 - Dela partem as paginas:
   - [`platform/CHECKLIST ACADEMICO/checklist-academico.html`](./platform/CHECKLIST%20ACADEMICO/checklist-academico.html)
+  - [`platform/manual/manual-aluno.html`](./platform/manual/manual-aluno.html)
   - [`platform/PLATAFORMAS/plataformas-gratuitas.html`](./platform/PLATAFORMAS/plataformas-gratuitas.html)
   - [`platform/CONFIGURACOES PERFIL/configuracoes.html`](./platform/CONFIGURACOES%20PERFIL/configuracoes.html)
   - [`platform/ajuda/ajuda-suporte.html`](./platform/ajuda/ajuda-suporte.html)
@@ -87,7 +88,8 @@ Na pratica, a landing explica o produto e leva o usuario para autenticacao. A ar
 - [`platform/css-interno/ui-polish.css`](./platform/css-interno/ui-polish.css) e a camada final compartilhada de temas, estados interativos e breakpoints das paginas internas principais.
 - [`platform/css-interno/notifications.css`](./platform/css-interno/notifications.css) estiliza o painel compartilhado de notificacoes, incluindo estados lido/nao lido e adaptacao mobile.
 - [`platform/CHECKLIST ACADEMICO/`](./platform/CHECKLIST%20ACADEMICO) guarda o modulo de checklist academico.
-- [`platform/PLATAFORMAS/`](./platform/PLATAFORMAS) guarda o modulo de plataformas gratuitas.
+- [`platform/manual/`](./platform/manual) guarda a central navegavel do Manual do Aluno e sua experiencia de leitura.
+- [`platform/PLATAFORMAS/`](./platform/PLATAFORMAS) guarda o modulo Beneficios para Estudantes.
 - [`platform/CONFIGURACOES PERFIL/`](./platform/CONFIGURACOES%20PERFIL) guarda o modulo de configuracao de perfil.
 - [`platform/ajuda/`](./platform/ajuda) guarda a central interna de Ajuda e Suporte, seu FAQ e a configuracao vazia dos futuros canais institucionais.
 
@@ -223,31 +225,38 @@ Regra central do modulo:
 - a visao de detalhe usa um unico padrao de cards de conclusao, variando apenas o texto e o conteudo de apoio de cada checklist;
 - o tutorial TOTVS em tela separada foi removido para evitar duplicacao de fluxo e concentrar a experiencia no checklist.
 
-### 6.5 Plataformas gratuitas
+### 6.5 Beneficios para Estudantes
 
 Arquivos principais:
 
 - [`platform/PLATAFORMAS/plataformas-gratuitas.html`](./platform/PLATAFORMAS/plataformas-gratuitas.html)
+- [`platform/PLATAFORMAS/benefits-data.js`](./platform/PLATAFORMAS/benefits-data.js)
 - [`platform/PLATAFORMAS/plataformas-gratuitas.js`](./platform/PLATAFORMAS/plataformas-gratuitas.js)
-- [`platform/PLATAFORMAS/platform-styles.css`](./platform/PLATAFORMAS/platform-styles.css)
 - [`platform/PLATAFORMAS/plataformas-gratuitas.css`](./platform/PLATAFORMAS/plataformas-gratuitas.css)
 
 Fluxo:
 
-- renderiza uma lista fixa e ampliada de plataformas;
-- permite busca por nome, descricao e features;
-- filtra por categoria;
+- trata a pagina como central de beneficios estudantis verificaveis, reunindo software, educacao, tecnologia, compras, entretenimento, direitos publicos e mobilidade relevante para estudantes brasileiros;
+- a curadoria local possui 34 beneficios em nove categorias: Desenvolvimento, Produtividade & Estudos, Design & Criatividade, Cloud & Dados, Educacao, Tecnologia, Entretenimento, Compras & Beneficios e Direitos & Mobilidade;
+- `benefits-data.js` e a fonte central dos cards e registra `id`, nome, categoria e subcategoria, tipo e rotulo do beneficio, disponibilidade, publico, verificacao, elegibilidade, descricao, tags, URL oficial, data da ultima verificacao e status;
+- `sourceChannel` diferencia acesso direto, GitHub Student Developer Pack, UNiDAYS, ISIC, instituicao e governo; `accessMethod` descreve verificacao estudantil, email institucional, GitHub Education, SheerID, elegibilidade governamental, loja educacional ou dependencia institucional;
+- `lastVerified` informa quando a referencia oficial foi conferida; campos volateis como preco, percentual e credito sao identificados por `volatileFields` e recebem contexto no detalhe;
+- `status: institution_dependent` e `benefitType: institution_dependent` distinguem ofertas cujo acesso depende da participacao ou elegibilidade da instituicao;
+- permite busca local por nome, descricao, beneficio, publico, verificacao, elegibilidade, disponibilidade, tags e categorias;
+- gera apenas filtros de categoria que possuem oferta e combina esse filtro com um seletor simples de gratuitos, descontos ou dependencia institucional, alem de um filtro local para exibir somente os favoritos da conta;
 - mostra imediatamente os favoritos do cache `platformFavorites:<user_id>` com icone padronizado de bookmark;
+- mantem IDs anteriores somente quando representam o mesmo produto; IDs removidos sao ignorados na leitura do cache, da fila e do resultado remoto, sem criar cards fantasma ou atividade artificial;
 - ao favoritar ou remover, atualiza UI e cache sem aguardar a rede e registra a ultima intencao por plataforma em `unicheck_favorites_sync_queue:<user_id>`;
 - sincroniza a fila em lote com `user_platform_favorites` na inicializacao, na proxima interacao e no evento `online`, sem polling;
 - depois da sessao, faz uma unica leitura consolidada dos favoritos remotos e reconcilia o resultado preservando operacoes locais ainda pendentes;
 - restauracao e reconciliacao nunca criam atividade recente; somente cliques efetivos continuam registrando plataforma favoritada ou removida;
 - comunica o favorito também por preenchimento, contraste, animação breve, `aria-pressed` e `aria-label` atualizado;
-- mostra modais de detalhes e tutorial;
+- mostra detalhes com beneficio, publico, verificacao, forma de acesso, disponibilidade, elegibilidade, fonte oficial e aviso localizado quando um dado e volatil; o rodape diferencia a acao secundaria de fechar do CTA primario que abre a oferta oficial em nova aba, ocultando-o quando a URL nao e valida;
 - abre links externos em nova aba;
-- exibe cards simples com a logo real da plataforma quando disponivel, badge de desconto e a informacao essencial para leitura rapida;
-- nao exibe botao de tutorial por plataforma;
-- a pagina foi ajustada para ser responsiva em desktop, tablet e mobile, com header em grade, filtros com rolagem horizontal em telas pequenas, cards em coluna unica e modais adaptados.
+- exibe cards com hierarquia para beneficio, publico elegivel, tags, data de verificacao e favorito, sem afirmar gratuidade universal quando ha dependencia institucional; o CTA `Ver detalhes` e explicito e permanece alinhado no rodape;
+- logos comerciais sao assets locais leves: primeiro reutilizam arquivos existentes, depois usam SVGs da biblioteca Simple Icons; quando uma marca nao esta disponivel, o card usa fallback tipografico consistente. Direitos publicos e mobilidade usam apenas icones semanticos, sem logotipos inventados;
+- beneficios governamentais registram `sourceChannel: government`; beneficios regionais registram disponibilidade e badge territorial, como o Cartao Transcol Escolar no Espirito Santo;
+- a pagina usa quatro colunas apenas em desktop amplo com espaco confortavel, tres em notebooks, duas em tablets e uma no mobile; filtros possuem rolagem horizontal e o modal se reorganiza em uma coluna.
 
 Esta pagina tambem depende da infraestrutura de dashboard e autenticacao, porque reaproveita sidebar, tema, logout e sincronizacao de perfil.
 
@@ -286,6 +295,27 @@ Fluxo:
 - usa a rota interna `platform/ajuda/ajuda-suporte.html`, sem espacos, para reduzir ambiguidades em links relativos.
 
 A sidebar do dashboard usa `ajuda/ajuda-suporte.html`; checklists e plataformas usam `../ajuda/ajuda-suporte.html`. A pagina de configuracoes, que possui layout proprio sem a sidebar global, oferece um atalho equivalente no cabecalho. A central de ajuda retorna para dashboard, checklists, plataformas e configuracoes por links relativos proprios e marca Ajuda e Suporte como item ativo.
+
+### 6.8 Manual do Aluno
+
+Arquivos principais:
+
+- [`platform/manual/manual-aluno.html`](./platform/manual/manual-aluno.html)
+- [`platform/manual/manual-aluno.css`](./platform/manual/manual-aluno.css)
+- [`platform/manual/manual-aluno.js`](./platform/manual/manual-aluno.js)
+- [`js/manual-data.js`](./js/manual-data.js)
+
+O modulo transforma o Manual do Aluno 2024 do UniSales em uma central de conhecimento web, sem reproduzir o PDF pagina a pagina. A fonte institucional foi lida integralmente e o conteudo foi agrupado semanticamente em oito categorias: comeco no UniSales, vida academica, ferramentas digitais, avaliacoes e frequencia, campus e biblioteca, apoio ao estudante, formacao e carreira e utilidades. Embora preserve corretamente o nome `Manual do Aluno 2024 — UniSales`, esse PDF e a ultima referencia institucional disponibilizada ao UniCheck em 2026 e, por isso, seu conteudo e presumido vigente ate a publicacao de fonte institucional mais nova.
+
+A area possui 41 conteudos mapeados. A descoberta exibe um hero objetivo, seis acessos rapidos definidos editorialmente e cards compactos para as oito categorias. Nao ha indicador, porcentagem ou estado visual de progresso enquanto leitura e conclusao nao possuirem comportamento real. Ao selecionar uma categoria, a pagina lista as orientacoes correspondentes; ao selecionar um conteudo, a mesma rota abre uma leitura web nativa pelo hash estavel `#conteudo=<id>`.
+
+A busca e inteiramente local e normaliza maiusculas, minusculas e acentos. Ela pesquisa titulo, categoria, resumo, corpo, palavras-chave e termos comuns. Consultas curtas como `RA` usam correspondencia por palavra para evitar falsos positivos. Durante a busca ou filtragem, a grade de categorias e substituida por uma lista editorial de resultados com titulo, resumo, categoria e acao de leitura. Os filtros usam as oito categorias e podem ser combinados com a busca. Nenhuma operacao do Manual consulta ou grava no Supabase.
+
+Todo item em `js/manual-data.js` possui ID estavel, categoria, titulo, resumo, conteudo, palavras-chave, paginas de origem, tempo estimado, secoes editoriais, destinos, campos temporais e IDs relacionados. A leitura adapta os blocos ao assunto e pode apresentar `Em poucas palavras`, `O que voce precisa saber`, `O que fazer`, `Onde resolver` e `Atencao`, sem forcar secoes sem suporte documental. Breadcrumb, retorno para a categoria, anterior/proximo na ordem da categoria e dois ou tres relacionados definidos semanticamente mantem a navegacao contextual. A fonte e suas paginas aparecem de forma discreta ao final do texto.
+
+A politica temporal separa regra institucional de dado operacional volatil. Conceitos, procedimentos e dependencias de Calendario, edital, Regimento ou norma continuam vigentes conforme a ultima fonte disponivel e nao recebem alerta generico. `temporalFields` identifica somente partes que podem mudar independentemente de uma nova edicao completa, como nomes de pessoas, telefones, e-mails, links, horarios, datas, valores, multas, quantidades, credenciais, fornecedores e dados de seguro. A interface mostra uma nota pequena e contextual junto ao fim da orientacao. `requiresValidation` fica reservado aos cinco conteudos cujo objeto central e volatil: calendario/horarios, prazos de documentos, tabela de servicos/taxas, contatos/atendimento e seguro escolar.
+
+A sidebar compartilhada posiciona `Manual do Aluno` entre `Checklists Academicos` e `Beneficios Estudantis`, usa o icone inequivoco `book-open` e preserva os comportamentos existentes de estado ativo, recolhimento e menu mobile. A rota da area e `platform/manual/manual-aluno.html` e tambem esta registrada em `platform/js/core-config.js`.
 
 ## 7. Modulos compartilhados
 
@@ -407,6 +437,7 @@ A sidebar do dashboard usa `ajuda/ajuda-suporte.html`; checklists e plataformas 
 15. `platform/PLATAFORMAS/plataformas-gratuitas.js` quando a pagina e de plataformas
 16. `platform/CONFIGURACOES PERFIL/configuracoes.js` quando a pagina e de configuracoes
 17. `platform/ajuda/support-config.js` e `platform/ajuda/ajuda-suporte.js` quando a pagina e de ajuda; ambos operam apenas com conteudo local
+18. `js/manual-data.js` e `platform/manual/manual-aluno.js` quando a pagina e do Manual; ambos operam apenas com conteudo local e o primeiro e a fonte central de textos e metadados
 
 ## 9. Dados e armazenamento
 
@@ -450,6 +481,7 @@ O projeto depende de pelo menos estas estruturas conceituais:
 Distincao de persistencia:
 
 - dados estruturais relativamente estaticos, como fases, textos, ordem e tarefas, ficam versionados no frontend;
+- o conteudo editorial do Manual fica versionado em `js/manual-data.js`, com rastreabilidade por pagina e revisao temporal explicita; seu estado de leitura ainda nao e persistido;
 - estado individual importante, como progresso e atividade, tem o Supabase como persistencia duravel e fonte para restauracao entre dispositivos;
 - `localStorage` e cache local-first, fila de escrita e fallback offline, nunca a unica copia pretendida desses dados individuais;
 - favoritos de plataformas tem `user_platform_favorites` como persistencia da conta, `platformFavorites:<user_id>` como cache local-first e uma fila local compactada para operacao offline e restauracao entre dispositivos.
@@ -471,6 +503,8 @@ Distincao de persistencia:
 - Logout deve limpar sessao e redirecionar para a area publica.
 - Somente a ausencia confirmada de sessao causa redirecionamento de uma pagina interna para o login; erros de perfil, checklist ou rede nao equivalem a logout.
 - Favoritos pertencem a conta autenticada: o cache responde imediatamente, operacoes remotas usam a chave composta para impedir duplicacao e alteracoes pendentes prevalecem durante a reconciliacao.
+- O Manual nao concede XP por abertura e nao altera `progression.js`; integracao de conclusao, persistencia e recompensas fica reservada a uma etapa posterior.
+- Conteudo do Manual vinculado a calendario, edital, Regimento ou instrucao normativa deve preservar essa dependencia, mas nao e marcado como desatualizado apenas por constar no Manual 2024. Somente campos operacionais genuinamente volateis usam `temporalFields`; `requiresValidation` e reservado a artigos cujo assunto central depende desses dados.
 
 ## 11. Estado de consistencia e pontos de atencao
 
