@@ -4,7 +4,16 @@
  */
 
 // Estado da aplicação
+const FAVORITES_TABLE = 'user_platform_favorites';
+const FAVORITES_CACHE_KEY = 'platformFavorites';
+const FAVORITES_QUEUE_KEY = 'unicheck_favorites_sync_queue';
+const FAVORITES_REMOTE_READY_KEY = 'unicheck_favorites_remote_ready';
+const FAVORITES_REQUEST_TIMEOUT_MS = 15000;
+let favoriteUserId = null;
+let favoriteSyncInFlight = false;
+
 function getCurrentUserStorageSuffix() {
+    if (favoriteUserId) return favoriteUserId;
     try {
         const profileKey = window.UniCheckConfig?.STORAGE_KEYS?.USER_PROFILE || 'userProfile';
         const rawProfile = localStorage.getItem(profileKey);
@@ -32,6 +41,169 @@ function readStoredList(baseKey) {
 
 function writeStoredList(baseKey, value) {
     localStorage.setItem(getPlatformStorageKey(baseKey), JSON.stringify(value));
+}
+
+function getFavoriteQueueKey(userId) {
+    return `${FAVORITES_QUEUE_KEY}:${userId}`;
+}
+
+function getFavoritesRemoteReadyKey(userId) {
+    return `${FAVORITES_REMOTE_READY_KEY}:${userId}`;
+}
+
+function normalizeFavoriteIds(values) {
+    const knownIds = new Set(platformState?.platforms?.map(platform => platform.id) || []);
+    return Array.from(new Set(Array.isArray(values) ? values.filter(value => typeof value === 'string' && knownIds.has(value)) : []));
+}
+
+function readFavoriteQueue(userId) {
+    try {
+        const parsed = JSON.parse(localStorage.getItem(getFavoriteQueueKey(userId)) || '[]');
+        if (!Array.isArray(parsed)) return [];
+        const latestByPlatform = new Map();
+        parsed.forEach(item => {
+            if (item && typeof item.platform_id === 'string' && (item.action === 'add' || item.action === 'remove')) {
+                latestByPlatform.set(item.platform_id, { platform_id: item.platform_id, action: item.action });
+            }
+        });
+        return Array.from(latestByPlatform.values());
+    } catch (error) {
+        console.warn('[UniCheckFavorites] Fila local inválida; mantendo cache de favoritos', error);
+        return [];
+    }
+}
+
+function writeFavoriteQueue(userId, queue) {
+    const latestByPlatform = new Map();
+    queue.forEach(item => latestByPlatform.set(item.platform_id, item));
+    const normalized = Array.from(latestByPlatform.values());
+    localStorage.setItem(getFavoriteQueueKey(userId), JSON.stringify(normalized));
+    return normalized;
+}
+
+function enqueueFavoriteChange(userId, platformId, action) {
+    const queue = readFavoriteQueue(userId).filter(item => item.platform_id !== platformId);
+    writeFavoriteQueue(userId, [...queue, { platform_id: platformId, action }]);
+}
+
+async function withFavoritesTimeout(query, context) {
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), FAVORITES_REQUEST_TIMEOUT_MS);
+    try {
+        return await query.abortSignal(controller.signal);
+    } catch (error) {
+        if (controller.signal.aborted) throw new Error(`${context} excedeu ${FAVORITES_REQUEST_TIMEOUT_MS / 1000} segundos.`);
+        throw error;
+    } finally {
+        window.clearTimeout(timeoutId);
+    }
+}
+
+function getFavoritesClient() {
+    const client = window.UniCheckSupabase?.client;
+    if (!client) throw new Error('Supabase não configurado para favoritos.');
+    return client;
+}
+
+async function flushFavoriteQueue(userId) {
+    if (!userId || favoriteSyncInFlight) return false;
+    const snapshot = readFavoriteQueue(userId);
+    if (!snapshot.length) return true;
+    favoriteSyncInFlight = true;
+    try {
+        const additions = snapshot.filter(item => item.action === 'add');
+        const removals = snapshot.filter(item => item.action === 'remove');
+
+        if (additions.length) {
+            const payload = additions.map(item => ({ user_id: userId, platform_id: item.platform_id }));
+            const { error } = await withFavoritesTimeout(
+                getFavoritesClient().from(FAVORITES_TABLE).upsert(payload, { onConflict: 'user_id,platform_id', ignoreDuplicates: true }),
+                'Sincronização dos favoritos'
+            );
+            if (error) throw error;
+        }
+        if (removals.length) {
+            const { error } = await withFavoritesTimeout(
+                getFavoritesClient().from(FAVORITES_TABLE).delete().eq('user_id', userId).in('platform_id', removals.map(item => item.platform_id)),
+                'Remoção dos favoritos'
+            );
+            if (error) throw error;
+        }
+
+        const processed = new Map(snapshot.map(item => [item.platform_id, item.action]));
+        const remaining = readFavoriteQueue(userId).filter(item => processed.get(item.platform_id) !== item.action);
+        writeFavoriteQueue(userId, remaining);
+        return true;
+    } catch (error) {
+        console.error('[UniCheckFavorites] Sincronização remota pendente; cache preservado', {
+            message: error?.message || String(error),
+            code: error?.code || null,
+            userId,
+            itemCount: snapshot.length
+        });
+        return false;
+    } finally {
+        favoriteSyncInFlight = false;
+    }
+}
+
+async function fetchRemoteFavorites(userId) {
+    const { data, error } = await withFavoritesTimeout(
+        getFavoritesClient().from(FAVORITES_TABLE).select('platform_id').eq('user_id', userId),
+        'Consulta dos favoritos'
+    );
+    if (error) throw error;
+    return normalizeFavoriteIds((data || []).map(item => item.platform_id));
+}
+
+function applyPendingFavoriteChanges(favorites, queue) {
+    const reconciled = new Set(favorites);
+    queue.forEach(item => item.action === 'add' ? reconciled.add(item.platform_id) : reconciled.delete(item.platform_id));
+    return Array.from(reconciled);
+}
+
+async function initializeFavoritePersistence() {
+    try {
+        const session = await window.UniCheckAuth?.getSession?.();
+        const userId = session?.user?.id;
+        if (!userId) return;
+        favoriteUserId = userId;
+
+        const localFavorites = normalizeFavoriteIds(readStoredList(FAVORITES_CACHE_KEY));
+        platformState.favorites = localFavorites;
+        renderPlatforms();
+
+        const remoteReadyKey = getFavoritesRemoteReadyKey(userId);
+        if (localStorage.getItem(remoteReadyKey) !== 'true' && localFavorites.length) {
+            localFavorites.forEach(platformId => enqueueFavoriteChange(userId, platformId, 'add'));
+        }
+
+        await flushFavoriteQueue(userId);
+        const remoteFavorites = await fetchRemoteFavorites(userId);
+        const reconciled = applyPendingFavoriteChanges(remoteFavorites, readFavoriteQueue(userId));
+        platformState.favorites = normalizeFavoriteIds(reconciled);
+        writeStoredList(FAVORITES_CACHE_KEY, platformState.favorites);
+        localStorage.setItem(remoteReadyKey, 'true');
+        renderPlatforms();
+    } catch (error) {
+        console.error('[UniCheckFavorites] Restauração remota indisponível; usando favoritos locais', {
+            message: error?.message || String(error),
+            code: error?.code || null
+        });
+    }
+}
+
+async function flushCurrentUserFavorites() {
+    try {
+        const session = await window.UniCheckAuth?.getSession?.();
+        const userId = session?.user?.id;
+        if (userId) {
+            favoriteUserId = userId;
+            await flushFavoriteQueue(userId);
+        }
+    } catch (error) {
+        console.warn('[UniCheckFavorites] Não foi possível tentar a fila pendente', error);
+    }
 }
 
 const platformIconMap = {
@@ -668,8 +840,11 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeElements();
     setupEventListeners();
     renderPlatforms();
+    void initializeFavoritePersistence();
     setupAnimations();
 });
+
+window.addEventListener('online', () => { void flushCurrentUserFavorites(); });
 
 /**
  * Inicializa elementos do DOM
@@ -1153,8 +1328,13 @@ function toggleFavorite(platformId, button) {
     button.setAttribute('title', isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos');
     
     // Salvar no localStorage
-    writeStoredList('platformFavorites', platformState.favorites);
-    window.UniCheckActivity?.record?.(getCurrentUserStorageSuffix(), {
+    writeStoredList(FAVORITES_CACHE_KEY, platformState.favorites);
+    const userId = getCurrentUserStorageSuffix();
+    if (userId !== 'anonymous') {
+        enqueueFavoriteChange(userId, platformId, isFavorite ? 'add' : 'remove');
+        void flushFavoriteQueue(userId);
+    }
+    window.UniCheckActivity?.record?.(userId, {
         type: isFavorite ? 'platform_favorited' : 'platform_unfavorited',
         title: isFavorite
             ? `Favoritou "${platformName}"`

@@ -68,7 +68,7 @@ Na pratica, a landing explica o produto e leva o usuario para autenticacao. A ar
 - Supabase Auth para sessao
 - tabelas do banco para perfil e progresso remoto dos checklists
 - `js/checklist-data.js` como fonte estrutural local dos checklists do MVP
-- `localStorage` para tema, perfil cacheado, favoritos, progresso por `user_id` e fila de sincronizacao
+- `localStorage` para tema, perfil cacheado, cache local-first de favoritos, progresso por `user_id` e filas de sincronizacao
 
 ## 5. Estrutura do repositório
 
@@ -95,6 +95,7 @@ Na pratica, a landing explica o produto e leva o usuario para autenticacao. A ar
 
 - [`supabase/checklist_progress_and_seed.sql`](./supabase/checklist_progress_and_seed.sql)
 - [`supabase/users_profile_policies.sql`](./supabase/users_profile_policies.sql)
+- [`supabase/20260816_create_user_platform_favorites.sql`](./supabase/20260816_create_user_platform_favorites.sql)
 
 ## 6. Fluxo funcional do sistema
 
@@ -233,7 +234,11 @@ Fluxo:
 - renderiza uma lista fixa e ampliada de plataformas;
 - permite busca por nome, descricao e features;
 - filtra por categoria;
-- salva favoritos no `localStorage` com ícone padronizado de bookmark;
+- mostra imediatamente os favoritos do cache `platformFavorites:<user_id>` com icone padronizado de bookmark;
+- ao favoritar ou remover, atualiza UI e cache sem aguardar a rede e registra a ultima intencao por plataforma em `unicheck_favorites_sync_queue:<user_id>`;
+- sincroniza a fila em lote com `user_platform_favorites` na inicializacao, na proxima interacao e no evento `online`, sem polling;
+- depois da sessao, faz uma unica leitura consolidada dos favoritos remotos e reconcilia o resultado preservando operacoes locais ainda pendentes;
+- restauracao e reconciliacao nunca criam atividade recente; somente cliques efetivos continuam registrando plataforma favoritada ou removida;
 - comunica o favorito também por preenchimento, contraste, animação breve, `aria-pressed` e `aria-label` atualizado;
 - mostra modais de detalhes e tutorial;
 - abre links externos em nova aba;
@@ -391,6 +396,8 @@ Chaves relevantes atualmente:
 - `sidebarCollapsed`
 - `userProfile`
 - `platformFavorites:<user_id>`
+- `unicheck_favorites_sync_queue:<user_id>` (ultima operacao de adicionar/remover ainda pendente por plataforma)
+- `unicheck_favorites_remote_ready:<user_id>` (marca a migracao inicial do antigo cache somente local)
 - `unicheck_checklist_progress_v2:<user_id>`
 - `unicheck_activity:<user_id>` (historico local, limitado a 100 eventos; dashboard exibe os 5 mais recentes)
 - `unicheck_activity_sync_queue:<user_id>` (eventos com UUID aguardando persistencia remota)
@@ -416,13 +423,14 @@ O projeto depende de pelo menos estas estruturas conceituais:
 - `user_checklist_item_progress`
 - `user_activity` (eventos duraveis da jornada, com SELECT/INSERT restritos ao proprio usuario por RLS)
 - `user_notifications` (comunicacoes duraveis, com SELECT/INSERT e UPDATE apenas da coluna `read`, protegidos por RLS)
+- `user_platform_favorites` (favoritos unicos por `user_id` e `platform_id`, com SELECT/INSERT/DELETE restritos ao proprio usuario por RLS)
 
 Distincao de persistencia:
 
 - dados estruturais relativamente estaticos, como fases, textos, ordem e tarefas, ficam versionados no frontend;
 - estado individual importante, como progresso e atividade, tem o Supabase como persistencia duravel e fonte para restauracao entre dispositivos;
 - `localStorage` e cache local-first, fila de escrita e fallback offline, nunca a unica copia pretendida desses dados individuais;
-- favoritos continuam locais nesta etapa, embora os eventos de favoritar e remover sejam persistidos em `user_activity`.
+- favoritos de plataformas tem `user_platform_favorites` como persistencia da conta, `platformFavorites:<user_id>` como cache local-first e uma fila local compactada para operacao offline e restauracao entre dispositivos.
 
 ## 10. Regras de negocio importantes
 
@@ -438,7 +446,7 @@ Distincao de persistencia:
 - Perfil e refletido em varias telas internas.
 - Logout deve limpar sessao e redirecionar para a area publica.
 - Somente a ausencia confirmada de sessao causa redirecionamento de uma pagina interna para o login; erros de perfil, checklist ou rede nao equivalem a logout.
-- Favoritos das plataformas estao sendo tratados no frontend como demonstracao.
+- Favoritos pertencem a conta autenticada: o cache responde imediatamente, operacoes remotas usam a chave composta para impedir duplicacao e alteracoes pendentes prevalecem durante a reconciliacao.
 
 ## 11. Estado de consistencia e pontos de atencao
 
@@ -450,6 +458,7 @@ O projeto funciona, mas existem inconsistencias tecnicas que precisam ser conhec
 - Consultas e gravacoes de atividade possuem timeout de 15 segundos, sem polling ou retries agressivos; novas oportunidades ocorrem na inicializacao, em novas interacoes e no evento `online`.
 - [`supabase/20260816_create_user_activity.sql`](./supabase/20260816_create_user_activity.sql) cria `user_activity`, indice de leitura recente e policies RLS somente para `SELECT` e `INSERT` do proprio usuario. A migration deve ser executada manualmente.
 - [`supabase/20260816_create_user_notifications.sql`](./supabase/20260816_create_user_notifications.sql) cria `user_notifications`, indice, idempotencia por evento e policies RLS para leitura/insercao proprias e atualizacao exclusiva de `read`. A migration deve ser executada manualmente.
+- [`supabase/20260816_create_user_platform_favorites.sql`](./supabase/20260816_create_user_platform_favorites.sql) cria `user_platform_favorites` com chave primaria composta, FK para `auth.users`, RLS e policies proprias de `SELECT`, `INSERT` e `DELETE`. A migration deve ser executada manualmente.
 - [`supabase/checklist_rls_policies.sql`](./supabase/checklist_rls_policies.sql) restaura policies explicitas: usuarios autenticados leem as definicoes e cada usuario le e grava somente o proprio progresso. O arquivo precisa ser aplicado manualmente no projeto remoto.
 - [`js/profile.js`](./js/profile.js) e [`supabase/users_profile_policies.sql`](./supabase/users_profile_policies.sql) estao alinhados em `users_profile.user_id` como chave de relacionamento com `auth.users`.
 - Alguns documentos auxiliares em `platform/PLATAFORMAS/` e `platform/CHECKLIST ACADEMICO/` descrevem funcionalidades de forma mais antiga do que o comportamento atual do codigo.
@@ -464,7 +473,7 @@ Se for preciso mudar alguma parte do sistema, a leitura correta e esta:
 - alteracao em auth mexe com sessao, cadastro, login e logout;
 - alteracao em profile mexe com toda a area interna que exibe nome, avatar e email;
 - alteracao em checklist mexe com persistencia, bloqueio de fases, navegacao de detalhe e integracao com Supabase;
-- alteracao em plataformas mexe com filtros, favoritos, modais e persistencia local;
+- alteracao em plataformas mexe com filtros, favoritos, modais, cache local, fila offline e persistencia remota por conta;
 - alteracao em configuracoes mexe com perfil, senha e preferencia visual;
 - alteracao em qualquer rota interna pode quebrar links relativos entre pastas.
 
