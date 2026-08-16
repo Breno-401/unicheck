@@ -248,6 +248,9 @@ Fluxo:
 - encapsula login, cadastro, logout e restauracao de sessao;
 - gera e salva perfil basico em `localStorage`;
 - expõe utilitarios como `requireAuth`, `getSession` e `normalizeErrorMessage`.
+- usa a sessao persistida restaurada por `getSession()` como fonte de verdade do guard;
+- uma falha isolada de consulta remota de usuario, perfil ou dados funcionais nao e interpretada como logout;
+- cada pagina interna e protegida pelo guard compartilhado carregado em `platform/script-interno.js`.
 
 ### `js/profile.js`
 
@@ -330,7 +333,7 @@ Chaves relevantes atualmente:
 
 - login com email e senha;
 - cadastro com `user_metadata`;
-- restauracao de sessao;
+- restauracao de sessao persistida com `persistSession` e renovacao com `autoRefreshToken`;
 - logout;
 - atualizacao de senha;
 - atualizacao de email, quando aplicavel.
@@ -351,6 +354,7 @@ O projeto depende de pelo menos estas estruturas conceituais:
 - Progresso pode vir do banco ou do cache local.
 - Perfil e refletido em varias telas internas.
 - Logout deve limpar sessao e redirecionar para a area publica.
+- Somente a ausencia confirmada de sessao causa redirecionamento de uma pagina interna para o login; erros de perfil, checklist ou rede nao equivalem a logout.
 - Favoritos das plataformas estao sendo tratados no frontend como demonstracao.
 
 ## 11. Estado de consistencia e pontos de atencao

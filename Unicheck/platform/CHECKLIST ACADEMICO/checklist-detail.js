@@ -1,14 +1,25 @@
 (function () {
+    const PHASE_ACCENTS = [
+        { color: "#0b61ff", gradient: "linear-gradient(135deg, #0b61ff, #31b0ff)" },
+        { color: "#06b6d4", gradient: "linear-gradient(135deg, #06b6d4, #22d3ee)" },
+        { color: "#8b5cf6", gradient: "linear-gradient(135deg, #8b5cf6, #c084fc)" },
+        { color: "#10b981", gradient: "linear-gradient(135deg, #10b981, #34d399)" },
+        { color: "#4f46e5", gradient: "linear-gradient(135deg, #4f46e5, #818cf8)" },
+        { color: "#f59e0b", gradient: "linear-gradient(135deg, #f59e0b, #fbbf24)" },
+        { color: "#ec4899", gradient: "linear-gradient(135deg, #ec4899, #fb7185)" }
+    ];
+
     const CHECKLIST_COPY = {
         "Primeiros passos na faculdade": {
             eyebrow: "Onboarding da turma",
-            helper: "Estruture o primeiro contato da turma, defina responsabilidades e deixe os canais oficiais prontos antes de avançar.",
+            helper: "Estruture o primeiro contato da turma, defina responsabilidades e deixe os canais oficiais prontos antes de avancar.",
             sectionTitle: "Organizacao inicial",
             sectionDescription: "Cada card cobre uma entrega concreta da fase 1 para dar base ao restante da jornada academica.",
             summaryLabel: "Base da fase",
             summaryStatus: "Turma pronta para seguir",
             summaryLead: "Fase de entrada e organizacao",
             nextStep: "Quando tudo estiver concluido, a fase 2 entra com os canais e a rotina ja alinhados.",
+            unlockNote: "Esta etapa cria a estrutura que evita ruido nas fases seguintes.",
             overview: [
                 { label: "Objetivo", value: "Organizar a turma" },
                 { label: "Foco", value: "Canais e combinados" },
@@ -21,34 +32,35 @@
             ],
             highlights: [
                 "Define um responsavel para centralizar informacoes.",
-                "Evita ruído de comunicacao logo no inicio.",
+                "Evita ruido de comunicacao logo no inicio.",
                 "Cria a base para os acessos institucionais seguintes."
             ],
             taskContext: [
-                "Escolher um lider ajuda a concentrar avisos, dúvidas e repasses da turma.",
-                "Criar o grupo oficial evita que a comunicação fique dispersa em varios canais.",
-                "Entrar no grupo correto garante que ninguém perca comunicados importantes.",
+                "Escolher um lider ajuda a concentrar avisos, duvidas e repasses da turma.",
+                "Criar o grupo oficial evita que a comunicacao fique dispersa em varios canais.",
+                "Entrar no grupo correto garante que ninguem perca comunicados importantes.",
                 "Confirmar calendario e canais evita retrabalho e mensagens contraditorias."
             ]
         },
-        "Portal Acadêmico TOTVS": {
+        "Portal Academico TOTVS": {
             eyebrow: "Portal do aluno",
             helper: "Use os cards para entrar no Portal Academico TOTVS, localizar a central do aluno e acessar os documentos mais usados.",
             sectionTitle: "Fluxo do portal",
             sectionDescription: "Cada card espelha uma etapa real do primeiro acesso, da navegacao e da consulta de documentos no portal.",
             summaryLabel: "Resumo do acesso",
             summaryStatus: "Acesso operacional",
-            summaryLead: "Entrada e navegação no portal",
+            summaryLead: "Entrada e navegacao no portal",
             nextStep: "Depois dessa fase, o estudante ja consegue consultar rotinas, boletos, documentos e comunicados com autonomia.",
+            unlockNote: "Com o portal dominado, a consulta diaria fica previsivel e segura.",
             overview: [
-                { label: "Objetivo", value: "Entrar com segurança" },
+                { label: "Objetivo", value: "Entrar com seguranca" },
                 { label: "Foco", value: "Navegacao e documentos" },
                 { label: "Saida", value: "Portal dominado" }
             ],
             beforeStart: [
-                "Tenha o RA e a senha inicial ou definitiva em mãos.",
+                "Tenha o RA e a senha inicial ou definitiva em maos.",
                 "Confirme se o portal institucional esta disponivel no navegador.",
-                "Use uma aba limpa para evitar conflito de sessão ou cache."
+                "Use uma aba limpa para evitar conflito de sessao ou cache."
             ],
             highlights: [
                 "Autenticacao com credenciais academicas.",
@@ -57,29 +69,30 @@
             ],
             taskContext: [
                 "Abrir o portal certo evita confusao com paginas espelho ou links antigos.",
-                "O login inicial precisa de atenção para não travar o primeiro acesso.",
+                "O login inicial precisa de atencao para nao travar o primeiro acesso.",
                 "Saber onde fica a navegacao principal acelera a consulta diaria.",
                 "Encontrar documentos e relatorios evita dependencia do suporte."
             ]
         },
-        "Configuração de Email": {
+        "Configuracao de Email": {
             eyebrow: "Conta institucional",
             helper: "Valide o email institucional, teste o acesso e deixe a conta pronta para comunicacoes e recuperacao de senha.",
             sectionTitle: "Conta de entrada",
-            sectionDescription: "Os cards desta fase cuidam do acesso, validação e uso correto do email acadêmico.",
+            sectionDescription: "Os cards desta fase cuidam do acesso, validacao e uso correto do email academico.",
             summaryLabel: "Resumo da conta",
             summaryStatus: "Conta pronta",
             summaryLead: "Email institucional configurado",
             nextStep: "Com o email funcionando, voce reduz risco de perder avisos e recuperacoes importantes.",
+            unlockNote: "Este canal e a principal linha oficial entre a instituicao e o aluno.",
             overview: [
                 { label: "Objetivo", value: "Ativar o email" },
                 { label: "Foco", value: "Acesso e validacao" },
                 { label: "Saida", value: "Conta preparada" }
             ],
             beforeStart: [
-                "Confirme o endereço institucional fornecido pela faculdade.",
+                "Confirme o endereco institucional fornecido pela faculdade.",
                 "Teste o acesso em um navegador confiavel antes de salvar a conta no celular.",
-                "Tenha a senha original e a nova senha guardadas com segurança."
+                "Tenha a senha original e a nova senha guardadas com seguranca."
             ],
             highlights: [
                 "Evita perda de comunicados e boletos internos.",
@@ -88,28 +101,29 @@
             ],
             taskContext: [
                 "A conta institucional deve abrir sem erro antes de configurar o restante.",
-                "Validar credenciais evita bloqueio futuro por falha de digitação.",
+                "Validar credenciais evita bloqueio futuro por falha de digitacao.",
                 "A navegacao correta garante que mensagens e sistemas sejam encontrados facilmente.",
                 "Documentos e avisos geralmente chegam por este canal, entao vale confirmar tudo."
             ]
         },
         "Biblioteca Virtual": {
-            eyebrow: "Acesso à pesquisa",
+            eyebrow: "Acesso a pesquisa",
             helper: "Organize o acesso aos recursos de biblioteca e consulta academica em cards curtos e diretos.",
             sectionTitle: "Acesso e pesquisa",
-            sectionDescription: "Esses cards representam a preparação para usar bases, acervo e servicos de apoio a pesquisa.",
+            sectionDescription: "Esses cards representam a preparacao para usar bases, acervo e servicos de apoio a pesquisa.",
             summaryLabel: "Resumo do acesso",
             summaryStatus: "Pesquisa liberada",
             summaryLead: "Biblioteca pronta para consulta",
             nextStep: "Quando essa fase terminar, a busca por livros, artigos e documentos fica mais simples.",
+            unlockNote: "Aqui o aluno ganha mais autonomia para estudar com profundidade.",
             overview: [
                 { label: "Objetivo", value: "Usar a biblioteca" },
                 { label: "Foco", value: "Pesquisa e acervo" },
                 { label: "Saida", value: "Consulta habilitada" }
             ],
             beforeStart: [
-                "Separe seus dados de login acadêmico, se a biblioteca exigir autenticação.",
-                "Verifique se a instituição usa catalogo, base digital ou ambos.",
+                "Separe seus dados de login academico, se a biblioteca exigir autenticacao.",
+                "Verifique se a instituicao usa catalogo, base digital ou ambos.",
                 "Anote os termos mais comuns da sua area para testar a busca."
             ],
             highlights: [
@@ -125,14 +139,15 @@
             ]
         },
         "Microsoft Teams": {
-            eyebrow: "Comunicação da turma",
+            eyebrow: "Comunicacao da turma",
             helper: "Configure a rotina de comunicacao e uso do Teams para aula, avisos e encontros com a turma.",
             sectionTitle: "Rotina de comunicacao",
             sectionDescription: "Os cards abaixo ajudam a montar um fluxo minimamente confiavel para mensagens e reunioes.",
-            summaryLabel: "Resumo da comunicação",
+            summaryLabel: "Resumo da comunicacao",
             summaryStatus: "Canal pronto",
             summaryLead: "Teams configurado para uso academico",
             nextStep: "Depois de concluir, a turma ganha um canal consistente para encontros, avisos e compartilhamento.",
+            unlockNote: "Quando o canal certo esta pronto, o caos de mensagens soltas cai muito.",
             overview: [
                 { label: "Objetivo", value: "Conectar a turma" },
                 { label: "Foco", value: "Aulas e avisos" },
@@ -146,7 +161,7 @@
             highlights: [
                 "Centraliza avisos e encontros da turma.",
                 "Facilita compartilhamento de arquivos e recados.",
-                "Reduz a dependência de mensagens soltas em outros apps."
+                "Reduz a dependencia de mensagens soltas em outros apps."
             ],
             taskContext: [
                 "Entrar com a conta correta evita misturar contatos pessoais e institucionais.",
@@ -164,19 +179,20 @@
             summaryStatus: "Ambiente preparado",
             summaryLead: "Plataforma complementar ativa",
             nextStep: "Com esta fase pronta, o usuario passa a navegar melhor entre as ferramentas da jornada.",
+            unlockNote: "Aqui a jornada ganha profundidade sem sair do fluxo principal.",
             overview: [
                 { label: "Objetivo", value: "Liberar acesso" },
                 { label: "Foco", value: "Configuracao final" },
                 { label: "Saida", value: "Ferramenta pronta" }
             ],
             beforeStart: [
-                "Confirme qual ferramenta complementar esta sendo usada pela instituição.",
+                "Confirme qual ferramenta complementar esta sendo usada pela instituicao.",
                 "Verifique se existe login unico ou credenciais especificas.",
-                "Separe os dados de acesso e permissões exigidas."
+                "Separe os dados de acesso e permissoes exigidas."
             ],
             highlights: [
                 "Evita falha de acesso na primeira tentativa.",
-                "Ajuda a mapear permissões e recursos essenciais.",
+                "Ajuda a mapear permissoes e recursos essenciais.",
                 "Deixa a rotina academica menos fragmentada."
             ],
             taskContext: [
@@ -187,7 +203,7 @@
             ]
         },
         "Mentorias": {
-            eyebrow: "Apoio acadêmico",
+            eyebrow: "Apoio academico",
             helper: "Use os cards para preparar o acompanhamento e o apoio academico que ajudam na adaptacao e permanencia.",
             sectionTitle: "Fluxo de apoio",
             sectionDescription: "Esta fase organiza a entrada em atividades de mentoria, acompanhamento e suporte ao estudante.",
@@ -195,25 +211,26 @@
             summaryStatus: "Acompanhamento pronto",
             summaryLead: "Mentoria organizada",
             nextStep: "Depois disso, o suporte academico fica mais facil de acessar quando surgir duvida ou necessidade.",
+            unlockNote: "A ultima fase reforca permanencia, orientacao e seguranca na rotina.",
             overview: [
                 { label: "Objetivo", value: "Ativar apoio" },
                 { label: "Foco", value: "Acompanhamento" },
-                { label: "Saida", value: "Suporte disponível" }
+                { label: "Saida", value: "Suporte disponivel" }
             ],
             beforeStart: [
-                "Identifique qual canal de mentoria a instituição usa.",
+                "Identifique qual canal de mentoria a instituicao usa.",
                 "Verifique como agendar ou solicitar atendimento.",
-                "Tenha em mãos temas que você quer acompanhar de perto."
+                "Tenha em mao temas que voce quer acompanhar de perto."
             ],
             highlights: [
-                "Apoia adaptação e organização ao longo do semestre.",
-                "Ajuda na resolução de problemas recorrentes.",
-                "Cria ponto de contato para orientação acadêmica."
+                "Apoia adaptacao e organizacao ao longo do semestre.",
+                "Ajuda na resolucao de problemas recorrentes.",
+                "Cria ponto de contato para orientacao academica."
             ],
             taskContext: [
                 "Entender o canal correto evita perder chamados ou agendamentos.",
-                "Saber como solicitar ajuda reduz tempo de espera em momentos críticos.",
-                "Reconhecer a área de acompanhamento facilita o uso recorrente.",
+                "Saber como solicitar ajuda reduz tempo de espera em momentos criticos.",
+                "Reconhecer a area de acompanhamento facilita o uso recorrente.",
                 "Definir temas ou demandas ajuda a tornar a mentoria mais objetiva."
             ]
         }
@@ -228,16 +245,29 @@
             .replace(/'/g, "&#39;");
     }
 
+    function normalizeTitleKey(value) {
+        return String(value ?? "")
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, " ")
+            .trim();
+    }
+
     function getChecklistCopy(checklist) {
-        return CHECKLIST_COPY[checklist.title] || {
+        const normalizedTitle = normalizeTitleKey(checklist.title);
+        const copyEntry = Object.entries(CHECKLIST_COPY).find(([title]) => normalizeTitleKey(title) === normalizedTitle);
+
+        return copyEntry ? copyEntry[1] : {
             eyebrow: `Fase ${checklist.phase || 1}`,
-            helper: checklist.description || "Conclua os itens abaixo para avançar na jornada academica.",
+            helper: checklist.description || "Conclua os itens abaixo para avancar na jornada academica.",
             sectionTitle: "Cards de conclusao",
             sectionDescription: "Marque cada card para atualizar o progresso em tempo real.",
             summaryLabel: "Resumo da fase",
             summaryStatus: checklist.completed ? "Checklist concluido" : "Checklist em andamento",
             summaryLead: "Fluxo operacional da fase",
             nextStep: "A conclusao desta fase libera o proximo bloco da jornada academica.",
+            unlockNote: "O bloqueio sequencial permanece ativo para garantir uma ordem clara.",
             overview: [
                 { label: "Objetivo", value: "Avancar na fase" },
                 { label: "Foco", value: "Conclusao de tarefas" },
@@ -261,6 +291,11 @@
         return copy.taskContext[index] || copy.taskContext[copy.taskContext.length - 1] || "Conclua este card para atualizar o progresso da fase.";
     }
 
+    function getPhaseAccent(checklist) {
+        const phaseIndex = Math.max((checklist.phase || 1) - 1, 0);
+        return PHASE_ACCENTS[phaseIndex % PHASE_ACCENTS.length];
+    }
+
     function buildOverviewCards(copy) {
         return `
             <div class="detail-overview-grid">
@@ -274,7 +309,21 @@
         `;
     }
 
-    function buildTaskList(checklist, copy) {
+    function buildProgressOrb(checklist) {
+        const angle = Math.max(0, Math.min(checklist.progress || 0, 100)) * 3.6;
+        const accent = getPhaseAccent(checklist);
+
+        return `
+            <div class="detail-progress-orb" style="--progress-angle: ${angle}deg; --phase-accent: ${accent.gradient}; --phase-accent-color: ${accent.color};">
+                <div class="detail-progress-orb-inner">
+                    <strong>${checklist.progress}%</strong>
+                    <span>concluido</span>
+                </div>
+            </div>
+        `;
+    }
+
+    function buildTrailList(checklist, copy) {
         if (!checklist.tasks.length) {
             return `
                 <div class="detail-empty-state">
@@ -285,9 +334,9 @@
         }
 
         return `
-            <div class="detail-task-list">
+            <div class="detail-trail-list">
                 ${checklist.tasks.map((task, index) => `
-                    <label class="detail-task-card ${task.completed ? "is-completed" : ""}">
+                    <label class="detail-trail-card ${task.completed ? "is-completed" : ""}">
                         <input
                             type="checkbox"
                             data-action="toggle-task"
@@ -295,14 +344,14 @@
                             data-task-id="${escapeHtml(task.id)}"
                             ${task.completed ? "checked" : ""}
                         >
-                        <span class="detail-task-badge" aria-hidden="true">
+                        <span class="detail-trail-step" aria-hidden="true">
                             <i data-lucide="${task.completed ? "check-circle-2" : "circle"}"></i>
                         </span>
-                        <span class="detail-task-copy">
-                            <span class="detail-task-header">
-                                <span class="detail-task-order">Card ${index + 1}</span>
+                        <span class="detail-trail-copy">
+                            <span class="detail-trail-header">
+                                <span class="detail-task-order">Etapa ${index + 1}</span>
                                 <span class="detail-task-state ${task.completed ? "is-completed" : ""}">
-                                    ${task.completed ? "Concluido" : "Pendente"}
+                                    ${task.completed ? "Feita" : "Em aberto"}
                                 </span>
                             </span>
                             <span class="detail-task-title">${escapeHtml(task.text)}</span>
@@ -323,23 +372,28 @@
             <aside class="detail-side-panel">
                 <div class="detail-summary-card">
                     <span class="detail-summary-label">${escapeHtml(copy.summaryLabel)}</span>
-                    <strong class="detail-summary-value">${checklist.progress}%</strong>
-                    <p class="detail-summary-lead">${escapeHtml(copy.summaryLead)}</p>
+                    <div class="detail-summary-head">
+                        ${buildProgressOrb(checklist)}
+                        <div class="detail-summary-copy">
+                            <strong class="detail-summary-value">${checklist.progress}%</strong>
+                            <p class="detail-summary-lead">${escapeHtml(copy.summaryLead)}</p>
+                        </div>
+                    </div>
                     <div class="detail-progress">
                         <div class="detail-progress-bar">
                             <div class="detail-progress-fill" style="width: ${checklist.progress}%"></div>
                         </div>
-                        <span class="detail-progress-text">${completedTasks}/${totalTasks} itens concluídos</span>
+                        <span class="detail-progress-text">${completedTasks}/${totalTasks} itens concluidos</span>
                     </div>
                     <div class="detail-summary-status ${checklist.completed ? "is-completed" : ""}">
-                        ${checklist.completed ? "Checklist concluído" : copy.summaryStatus}
+                        ${checklist.completed ? "Checklist concluido" : copy.summaryStatus}
                     </div>
                 </div>
 
                 <div class="detail-support-card">
                     <div class="detail-section-heading">
-                        <h3>Antes de começar</h3>
-                        <p>Use este bloco para evitar retrabalho e marcar os cards na ordem correta.</p>
+                        <h3>Como ler a trilha</h3>
+                        <p>Avance etapa por etapa. Cada card mostra a acao, o contexto e o estado atual.</p>
                     </div>
                     <ul class="detail-support-list">
                         ${copy.beforeStart.map(item => `<li>${escapeHtml(item)}</li>`).join("")}
@@ -348,15 +402,22 @@
 
                 <div class="detail-support-card detail-support-card--accent">
                     <div class="detail-section-heading">
-                        <h3>O que esta fase entrega</h3>
+                        <h3>O que esta fase libera</h3>
                         <p>${escapeHtml(copy.nextStep)}</p>
                     </div>
                     <ul class="detail-support-list">
-                        ${copy.highlights.map(item => `<li>${escapeHtml(item)}</li>`).join("")}
+                        ${copy.highlights.slice(0, 2).map(item => `<li>${escapeHtml(item)}</li>`).join("")}
                     </ul>
                     <div class="detail-next-step">
-                        <span class="detail-next-step-label">Restam ${remainingTasks} cards</span>
+                        <span class="detail-next-step-label">Restam ${remainingTasks} etapas</span>
                         <span class="detail-next-step-text">${escapeHtml(remainingTasks === 0 ? "Tudo pronto para a proxima fase." : "Continue para destravar o fluxo completo.")}</span>
+                    </div>
+                </div>
+
+                <div class="detail-support-card detail-support-card--subtle">
+                    <div class="detail-section-heading">
+                        <h3>Impacto</h3>
+                        <p>${escapeHtml(copy.unlockNote)}</p>
                     </div>
                 </div>
             </aside>
@@ -365,9 +426,10 @@
 
     function buildChecklistLayout(checklist) {
         const copy = getChecklistCopy(checklist);
+        const accent = getPhaseAccent(checklist);
 
         return `
-            <section class="checklist-detail-shell">
+            <section class="checklist-detail-shell" style="--phase-accent: ${accent.gradient}; --phase-accent-color: ${accent.color};">
                 <div class="detail-topbar">
                     <button class="btn btn-secondary detail-back-button" type="button" data-action="back-to-list">
                         <i data-lucide="arrow-left"></i>
@@ -387,7 +449,13 @@
                         <h2>${escapeHtml(checklist.title)}</h2>
                         <p>${escapeHtml(copy.helper)}</p>
                     </div>
-                    ${buildOverviewCards(copy)}
+                    <div class="detail-hero-panel">
+                        ${buildOverviewCards(copy)}
+                        <div class="detail-hero-note">
+                            <strong>Leitura guiada</strong>
+                            <p>${escapeHtml(copy.unlockNote)}</p>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="detail-layout">
@@ -397,7 +465,7 @@
                                 <h3>${escapeHtml(copy.sectionTitle)}</h3>
                                 <p>${escapeHtml(copy.sectionDescription)}</p>
                             </div>
-                            ${buildTaskList(checklist, copy)}
+                            ${buildTrailList(checklist, copy)}
                         </div>
                     </section>
                     ${buildSidePanel(checklist, copy)}
@@ -407,7 +475,9 @@
     }
 
     function render(container, checklist) {
-        if (!container || !checklist) return;
+        if (!container || !checklist) {
+            return;
+        }
 
         container.innerHTML = buildChecklistLayout(checklist);
 

@@ -190,15 +190,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 const emailInput = document.getElementById("loginEmail");
                 const passwordInput = document.getElementById("loginSenha");
 
-                await auth.login({
+                const result = await auth.login({
                     email: emailInput.value.trim(),
                     password: passwordInput.value
                 });
 
+                if (!result.session?.user) {
+                    throw new Error("A sessao nao foi criada. Tente entrar novamente.");
+                }
+
                 showToast("Login realizado com sucesso!", "success");
-                setTimeout(() => {
-                    window.location.href = "../platform/index-interno.html";
-                }, 700);
+                window.location.replace("../platform/index-interno.html");
             } catch (error) {
                 showToast(auth?.normalizeErrorMessage(error) || "Nao foi possivel entrar.", "error");
             } finally {

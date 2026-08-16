@@ -2,10 +2,19 @@
     const STORAGE_KEY = "unicheck_checklist_progress_v2";
     const ROUTE_PREFIX = "#checklist=";
     const FALLBACK_IMAGE = "../img-interno/logo.png";
+    const PHASE_ACCENTS = [
+        { color: "#0b61ff", gradient: "linear-gradient(135deg, #0b61ff, #31b0ff)" },
+        { color: "#06b6d4", gradient: "linear-gradient(135deg, #06b6d4, #22d3ee)" },
+        { color: "#8b5cf6", gradient: "linear-gradient(135deg, #8b5cf6, #c084fc)" },
+        { color: "#10b981", gradient: "linear-gradient(135deg, #10b981, #34d399)" },
+        { color: "#4f46e5", gradient: "linear-gradient(135deg, #4f46e5, #818cf8)" },
+        { color: "#f59e0b", gradient: "linear-gradient(135deg, #f59e0b, #fbbf24)" },
+        { color: "#ec4899", gradient: "linear-gradient(135deg, #ec4899, #fb7185)" }
+    ];
 
     const checklistImages = {
-        "Portal Acadêmico TOTVS": "../img-interno/TOTVS.jpg",
-        "Configuração de Email": "../img-interno/outlook.png",
+        "Portal Academico TOTVS": "../img-interno/TOTVS.jpg",
+        "Configuracao de Email": "../img-interno/outlook.png",
         "Biblioteca Virtual": "../img-interno/bibliotecaV.png",
         "Microsoft Teams": "../img-interno/MicrosoftT.png",
         "Plataforma A+": "../img-interno/platafromaA.png",
@@ -15,38 +24,52 @@
     const cardCopy = {
         "Primeiros passos na faculdade": {
             eyebrow: "Onboarding da turma",
-            description: "Defina os combinados iniciais, centralize a comunicação e prepare a turma para a rotina academica.",
-            highlights: ["Organizacao da turma", "Canais oficiais", "Calendario academico"]
+            description: "Crie a base da jornada com alinhamento de contatos, combinados e comunicacao oficial da turma.",
+            highlights: ["Organizacao da turma", "Canais oficiais", "Calendario academico", "Primeiros combinados"],
+            footnote: "Essa fase estrutura o ritmo para todo o restante da jornada.",
+            unlockHint: "Libera a navegacao dos sistemas e canais institucionais."
         },
-        "Portal Acadêmico TOTVS": {
+        "Portal Academico TOTVS": {
             eyebrow: "Portal do aluno",
-            description: "Acesse o Portal Academico TOTVS, entre com seu RA, encontre a central do aluno e localize documentos essenciais.",
-            highlights: ["Portal do Aluno", "Central do aluno", "Documentos e relatorios"]
+            description: "Acesse o portal, valide seu RA e encontre os documentos e menus que sustentam a rotina academica.",
+            highlights: ["Portal do Aluno", "Central do aluno", "Documentos e relatorios", "Acesso autenticado"],
+            footnote: "Depois disso, o aluno consulta boletos, documentos e avisos com autonomia.",
+            unlockHint: "Libera o uso consistente da central do aluno."
         },
-        "Configuração de Email": {
+        "Configuracao de Email": {
             eyebrow: "Email institucional",
-            description: "Ative o e-mail da faculdade, valide o acesso no Outlook/Webmail e garanta o canal oficial de comunicacao.",
-            highlights: ["Outlook/Webmail", "Senha atualizada", "Canal oficial"]
+            description: "Ative o email institucional, teste login e garanta que a comunicacao da faculdade chegue sem ruido.",
+            highlights: ["Outlook/Webmail", "Senha atualizada", "Canal oficial", "Notificacoes ativas"],
+            footnote: "A caixa institucional vira a principal fonte de avisos e recuperacao de acesso.",
+            unlockHint: "Prepara o canal mais importante de comunicacao do aluno."
         },
         "Biblioteca Virtual": {
             eyebrow: "Pesquisa e acervo",
-            description: "Use a Biblioteca Virtual para pesquisar livros, artigos e bases digitais ligadas à sua disciplina.",
-            highlights: ["Acervo digital", "Artigos e livros", "Busca por disciplina"]
+            description: "Organize o acesso ao acervo digital e deixe a busca por livros, artigos e bases rapida e confiavel.",
+            highlights: ["Acervo digital", "Artigos e livros", "Busca por disciplina", "Materiais da area"],
+            footnote: "Uma biblioteca pronta reduz tempo perdido nas primeiras pesquisas.",
+            unlockHint: "Abre caminho para leitura, consulta e pesquisa academica."
         },
         "Microsoft Teams": {
-            eyebrow: "Comunicação da turma",
-            description: "Organize o Teams da turma, confirme a equipe da disciplina e ajuste avisos e reunioes.",
-            highlights: ["Equipe da disciplina", "Arquivos e canais", "Aulas e avisos"]
+            eyebrow: "Comunicacao da turma",
+            description: "Configure equipes, canais e alertas para transformar o Teams no centro da comunicacao da turma.",
+            highlights: ["Equipe da disciplina", "Arquivos e canais", "Aulas e avisos", "Reunioes online"],
+            footnote: "A rotina de aula fica mais fluida quando o canal certo ja esta pronto.",
+            unlockHint: "Integra avisos, encontros e compartilhamento de arquivos."
         },
         "Plataforma A+": {
             eyebrow: "Ferramenta complementar",
-            description: "Acesse a Plataforma A+ e conclua a configuracao minima para materiais e recursos extras.",
-            highlights: ["Acesso inicial", "Materiais extras", "Uso complementar"]
+            description: "Conclua o acesso inicial e deixe a plataforma complementar pronta para materiais e recursos extras.",
+            highlights: ["Acesso inicial", "Materiais extras", "Uso complementar", "Permissoes validas"],
+            footnote: "Essa etapa amplia os recursos sem fragmentar a experiencia do aluno.",
+            unlockHint: "Completa a malha de ferramentas complementares."
         },
         "Mentorias": {
             eyebrow: "Apoio academico",
-            description: "Localize o canal de mentoria, saiba como agendar atendimento e acompanhe suas demandas.",
-            highlights: ["Canal de apoio", "Agendamento", "Acompanhamento"]
+            description: "Encontre o canal de apoio, entenda como agendar e deixe claro quando e como pedir suporte.",
+            highlights: ["Canal de apoio", "Agendamento", "Acompanhamento", "Orientacao recorrente"],
+            footnote: "A mentoria fecha a jornada com suporte continuo e mais seguranca.",
+            unlockHint: "Entrega o ultimo nivel de apoio para o semestre."
         }
     };
 
@@ -54,6 +77,7 @@
         rawChecklists: [],
         checklists: [],
         progress: {},
+        searchTerm: "",
         user: null,
         currentChecklistId: null,
         initialized: false
@@ -64,7 +88,8 @@
         listView: null,
         grid: null,
         detailView: null,
-        detailContent: null
+        detailContent: null,
+        searchInput: null
     };
 
     function escapeHtml(value) {
@@ -74,6 +99,15 @@
             .replace(/>/g, "&gt;")
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#39;");
+    }
+
+    function normalizeTitleKey(value) {
+        return String(value ?? "")
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, " ")
+            .trim();
     }
 
     function getStoredProgressKey(userId) {
@@ -124,23 +158,72 @@
     }
 
     function resolveChecklistImage(checklist) {
-        return checklist.imageUrl || checklistImages[checklist.title] || FALLBACK_IMAGE;
+        if (checklist.imageUrl) {
+            return checklist.imageUrl;
+        }
+
+        const normalizedTitle = normalizeTitleKey(checklist.title);
+        const imageEntry = Object.entries(checklistImages).find(([title]) => normalizeTitleKey(title) === normalizedTitle);
+
+        return imageEntry ? imageEntry[1] : FALLBACK_IMAGE;
     }
 
     function getCardCopy(checklist) {
-        return cardCopy[checklist.title] || {
+        const normalizedTitle = normalizeTitleKey(checklist.title);
+        const copyEntry = Object.entries(cardCopy).find(([title]) => normalizeTitleKey(title) === normalizedTitle);
+
+        return copyEntry ? copyEntry[1] : {
             eyebrow: `Fase ${checklist.phase || 1}`,
             description: checklist.description || "Card de conclusao da fase academica.",
-            highlights: ["Progresso sincronizado", "Fluxo continuo", "Checklist objetivo"]
+            highlights: ["Progresso sincronizado", "Fluxo continuo", "Checklist objetivo"],
+            footnote: "Conclua os itens para avanzar com seguranca.",
+            unlockHint: "Mantem o fluxo sequencial entre as fases."
         };
+    }
+
+    function getPhaseAccent(index) {
+        return PHASE_ACCENTS[index % PHASE_ACCENTS.length];
+    }
+
+    function getChecklistStats(checklist) {
+        const completedTasks = checklist.tasks.filter(task => task.completed).length;
+        const totalTasks = checklist.tasks.length;
+        const remainingTasks = Math.max(totalTasks - completedTasks, 0);
+
+        return {
+            completedTasks,
+            totalTasks,
+            remainingTasks
+        };
+    }
+
+    function matchesSearch(checklist, searchTerm) {
+        if (!searchTerm) {
+            return true;
+        }
+
+        const copy = getCardCopy(checklist);
+        const haystack = [
+            checklist.title,
+            checklist.description,
+            copy.description,
+            copy.eyebrow,
+            ...(checklist.tasks || []).map(task => task.text)
+        ]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase();
+
+        return haystack.includes(searchTerm.toLowerCase());
     }
 
     function hydrateChecklists() {
         state.checklists = window.UniCheckChecklist
             .applyProgress(state.rawChecklists, state.progress)
-            .map(checklist => ({
+            .map((checklist, index) => ({
                 ...checklist,
-                imageUrl: resolveChecklistImage(checklist)
+                imageUrl: resolveChecklistImage(checklist),
+                accent: getPhaseAccent(index)
             }));
     }
 
@@ -183,13 +266,16 @@
     function buildChecklistCard(checklist, index) {
         const action = createCardActionLabel(checklist);
         const copy = getCardCopy(checklist);
+        const stats = getChecklistStats(checklist);
+        const nextChecklist = state.checklists[index + 1] || null;
         const lockMessage = index === 0
             ? "Sempre liberado"
-            : `Complete a fase ${index} para desbloquear`;
+            : "Complete a fase anterior para liberar esta etapa";
 
         return `
             <article
-                class="platform-card ${checklist.locked ? "locked" : ""} ${checklist.completed ? "completed" : ""}"
+                class="platform-card checklist-card ${checklist.locked ? "locked" : ""} ${checklist.completed ? "completed" : ""}"
+                style="--phase-accent: ${checklist.accent.gradient}; --phase-accent-color: ${checklist.accent.color};"
                 data-action="${checklist.locked ? "" : "open-checklist"}"
                 data-checklist-id="${escapeHtml(checklist.id)}"
                 aria-disabled="${checklist.locked ? "true" : "false"}"
@@ -201,17 +287,25 @@
                     </div>
                 ` : ""}
                 <div class="card-header">
-                    <img
-                        src="${escapeHtml(checklist.imageUrl)}"
-                        alt="${escapeHtml(checklist.title)}"
-                        class="platform-logo"
-                        onerror="this.onerror=null;this.src='${FALLBACK_IMAGE}'"
-                    >
-                    <div class="phase-info">
-                        <span class="phase-number">Fase ${escapeHtml(checklist.phase || index + 1)}</span>
-                        <span class="phase-title">${escapeHtml(checklist.title)}</span>
-                        <span class="card-eyebrow">${escapeHtml(copy.eyebrow)}</span>
+                    <div class="card-identity">
+                        <img
+                            src="${escapeHtml(checklist.imageUrl)}"
+                            alt="${escapeHtml(checklist.title)}"
+                            class="platform-logo"
+                            onerror="this.onerror=null;this.src='${FALLBACK_IMAGE}'"
+                        >
+                        <div class="phase-info">
+                            <div class="phase-badges">
+                                <span class="phase-number">Fase ${escapeHtml(checklist.phase || index + 1)}</span>
+                                <span class="card-status-pill ${checklist.completed ? "is-completed" : ""}">
+                                    ${checklist.completed ? "Concluida" : checklist.progress > 0 ? "Em andamento" : "Nao iniciada"}
+                                </span>
+                            </div>
+                            <span class="phase-title">${escapeHtml(checklist.title)}</span>
+                            <span class="card-eyebrow">${escapeHtml(copy.eyebrow)}</span>
+                        </div>
                     </div>
+                    <span class="card-lock-hint">${escapeHtml(checklist.locked ? lockMessage : copy.unlockHint || "Fluxo guiado em andamento")}</span>
                 </div>
                 <div class="card-content">
                     <p class="platform-description">${escapeHtml(copy.description)}</p>
@@ -227,10 +321,8 @@
                         <span class="progress-text">${checklist.progress}%</span>
                     </div>
                     <div class="card-status-row">
-                        <span class="card-status-pill ${checklist.completed ? "is-completed" : ""}">
-                            ${checklist.completed ? "Concluido" : checklist.progress > 0 ? "Em andamento" : "Nao iniciado"}
-                        </span>
-                        <span class="card-status-meta">${checklist.tasks.filter(task => task.completed).length}/${checklist.tasks.length} itens</span>
+                        <span class="card-status-meta">${stats.completedTasks}/${stats.totalTasks} itens</span>
+                        <span class="card-status-meta">${checklist.completed ? "Proxima fase liberada" : nextChecklist ? `Desbloqueia ${escapeHtml(nextChecklist.title)}` : "Bloqueio ativo"}</span>
                     </div>
                 </div>
                 <div class="card-actions">
@@ -249,19 +341,61 @@
         `;
     }
 
+    function buildListHeader(completedCount, activeCount, lockedCount) {
+        return `
+            <section class="checklists-header-strip">
+                <div class="checklists-header-copy">
+                    <span class="hero-kicker">Trilha academica</span>
+                    <h2>Fases organizadas em ordem, com leitura simples e progresso claro.</h2>
+                </div>
+                <div class="checklists-header-stats">
+                    <span><strong>${completedCount}</strong> concluidos</span>
+                    <span><strong>${activeCount}</strong> ativos</span>
+                    <span><strong>${lockedCount}</strong> bloqueados</span>
+                </div>
+            </section>
+        `;
+    }
+
     function renderListView() {
-        if (!refs.grid) return;
+        if (!refs.grid) {
+            return;
+        }
+
+        const filteredChecklists = state.checklists.filter(checklist => matchesSearch(checklist, state.searchTerm));
+        const completedCount = state.checklists.filter(checklist => checklist.completed).length;
+        const lockedCount = state.checklists.filter(checklist => checklist.locked).length;
+        const activeCount = Math.max(state.checklists.length - completedCount - lockedCount, 0);
 
         if (!state.checklists.length) {
             refs.grid.innerHTML = `
-                <div class="platform-card">
+                <div class="checklist-list-empty platform-card">
                     <div class="card-content">
                         <p class="platform-description">Nenhum checklist encontrado no momento.</p>
                     </div>
                 </div>
             `;
+        } else if (!filteredChecklists.length) {
+            refs.grid.innerHTML = `
+                ${buildListHeader(completedCount, activeCount, lockedCount)}
+                <div class="checklist-empty-state platform-card">
+                    <div class="card-content">
+                        <p class="platform-description">Nenhum resultado combina com "${escapeHtml(state.searchTerm)}".</p>
+                    </div>
+                </div>
+            `;
         } else {
-            refs.grid.innerHTML = state.checklists.map(buildChecklistCard).join("");
+            refs.grid.innerHTML = `
+                ${buildListHeader(completedCount, activeCount, lockedCount)}
+                <div class="checklists-cards-grid">
+                    ${filteredChecklists
+                        .map(checklist => {
+                            const originalIndex = state.checklists.findIndex(item => item.id === checklist.id);
+                            return buildChecklistCard(checklist, originalIndex);
+                        })
+                        .join("")}
+                </div>
+            `;
         }
 
         if (typeof lucide !== "undefined") {
@@ -270,7 +404,9 @@
     }
 
     function renderDetailView() {
-        if (!refs.detailContent) return;
+        if (!refs.detailContent) {
+            return;
+        }
 
         const checklist = getChecklistById(state.currentChecklistId);
         if (!checklist) {
@@ -335,12 +471,13 @@
 
         hydrateChecklists();
         syncVisibleView();
-        renderListView();
     }
 
     function openChecklist(checklistId, shouldPushState = true) {
         const checklist = getChecklistById(checklistId);
-        if (!checklist || checklist.locked) return;
+        if (!checklist || checklist.locked) {
+            return;
+        }
 
         state.currentChecklistId = checklistId;
         syncVisibleView();
@@ -404,10 +541,12 @@
     }
 
     function renderLoadingState() {
-        if (!refs.grid) return;
+        if (!refs.grid) {
+            return;
+        }
 
         refs.grid.innerHTML = `
-            <div class="platform-card">
+            <div class="platform-card checklist-card loading-card">
                 <div class="card-content">
                     <p class="platform-description">Carregando checklists...</p>
                 </div>
@@ -428,11 +567,9 @@
                 email: state.user.email || null
             });
 
-            if (state.user?.id) {
-                const remoteProgress = await window.UniCheckChecklist.fetchUserProgressMap(state.user.id);
-                state.progress = mergeProgressMaps(remoteProgress, state.progress);
-                saveStoredProgress(state.user.id);
-            }
+            const remoteProgress = await window.UniCheckChecklist.fetchUserProgressMap(state.user.id);
+            state.progress = mergeProgressMaps(remoteProgress, state.progress);
+            saveStoredProgress(state.user.id);
 
             state.rawChecklists = await window.UniCheckChecklist.fetchAllChecklists();
             hydrateChecklists();
@@ -444,7 +581,7 @@
                 userId: state.user?.id || null
             });
             refs.grid.innerHTML = `
-                <div class="platform-card">
+                <div class="platform-card checklist-card">
                     <div class="card-content">
                         <p class="platform-description">Nao foi possivel carregar os checklists agora.</p>
                     </div>
@@ -473,11 +610,14 @@
         refs.grid = document.getElementById("checklistsGrid");
         refs.detailView = document.getElementById("checklistDetailView");
         refs.detailContent = document.getElementById("checklistDetailContent");
+        refs.searchInput = document.querySelector(".header-search-enhanced .search-input");
     }
 
     function handlePageClick(event) {
         const actionElement = event.target.closest("[data-action]");
-        if (!actionElement) return;
+        if (!actionElement) {
+            return;
+        }
 
         const action = actionElement.getAttribute("data-action");
 
@@ -496,13 +636,20 @@
 
     async function handlePageChange(event) {
         const target = event.target;
-        if (!(target instanceof HTMLInputElement)) return;
-        if (target.getAttribute("data-action") !== "toggle-task") return;
+        if (!(target instanceof HTMLInputElement)) {
+            return;
+        }
+
+        if (target.getAttribute("data-action") !== "toggle-task") {
+            return;
+        }
 
         const checklistId = target.getAttribute("data-checklist-id");
         const taskId = target.getAttribute("data-task-id");
 
-        if (!checklistId || !taskId) return;
+        if (!checklistId || !taskId) {
+            return;
+        }
 
         const before = getChecklistById(checklistId);
         await toggleTask(checklistId, taskId, target.checked);
@@ -517,19 +664,24 @@
         refs.pageContent?.addEventListener("click", handlePageClick);
         refs.pageContent?.addEventListener("change", handlePageChange);
         window.addEventListener("popstate", syncFromLocation);
+
+        refs.searchInput?.addEventListener("input", event => {
+            state.searchTerm = event.target.value.trim();
+            if (!state.currentChecklistId) {
+                renderListView();
+            }
+        });
     }
 
     async function init() {
-        if (state.initialized) return;
+        if (state.initialized) {
+            return;
+        }
         state.initialized = true;
 
-        if (window.UniCheckAuth?.getAuthDebugSnapshot) {
-            await window.UniCheckAuth.getAuthDebugSnapshot("checklist-view.init");
-        }
-
-        const authSession = await window.UniCheckAuth?.requireAuth?.({
-            redirectTo: window.UniCheckAuth?.getLoginPage?.()
-        });
+        // O guard compartilhado de script-interno.js ja protege esta pagina.
+        // Aqui apenas recuperamos a mesma sessao para identificar o progresso.
+        const authSession = await window.UniCheckAuth?.getSession?.();
 
         if (!authSession?.user) {
             console.warn("[UniCheckChecklistView] Acesso bloqueado sem usuario autenticado.");

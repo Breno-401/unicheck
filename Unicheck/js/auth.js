@@ -134,7 +134,11 @@
         ]);
 
         const session = sessionResult.status === "fulfilled" ? sessionResult.value.data.session || null : null;
-        const user = userResult.status === "fulfilled" ? userResult.value.data.user || null : null;
+        // A sessao persistida e a fonte de verdade do guard. getUser() faz uma
+        // validacao remota adicional e pode falhar por rede sem invalidar a
+        // sessao que o Supabase acabou de restaurar do storage.
+        const remoteUser = userResult.status === "fulfilled" ? userResult.value.data.user || null : null;
+        const user = remoteUser || session?.user || null;
 
         const snapshot = {
             context,
@@ -161,11 +165,12 @@
     }
 
     async function restoreSession() {
-        const { session, user } = await getAuthDebugSnapshot("restoreSession");
+        const session = await getSession();
+        const user = session?.user || null;
 
         if (user) {
             saveProfile(user);
-            return session || { user };
+            return session;
         }
 
         clearProfile();
@@ -199,7 +204,11 @@
 
         if (error) throw error;
 
-        if (data.user) saveProfile(data.user);
+        if (!data.session?.user) {
+            throw new Error("O Supabase nao retornou uma sessao valida apos o login.");
+        }
+
+        saveProfile(data.session.user);
         return data;
     }
 
@@ -209,7 +218,8 @@
         let signOutError = null;
 
         try {
-            await client.auth.signOut();
+            const { error } = await client.auth.signOut();
+            if (error) throw error;
         } catch (error) {
             signOutError = error;
             console.error("[UniCheckAuth] Falha ao chamar signOut()", error);
@@ -229,11 +239,22 @@
 
     async function requireAuth(options = {}) {
         const redirectTo = options.redirectTo === undefined ? getLoginPage() : options.redirectTo;
-        const { session, user } = await getAuthDebugSnapshot("requireAuth", { redirectTo });
+        let session;
+
+        try {
+            session = await getSession();
+        } catch (error) {
+            // Uma falha de rede/storage nao prova que o usuario saiu. O caller
+            // recebe o erro e a pagina nao entra em um redirect falso.
+            console.error("[UniCheckAuth] Falha ao restaurar sessao", error);
+            throw error;
+        }
+
+        const user = session?.user || null;
 
         if (user) {
             saveProfile(user);
-            return session || { user };
+            return session;
         }
 
         clearProfile();
