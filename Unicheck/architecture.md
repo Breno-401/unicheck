@@ -83,6 +83,7 @@ Na pratica, a landing explica o produto e leva o usuario para autenticacao. A ar
 - [`platform/index-interno.html`](./platform/index-interno.html) e o dashboard inicial.
 - [`platform/js/`](./platform/js) guarda configuracoes compartilhadas da area interna.
 - [`platform/css-interno/`](./platform/css-interno) guarda estilos base e componentes reutilizados.
+- [`platform/css-interno/ui-polish.css`](./platform/css-interno/ui-polish.css) e a camada final compartilhada de temas, estados interativos e breakpoints das paginas internas principais.
 - [`platform/CHECKLIST ACADEMICO/`](./platform/CHECKLIST%20ACADEMICO) guarda o modulo de checklist academico.
 - [`platform/PLATAFORMAS/`](./platform/PLATAFORMAS) guarda o modulo de plataformas gratuitas.
 - [`platform/CONFIGURACOES PERFIL/`](./platform/CONFIGURACOES%20PERFIL) guarda o modulo de configuracao de perfil.
@@ -162,6 +163,8 @@ O dashboard tambem usa:
 - [`platform/js/loading-navigation.js`](./platform/js/loading-navigation.js) para navegacao com loading;
 - [`platform/script-profile-sync.js`](./platform/script-profile-sync.js) para refletir o perfil na interface.
 
+As paginas de dashboard, checklist e plataformas carregam `ui-polish.css` por ultimo e usam classes no `body` (`page-dashboard`, `page-checklist` e `page-platforms`). Isso permite compartilhar tokens de superficie, borda, texto, foco e estado sem deixar seletores genericos de um modulo alterarem os cards de outro.
+
 ### 6.4 Checklists academicos
 
 O modulo de checklist academico e uma das partes mais importantes do sistema.
@@ -216,6 +219,7 @@ Fluxo:
 - permite busca por nome, descricao e features;
 - filtra por categoria;
 - salva favoritos no `localStorage` com ícone padronizado de bookmark;
+- comunica o favorito também por preenchimento, contraste, animação breve, `aria-pressed` e `aria-label` atualizado;
 - mostra modais de detalhes e tutorial;
 - abre links externos em nova aba;
 - exibe cards simples com a logo real da plataforma quando disponivel, badge de desconto e a informacao essencial para leitura rapida;
@@ -281,6 +285,14 @@ Fluxo:
 
 - mostra a tela de loading antes de navegações especificas;
 - lida com `data-action="navigate-with-loading"` e `data-action="navigate-platforms"`.
+
+### `platform/css-interno/ui-polish.css`
+
+- centraliza tokens semanticos dos temas claro e escuro (`surface`, bordas, textos, destaque, sucesso, alerta e foco);
+- normaliza sidebar, header, inputs, dropdowns e estados interativos;
+- diferencia visualmente os estados dos cards de checklist e os cards de plataformas;
+- define a progressao responsiva para desktop amplo, notebook, tablet e celulares de 430/390 px;
+- respeita `prefers-reduced-motion`.
 
 ### `platform/script-page-state.js`
 

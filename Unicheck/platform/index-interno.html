@@ -21,8 +21,9 @@
     <link rel="stylesheet" href="css-interno/responsividade.css">
     <link rel="stylesheet" href="css-interno/variaveis.css">
     <link rel="stylesheet" href="css-interno/style.css">
+    <link rel="stylesheet" href="css-interno/ui-polish.css">
 </head>
-<body>
+<body class="page-dashboard">
     <!-- Container Principal do Dashboard -->
     <div class="dashboard-container" id="dashboardContainer">
         <!-- Sidebar/Navbar -->
@@ -36,7 +37,7 @@
                     <span class="logo-text">UniCheck</span>
                 </div>
                 <!-- BOTÃO HAMBURGUER MELHORADO - 32x32px com espaçamento adequado -->
-                <button class="sidebar-toggle" id="sidebarToggle" title="Retrair/Expandir Navbar">
+                <button class="sidebar-toggle" id="sidebarToggle" type="button" title="Retrair/Expandir Navbar" aria-label="Recolher ou expandir menu lateral">
                     <div class="hamburger-menu">
                         <span class="hamburger-line"></span>
                         <span class="hamburger-line"></span>
@@ -90,7 +91,7 @@
 
                 <!-- Rodapé da Navbar -->
                 <div class="nav-footer">
-                    <button class="theme-toggle" id="themeToggle">
+                    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Alternar tema claro ou escuro">
                         <i data-lucide="moon"></i>
                         <span>Modo Escuro</span>
                     </button>
@@ -108,7 +109,7 @@
             <header class="main-header">
                 <div class="header-top">
                     <div class="header-mobile-controls">
-                        <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                        <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-label="Abrir menu lateral">
                             <i data-lucide="menu"></i>
                         </button>
                     </div>
@@ -126,7 +127,7 @@
                         <div class="search-box">
                             <i data-lucide="search" class="search-icon"></i>
                             <input type="text" placeholder="Buscar relatórios, documentos ou dados..." class="search-input">
-                            <button class="search-filters">
+                            <button class="search-filters" type="button" aria-label="Opções de busca">
                                 <i data-lucide="filter"></i>
                             </button>
                         </div>
@@ -134,14 +135,14 @@
 
                     <!-- Ações do Usuário à Direita -->
                     <div class="header-actions-enhanced">
-                        <button class="theme-toggle-mobile" id="themeToggleMobile">
+                        <button class="theme-toggle-mobile" id="themeToggleMobile" type="button" aria-label="Alternar tema claro ou escuro">
                             <i data-lucide="moon"></i>
                         </button>
                         <button class="header-notification-button" type="button" aria-label="Notificações">
                             <i data-lucide="bell"></i>
                         </button>
                         <div class="user-menu">
-                            <button class="user-menu-trigger" id="userMenuTrigger">
+                            <button class="user-menu-trigger" id="userMenuTrigger" type="button" aria-label="Abrir menu do usuário" aria-expanded="false">
                                 <div class="user-avatar-small">
                                     <span>JS</span>
                                 </div>

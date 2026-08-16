@@ -21,8 +21,9 @@
     <link rel="stylesheet" href="../css-interno/checklist-plataformas.css">
     <link rel="stylesheet" href="plataformas-gratuitas.css">
     <link rel="stylesheet" href="platform-styles.css">
+    <link rel="stylesheet" href="../css-interno/ui-polish.css">
 </head>
-<body>
+<body class="page-platforms">
     <!-- Container Principal do Dashboard -->
     <div class="dashboard-container" id="dashboardContainer">
         <!-- Sidebar/Navbar -->
@@ -34,7 +35,7 @@
                     </div>
                     <span class="logo-text">UniCheck</span>
                 </div>
-                <button class="sidebar-toggle" id="sidebarToggle" title="Retrair/Expandir Navbar">
+                <button class="sidebar-toggle" id="sidebarToggle" type="button" title="Retrair/Expandir Navbar" aria-label="Recolher ou expandir menu lateral">
                     <div class="hamburger-menu">
                         <span class="hamburger-line"></span>
                         <span class="hamburger-line"></span>
@@ -88,7 +89,7 @@
 
                 <!-- Rodapé da Navbar -->
                 <div class="nav-footer">
-                    <button class="theme-toggle" id="themeToggle">
+                    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Alternar tema claro ou escuro">
                         <i data-lucide="moon"></i>
                         <span>Modo Escuro</span>
                     </button>
@@ -106,7 +107,7 @@
             <header class="main-header">
                 <div class="header-top">
                     <div class="header-mobile-controls">
-                        <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                        <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-label="Abrir menu lateral">
                             <i data-lucide="menu"></i>
                         </button>
                     </div>
@@ -146,7 +147,7 @@
                             <i data-lucide="bell"></i>
                         </button>
                         <div class="user-menu">
-                            <button class="user-menu-trigger" id="userMenuTrigger" type="button">
+                            <button class="user-menu-trigger" id="userMenuTrigger" type="button" aria-label="Abrir menu do usuário" aria-expanded="false">
                                 <div class="user-avatar-small">
                                     <span>JS</span>
                                 </div>
@@ -531,7 +532,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="modalTitle">Detalhes da Plataforma</h3>
-                <button class="modal-close" id="modalClose">
+                <button class="modal-close" id="modalClose" type="button" aria-label="Fechar janela">
                     <i data-lucide="x"></i>
                 </button>
             </div>

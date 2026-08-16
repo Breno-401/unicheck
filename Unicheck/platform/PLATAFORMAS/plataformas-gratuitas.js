@@ -939,7 +939,7 @@ function createPlatformCard(platform) {
                 <h3 class="platform-title">${platform.name}</h3>
                 <span class="discount-badge">${platform.discount}</span>
             </div>
-            <button class="favorite-btn ${isFavorite ? 'active' : ''}" data-platform="${platform.id}" aria-pressed="${isFavorite}">
+            <button type="button" class="favorite-btn ${isFavorite ? 'active' : ''}" data-platform="${platform.id}" aria-pressed="${isFavorite}" aria-label="${isFavorite ? `Remover ${platform.name} dos favoritos` : `Adicionar ${platform.name} aos favoritos`}" title="${isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}">
                 <i data-lucide="${isFavorite ? 'bookmark-check' : 'bookmark'}" class="favorite-icon"></i>
             </button>
         </div>
@@ -1145,15 +1145,23 @@ function toggleFavorite(platformId, button) {
     }
 
     button.setAttribute('aria-pressed', String(isFavorite));
+    const platform = platformState.platforms.find(item => item.id === platformId);
+    const platformName = platform?.name || 'plataforma';
+    button.setAttribute('aria-label', isFavorite
+        ? `Remover ${platformName} dos favoritos`
+        : `Adicionar ${platformName} aos favoritos`);
+    button.setAttribute('title', isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos');
     
     // Salvar no localStorage
     writeStoredList('platformFavorites', platformState.favorites);
     
     // Animação no botão
-    button.style.transform = 'scale(1.2)';
+    button.classList.remove('favorite-pop');
+    void button.offsetWidth;
+    button.classList.add('favorite-pop');
     setTimeout(() => {
-        button.style.transform = 'scale(1)';
-    }, 200);
+        button.classList.remove('favorite-pop');
+    }, 280);
     
     // Re-inicializar ícones para atualizar o ícone do favorito
     setTimeout(() => {

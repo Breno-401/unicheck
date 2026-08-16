@@ -535,6 +535,7 @@ function closeUserDropdownOnClickOutside() {
     document.addEventListener('click', function(e) {
         if (userMenuTrigger && userDropdown && !userMenuTrigger.contains(e.target) && !userDropdown.contains(e.target)) {
             userDropdown.classList.remove('active');
+            userMenuTrigger.setAttribute('aria-expanded', 'false');
             
             // Resetar rotação da seta
             const dropdownIndicator = userMenuTrigger.querySelector('.dropdown-indicator');
@@ -559,6 +560,7 @@ function closeUserDropdownOnEscape() {
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && userDropdown) {
             userDropdown.classList.remove('active');
+            userMenuTrigger?.setAttribute('aria-expanded', 'false');
             
             // Resetar rotação da seta
             if (userMenuTrigger) {
