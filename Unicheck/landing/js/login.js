@@ -10,6 +10,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const strengthText = document.getElementById("strengthText");
     const forgotPasswordLink = document.getElementById("forgotPasswordLink");
     const togglePasswordButtons = document.querySelectorAll("[data-toggle-password]");
+    const authTitle = document.getElementById("authTitle");
+    const authSubtitle = document.getElementById("authSubtitle");
+    const switchPanelButtons = document.querySelectorAll("[data-switch-panel]");
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
@@ -40,6 +43,14 @@ document.addEventListener("DOMContentLoaded", () => {
             panel.classList.toggle("is-active", isActive);
             panel.hidden = !isActive;
         });
+
+        const isRegister = targetId === "registerPanel";
+        if (authTitle) authTitle.textContent = isRegister ? "Crie sua conta" : "Acesse sua conta";
+        if (authSubtitle) {
+            authSubtitle.textContent = isRegister
+                ? "Comece agora a organizar sua jornada acadêmica."
+                : "Continue de onde parou e acompanhe sua jornada.";
+        }
     }
 
     function getErrorElement(inputId) {
@@ -155,6 +166,13 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    switchPanelButtons.forEach(button => {
+        button.addEventListener("click", () => {
+            const targetId = button.getAttribute("data-switch-panel");
+            if (targetId) setActiveTab(targetId);
+        });
+    });
+
     togglePasswordButtons.forEach(button => {
         if (!(button instanceof HTMLButtonElement)) return;
         button.addEventListener("click", () => handleTogglePassword(button));
@@ -253,6 +271,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!(button instanceof HTMLButtonElement)) return;
         button.dataset.defaultLabel = button.textContent;
     });
+
+    const currentYear = document.getElementById("currentYear");
+    if (currentYear) currentYear.textContent = new Date().getFullYear();
 
     auth?.restoreSession()
         .then(session => {
