@@ -1,0 +1,122 @@
+.support-shell {
+  min-width: 0;
+  padding: clamp(1rem, 3vw, 2.5rem);
+}
+
+.support-hero,
+.support-card {
+  max-width: 72rem;
+  margin-inline: auto;
+}
+
+.support-hero {
+  padding: clamp(1.5rem, 4vw, 3rem);
+  color: #fff;
+  background: linear-gradient(135deg, #071a1e, #0b525b);
+  border-radius: 1.25rem;
+}
+
+.support-hero .dashboard-eyebrow {
+  color: #8de8d3;
+}
+
+.support-hero h1 {
+  max-width: 16ch;
+  margin: 0.35rem 0 0.75rem;
+  font-size: clamp(2rem, 6vw, 3.6rem);
+  line-height: 1.05;
+}
+
+.support-hero p {
+  max-width: 65ch;
+  margin: 0;
+  color: #d9f1ed;
+  line-height: 1.7;
+}
+
+.support-grid {
+  max-width: 72rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 1rem auto 0;
+}
+
+.support-card {
+  min-width: 0;
+  padding: 1.35rem;
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+}
+
+.support-card h2,
+.support-card h3 {
+  margin-top: 0;
+}
+
+.support-card p,
+.support-card li {
+  color: var(--text-muted);
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.support-card ol,
+.support-card ul {
+  padding-inline-start: 1.25rem;
+}
+
+.support-card a {
+  color: var(--unisales-blue);
+  font-weight: 700;
+}
+
+.support-card--wide {
+  grid-column: 1 / -1;
+}
+
+.support-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.support-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0.65rem 1rem;
+  color: #fff !important;
+  background: var(--unisales-blue);
+  border-radius: 0.7rem;
+  text-decoration: none;
+}
+
+details {
+  padding-block: 0.8rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+summary {
+  color: var(--text-primary);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (max-width: 767px) {
+  .support-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .support-card--wide {
+    grid-column: auto;
+  }
+
+  .support-action {
+    width: 100%;
+  }
+}
