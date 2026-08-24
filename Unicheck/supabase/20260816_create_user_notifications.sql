@@ -33,20 +33,20 @@ create policy "user_notifications_select_own"
 on public.user_notifications
 for select
 to authenticated
-using (auth.uid() = user_id);
+using ((select auth.uid()) = user_id);
 
 create policy "user_notifications_insert_own"
 on public.user_notifications
 for insert
 to authenticated
-with check (auth.uid() = user_id);
+with check ((select auth.uid()) = user_id);
 
 create policy "user_notifications_update_read_own"
 on public.user_notifications
 for update
 to authenticated
-using (auth.uid() = user_id)
-with check (auth.uid() = user_id);
+using ((select auth.uid()) = user_id)
+with check ((select auth.uid()) = user_id);
 
 revoke all on public.user_notifications from anon;
 revoke all on public.user_notifications from authenticated;
