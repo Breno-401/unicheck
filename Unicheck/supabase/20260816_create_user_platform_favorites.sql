@@ -1,0 +1,40 @@
+-- Account-scoped platform favorites.
+-- Safe to run repeatedly.
+
+create table if not exists public.user_platform_favorites (
+    user_id uuid not null references auth.users (id) on delete cascade,
+    platform_id text not null,
+    created_at timestamptz not null default now(),
+    primary key (user_id, platform_id),
+    constraint user_platform_favorites_platform_id_not_blank
+        check (length(trim(platform_id)) > 0)
+);
+
+create index if not exists user_platform_favorites_user_created_at_idx
+    on public.user_platform_favorites (user_id, created_at desc);
+
+alter table public.user_platform_favorites enable row level security;
+
+drop policy if exists "user_platform_favorites_select_own" on public.user_platform_favorites;
+create policy "user_platform_favorites_select_own"
+on public.user_platform_favorites
+for select
+to authenticated
+using (auth.uid() = user_id);
+
+drop policy if exists "user_platform_favorites_insert_own" on public.user_platform_favorites;
+create policy "user_platform_favorites_insert_own"
+on public.user_platform_favorites
+for insert
+to authenticated
+with check (auth.uid() = user_id);
+
+drop policy if exists "user_platform_favorites_delete_own" on public.user_platform_favorites;
+create policy "user_platform_favorites_delete_own"
+on public.user_platform_favorites
+for delete
+to authenticated
+using (auth.uid() = user_id);
+
+revoke update on public.user_platform_favorites from authenticated;
+grant select, insert, delete on public.user_platform_favorites to authenticated;
