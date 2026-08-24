@@ -57,6 +57,7 @@
             id: user?.id || "",
             nome,
             email,
+            ra: row?.ra || "",
             foto_url: fotoUrl,
             avatarImage: fotoUrl,
             avatarText: getInitials(nome, email)
@@ -93,7 +94,7 @@
         try {
             ({ data, error } = await client
                 .from(PROFILE_TABLE)
-                .select("nome, email, foto_url")
+                .select("nome, email, foto_url, ra")
                 .eq(PROFILE_USER_ID_COLUMN, user.id)
                 .maybeSingle());
         } catch (queryError) {
@@ -132,7 +133,7 @@
         const { data: inserted, error: insertError } = await client
             .from(PROFILE_TABLE)
             .upsert(baseProfile, { onConflict: PROFILE_USER_ID_COLUMN })
-            .select("nome, email, foto_url")
+            .select("nome, email, foto_url, ra")
             .single();
 
         if (insertError) {
@@ -159,7 +160,7 @@
         return ensureProfileRow();
     }
 
-    async function updateMyProfile({ nome, email, foto_url }) {
+    async function updateMyProfile({ nome, email, foto_url, ra }) {
         const client = getClient();
         const user = await getCurrentUser();
 
@@ -171,6 +172,7 @@
         const cleanProfile = {
             nome: (nome || "").trim(),
             email: (email || "").trim(),
+            ra: (ra || "").trim() || null,
             foto_url: foto_url || null
         };
 
@@ -201,6 +203,7 @@
         const persistedProfile = {
             nome: cleanProfile.nome,
             email: confirmedEmail,
+            ra: cleanProfile.ra,
             foto_url: cleanProfile.foto_url
         };
 
@@ -217,7 +220,7 @@
                     },
                     { onConflict: PROFILE_USER_ID_COLUMN }
                 )
-                .select("nome, email, foto_url")
+                .select("nome, email, foto_url, ra")
                 .single());
         } catch (queryError) {
             tableError = queryError;
