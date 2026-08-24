@@ -9,7 +9,7 @@ O UniCheck e uma aplicacao web sem framework de build, composta por paginas HTML
 - `landing/` como camada externa de apresentacao, captura e entrada do usuario.
 - `platform/` como area interna autenticada, onde ficam dashboard, checklists, configuracoes de perfil e paginas de recursos.
 
-O projeto usa Supabase como backend para autenticacao e persistencia dos dados individuais importantes: perfil, progresso, atividade e notificacoes. A definicao estrutural dos checklists do MVP e local no frontend. `localStorage` funciona como cache local-first, fila offline e armazenamento de preferencias de interface.
+O projeto usa Supabase como backend para autenticacao e como fonte canônica dos perfis, do catalogo de checklists, do progresso, das atividades, das notificacoes e dos favoritos. `js/checklist-data.js` carrega `checklists` e `checklist_items` e mantem uma copia local do catalogo para acelerar as proximas aberturas e tolerar indisponibilidade temporaria. `localStorage` tambem funciona como cache local-first, fila offline onde o modulo oferece esse comportamento e armazenamento de preferencias de interface.
 
 Nao existe etapa de bundling, transpile ou framework SPA. A navegacao e feita por arquivos estaticos, links relativos e algumas rotinas de redirecionamento e restauracao de estado.
 
@@ -67,8 +67,8 @@ Na pratica, a landing explica o produto e leva o usuario para autenticacao. A ar
 ### Persistencia
 
 - Supabase Auth para sessao
-- tabelas do banco para perfil e progresso remoto dos checklists
-- `js/checklist-data.js` como fonte estrutural local dos checklists do MVP
+- tabelas do banco para perfil, catalogo e progresso remoto dos checklists
+- `js/checklist-data.js` como adaptador e cache local do catalogo canônico no Supabase
 - `localStorage` para tema, perfil cacheado, cache local-first de favoritos, progresso por `user_id` e filas de sincronizacao
 
 ## 5. Estrutura do repositório
@@ -157,7 +157,7 @@ O script principal e [`platform/script-interno.js`](./platform/script-interno.js
 
 O painel inicial da dashboard renderiza primeiro o estado local do usuario e o reconcilia em background com a persistencia remota:
 
-- percentual geral calculado por tarefas concluidas sobre o total de tarefas da estrutura local;
+- percentual geral calculado por tarefas concluidas sobre o total de tarefas do catalogo canônico carregado;
 - fases concluidas, fase atual e primeira tarefa pendente dessa fase;
 - CTA que abre diretamente a fase atual por hash de rota;
 - mapa visual das sete fases, derivado do progresso real, com estados concluida, em andamento, proxima e bloqueada;
@@ -165,11 +165,11 @@ O painel inicial da dashboard renderiza primeiro o estado local do usuario e o r
 
 A Home usa uma hierarquia enxuta: cabecalho compartilhado, um bloco principal de progresso, a visao compacta `Sua Jornada` com o contexto das sete fases e uma faixa institucional secundaria da Fundacao Bradesco / Escola Virtual. Nivel, XP e avanco para o proximo nivel ficam associados ao perfil na sidebar compartilhada, em vez de ocuparem um bloco proprio na Home. Os antigos cards grandes de gerenciamento de checklists, notificacoes e biblioteca de plataformas, assim como os tres atalhos estatisticos redundantes, nao fazem mais parte da Home; as funcionalidades continuam disponiveis na sidebar, no sino e nas paginas proprias. A Home nao exibe busca enquanto nao houver uma acao real para ela; as buscas funcionais continuam preservadas nas paginas especificas.
 
-Na abertura, o cache de progresso e carregado e alimenta imediatamente o bloco principal e `Sua Jornada` assim que a sessao identifica o `user_id`. Em paralelo, o dashboard tenta esvaziar filas pendentes e faz uma consulta consolidada a `user_checklist_item_progress`; a restauracao dos eventos recentes de `user_activity` continua ativa em background, embora eles nao sejam exibidos na Home. Os resultados remotos atualizam os caches e a UI de progresso sem bloquear a primeira renderizacao. Alteracoes de progresso que continuem na fila local prevalecem durante a reconciliacao.
+Na abertura, o dashboard carrega o catalogo canônico por `js/checklist-data.js`, identifica o `user_id` e combina a estrutura com o cache local de progresso. Em paralelo, tenta esvaziar a fila de progresso, consulta `user_checklist_item_progress` e restaura `user_activity`. Os resultados remotos atualizam os caches, o bloco principal, `Sua Jornada` e a secao `Atividade recente`; alteracoes de progresso ainda pendentes localmente prevalecem durante a reconciliacao.
 
-O historico e implementado por [`js/activity.js`](./js/activity.js). Eventos sao registrados apenas em interacoes efetivas do checklist e dos favoritos (tarefa concluida, fase concluida, fase desbloqueada, plataforma favoritada ou removida). Cada evento recebe UUID estavel, entra imediatamente em `unicheck_activity:<user_id>` e em `unicheck_activity_sync_queue:<user_id>`, e e enviado em background para `user_activity`. A fila usa insercao idempotente pelo UUID, e falhas de rede nunca removem o cache. O modulo mantem no maximo 100 eventos no cache por usuario. A Home nao renderiza mais o historico como secao principal, mas sua restauracao, cache, fila e sincronizacao cross-device continuam ativos para uso futuro em uma superficie dedicada.
+O historico e implementado por [`js/activity.js`](./js/activity.js). Eventos sao registrados em interacoes efetivas do checklist, dos favoritos e do perfil. A gravacao ocorre diretamente em `user_activity`; quando o banco confirma a insercao, o modulo atualiza `unicheck_activity_v1:<user_id>` e a secao da Home. A restauracao busca ate 20 eventos da conta, mantem o mesmo limite no cache e exibe os cinco mais recentes no dashboard. Uma falha de gravacao e reportada no console e nao produz um evento apenas local.
 
-O sino das paginas internas e gerenciado centralmente por [`js/notifications.js`](./js/notifications.js). O modulo valida a sessao, renderiza `unicheck_notifications:<user_id>` imediatamente e executa uma unica restauracao remota por carregamento de pagina. O painel diferencia itens lidos e nao lidos, mostra contador, permite marcar todos como lidos e resolve destinos internos sem depender da profundidade da pagina atual. Clique fora e `Escape` fecham o painel.
+O sino das paginas internas e gerenciado centralmente por [`js/notifications.js`](./js/notifications.js). O modulo valida a sessao, renderiza `unicheck_notifications_v1:<user_id>` imediatamente e executa uma restauracao remota por carregamento de pagina. O painel diferencia itens lidos e nao lidos, mostra contador e marca individualmente uma notificacao como lida ao abrir seu destino. O botao de fechar e `Escape` fecham o painel.
 
 Notificacao e atividade possuem papeis distintos. A conclusao de uma tarefa/fase continua no historico; uma notificacao e criada quando a fase seguinte e desbloqueada ou quando toda a jornada e concluida. Chaves semanticas como `phase_unlocked:<checklist_id>` impedem que a mesma comunicacao seja criada novamente por re-renderizacao ou reconclusao.
 
@@ -197,13 +197,13 @@ Arquivos principais:
 - [`platform/CHECKLIST ACADEMICO/checklist-detail.js`](./platform/CHECKLIST%20ACADEMICO/checklist-detail.js)
 - [`platform/CHECKLIST ACADEMICO/checklist-academico.js`](./platform/CHECKLIST%20ACADEMICO/checklist-academico.js)
 
-Fluxo local-first:
+Fluxo canônico com cache local:
 
-- carrega fases, titulos, descricoes, ordem, tarefas e UUIDs imediatamente de `js/checklist-data.js`;
+- `js/checklist-data.js` consulta fases e tarefas em `checklists` e `checklist_items`, normaliza o catalogo e salva `unicheck_checklist_catalog_v1`;
+- se uma consulta posterior falhar e ja houver catalogo valido em cache, usa essa copia local como fallback;
 - identifica o usuario pela sessao ja validada e le `unicheck_checklist_progress_v2:<user_id>`;
-- renderiza a estrutura e o progresso local sem aguardar a Data API;
+- renderiza o progresso local assim que o catalogo esta disponivel;
 - faz em background uma unica consulta a `user_checklist_item_progress` e combina o resultado com o estado local;
-- nao consulta `checklists` nem `checklist_items` durante a renderizacao;
 - aplica regra de bloqueio entre fases;
 - mostra lista de fases;
 - abre a visao detalhada de uma fase com o mesmo padrao de cards de conclusao para todas as etapas;
@@ -220,7 +220,7 @@ Fluxo local-first:
 Regra central do modulo:
 
 - o checklist e ordenado por `ordem`;
-- os UUIDs locais sao os mesmos das tabelas preservadas no Supabase, mantendo compatibilidade com as FKs de `user_checklist_item_progress`;
+- os UUIDs usados pelo frontend vem das tabelas preservadas no Supabase e mantem compatibilidade com as FKs de `user_checklist_item_progress`;
 - a primeira fase nao e bloqueada;
 - uma fase posterior fica bloqueada ate a anterior estar concluida;
 - a visao de detalhe usa um unico padrao de cards de conclusao, variando apenas o texto e o conteudo de apoio de cada checklist;
@@ -343,17 +343,16 @@ A sidebar compartilhada posiciona `Manual do Aluno` entre `Checklists Academicos
 ### `js/profile.js`
 
 - busca e atualiza o perfil do usuario em Supabase;
-- faz upsert do perfil local;
+- atualiza somente os campos editaveis do proprio perfil e insere um perfil ausente como fallback;
 - sincroniza nome, email e foto;
 - atualiza o cache local de perfil.
 - a interface interna renderiza primeiro o perfil cacheado e atualiza em background quando a consulta remota termina.
 
 ### `js/notifications.js`
 
-- centraliza cache, fila, restauracao remota e UI do sino;
+- centraliza cache, restauracao remota e UI do sino;
 - persiste em `user_notifications` com UUID e `event_key` idempotente;
-- grava localmente antes de sincronizar em background;
-- sincroniza filas em oportunidades naturais de inicializacao, nova notificacao e evento `online`;
+- atualiza o cache depois que insercoes e marcacoes de leitura sao confirmadas pelo Supabase;
 - nao usa polling, realtime, consulta em `focus` ou `service_role`.
 
 ### `js/progression.js`
@@ -380,7 +379,7 @@ A sidebar compartilhada posiciona `Manual do Aluno` entre `Checklists Academicos
 ### `platform/js/progression-profile.js`
 
 - injeta a representacao compacta de nivel, XP e barra abaixo do perfil nas sidebars das paginas internas que usam esse layout;
-- calcula a apresentacao usando `js/progression.js`, a estrutura local do checklist e o cache de progresso da conta, sem armazenar XP ou nivel;
+- calcula a apresentacao usando `js/progression.js`, o catalogo carregado dos checklists e o cache de progresso da conta, sem armazenar XP ou nivel;
 - na sidebar recolhida, oculta textos e barra, mantendo somente um indicador numerico com tooltip acessivel;
 - reage ao cache alterado por outra aba e ao evento local `unicheck:progression-updated` emitido imediatamente pelo checklist;
 - mostra um toast transitorio somente quando uma interacao local atravessa um threshold de nivel; nao cria notificacao nem atividade.
@@ -456,11 +455,10 @@ Chaves relevantes atualmente:
 - `platformFavorites:<user_id>`
 - `unicheck_favorites_sync_queue:<user_id>` (ultima operacao de adicionar/remover ainda pendente por plataforma)
 - `unicheck_favorites_remote_ready:<user_id>` (marca a migracao inicial do antigo cache somente local)
+- `unicheck_checklist_catalog_v1` (ultima copia valida de `checklists` e `checklist_items`)
 - `unicheck_checklist_progress_v2:<user_id>`
-- `unicheck_activity:<user_id>` (historico local, limitado a 100 eventos; dashboard exibe os 5 mais recentes)
-- `unicheck_activity_sync_queue:<user_id>` (eventos com UUID aguardando persistencia remota)
-- `unicheck_notifications:<user_id>` (cache das notificacoes da conta)
-- `unicheck_notifications_sync_queue:<user_id>` (insercoes e marcacoes de leitura pendentes)
+- `unicheck_activity_v1:<user_id>` (historico local, limitado a 20 eventos; dashboard exibe os 5 mais recentes)
+- `unicheck_notifications_v1:<user_id>` (cache de ate 30 notificacoes da conta)
 
 ### Supabase Auth
 
@@ -485,7 +483,7 @@ O projeto depende de pelo menos estas estruturas conceituais:
 
 Distincao de persistencia:
 
-- dados estruturais relativamente estaticos, como fases, textos, ordem e tarefas, ficam versionados no frontend;
+- dados estruturais relativamente estaticos, como fases, ordem e tarefas, tem `checklists` e `checklist_items` como fonte canônica e um cache local descartavel no frontend;
 - o conteudo editorial do Manual fica versionado em `js/manual-data.js`, com rastreabilidade por pagina e revisao temporal explicita; seu estado de leitura ainda nao e persistido;
 - estado individual importante, como progresso e atividade, tem o Supabase como persistencia duravel e fonte para restauracao entre dispositivos;
 - `localStorage` e cache local-first, fila de escrita e fallback offline, nunca a unica copia pretendida desses dados individuais;
@@ -496,14 +494,14 @@ Distincao de persistencia:
 - Checklists seguem ordem de fase.
 - Fase posterior depende da conclusao da anterior.
 - Progresso pode vir do banco ou do cache local.
-- A estrutura do checklist e um modulo local versionado e nao usa cache nem consulta estrutural remota; o progresso continua obrigatoriamente separado por `user_id`.
+- A estrutura do checklist e carregada das tabelas canônicas e usa `unicheck_checklist_catalog_v1` apenas como cache; o progresso continua obrigatoriamente separado por `user_id`.
 - Alteracoes de tarefa atualizam primeiro a UI e o cache por usuario e depois sincronizam com Supabase.
 - XP e a funcao `tarefas concluidas * 10 + fases completas * 50`; desmarcar e remarcar nunca acumula pontos fora do estado atual.
 - Nao existe `user_xp`: em outro dispositivo, o mesmo progresso restaurado produz o mesmo XP e nivel.
 - O dashboard calcula imediatamente progresso e proxima acao usando `js/checklist-data.js` e o cache `unicheck_checklist_progress_v2:<user_id>`, depois reconcilia esse cache com `user_checklist_item_progress` em background.
-- Atividades recentes sao isoladas por `user_id`, persistidas em `user_activity` e mantidas em cache/fila local para operacao offline.
-- Notificacoes sao isoladas por `user_id`, persistidas em `user_notifications` e usam cache/fila local-first; atividade recente e notificacao nao sao tratadas como o mesmo registro.
-- Falha de sincronizacao do progresso nao impede a estrutura local do checklist de aparecer nem o usuario de continuar marcando tarefas.
+- Atividades recentes sao isoladas por `user_id`, persistidas em `user_activity` e copiadas para um cache local depois da confirmacao remota.
+- Notificacoes sao isoladas por `user_id`, persistidas em `user_notifications` e mantidas em cache apos confirmacao remota; atividade recente e notificacao nao sao tratadas como o mesmo registro.
+- Quando ja existe um catalogo valido em cache, uma falha temporaria ao consultar a estrutura remota nao impede o checklist de aparecer; alteracoes de progresso continuam na fila local ate a sincronizacao.
 - Perfil e refletido em varias telas internas.
 - Logout deve limpar sessao e redirecionar para a area publica.
 - Somente a ausencia confirmada de sessao causa redirecionamento de uma pagina interna para o login; erros de perfil, checklist ou rede nao equivalem a logout.
