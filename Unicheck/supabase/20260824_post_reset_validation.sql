@@ -85,6 +85,19 @@ where table_schema = 'public'
   and grantee in ('anon', 'authenticated')
 order by table_name, grantee, privilege_type;
 
+-- Expected: profile columns follow least privilege and notifications exposes
+-- UPDATE only for read.
+select
+    table_name,
+    column_name,
+    grantee,
+    privilege_type
+from information_schema.role_column_grants
+where table_schema = 'public'
+  and table_name in ('users_profile', 'user_notifications')
+  and grantee = 'authenticated'
+order by table_name, privilege_type, column_name;
+
 -- Expected: both functions have an empty, immutable search_path.
 select
     p.proname,
