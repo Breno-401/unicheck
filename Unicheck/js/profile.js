@@ -132,7 +132,7 @@
 
         const { data: inserted, error: insertError } = await client
             .from(PROFILE_TABLE)
-            .upsert(baseProfile, { onConflict: PROFILE_USER_ID_COLUMN })
+            .insert(baseProfile)
             .select("nome, email, foto_url, ra")
             .single();
 
@@ -213,15 +213,21 @@
         try {
             ({ data, error: tableError } = await client
                 .from(PROFILE_TABLE)
-                .upsert(
-                    {
-                        [PROFILE_USER_ID_COLUMN]: user.id,
-                        ...persistedProfile
-                    },
-                    { onConflict: PROFILE_USER_ID_COLUMN }
-                )
+                .update(persistedProfile)
+                .eq(PROFILE_USER_ID_COLUMN, user.id)
                 .select("nome, email, foto_url, ra")
                 .single());
+
+            if (tableError?.code === "PGRST116") {
+                ({ data, error: tableError } = await client
+                    .from(PROFILE_TABLE)
+                    .insert({
+                        [PROFILE_USER_ID_COLUMN]: user.id,
+                        ...persistedProfile
+                    })
+                    .select("nome, email, foto_url, ra")
+                    .single());
+            }
         } catch (queryError) {
             tableError = queryError;
         }
