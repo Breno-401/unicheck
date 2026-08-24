@@ -368,6 +368,7 @@ async function updateDashboardMetrics(syncRemote = false) {
     if (!dashboardSurface) return;
 
     try {
+        await window.UniCheckChecklistData?.load?.();
         const session = await window.UniCheckAuth?.getSession?.();
         const sessionUserId = session?.user?.id || null;
         if (sessionUserId) {
