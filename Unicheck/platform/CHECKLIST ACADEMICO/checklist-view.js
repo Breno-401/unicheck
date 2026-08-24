@@ -929,6 +929,12 @@
             console.error("[UniCheckChecklistView] Estrutura local dos checklists nao foi carregada.");
             return;
         }
+        try {
+            await window.UniCheckChecklistData.load();
+        } catch (error) {
+            console.error("[UniCheckChecklistView] Nao foi possivel carregar os checklists canonicos.", error);
+            return;
+        }
         state.rawChecklists = window.UniCheckChecklistData.getChecklists();
 
         // O guard compartilhado de script-interno.js ja protege esta pagina.
