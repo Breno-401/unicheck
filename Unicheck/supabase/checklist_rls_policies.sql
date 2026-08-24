@@ -28,20 +28,20 @@ create policy "Users can read their checklist progress"
 on public.user_checklist_item_progress
 for select
 to authenticated
-using (auth.uid() = user_id);
+using ((select auth.uid()) = user_id);
 
 create policy "Users can insert their checklist progress"
 on public.user_checklist_item_progress
 for insert
 to authenticated
-with check (auth.uid() = user_id);
+with check ((select auth.uid()) = user_id);
 
 create policy "Users can update their checklist progress"
 on public.user_checklist_item_progress
 for update
 to authenticated
-using (auth.uid() = user_id)
-with check (auth.uid() = user_id);
+using ((select auth.uid()) = user_id)
+with check ((select auth.uid()) = user_id);
 
 revoke all on public.checklists from anon;
 revoke all on public.checklist_items from anon;
