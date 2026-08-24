@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual do aluno | UniCheck</title>
+    <link rel="stylesheet" href="../css-interno/base.css">
+    <link rel="stylesheet" href="../css-interno/variaveis.css">
+    <link rel="stylesheet" href="../css-interno/support-pages.css">
+</head>
+<body>
+    <main class="support-shell">
+        <section class="support-hero">
+            <span class="dashboard-eyebrow">Manual UniCheck</span>
+            <h1>Comece pela próxima ação.</h1>
+            <p>Este guia resume o fluxo do MVP: organize o perfil, avance pelas fases acadêmicas e salve os benefícios que fazem sentido para sua rotina.</p>
+            <div class="support-actions">
+                <a class="support-action" href="../index-interno.html">Voltar ao painel</a>
+                <a class="support-action" href="../CHECKLIST ACADEMICO/checklist-academico.html">Abrir checklists</a>
+            </div>
+        </section>
+
+        <div class="support-grid">
+            <article class="support-card">
+                <h2>1. Configure seu perfil</h2>
+                <ol>
+                    <li>Abra Configurações no menu do usuário.</li>
+                    <li>Revise nome, e-mail, RA e foto.</li>
+                    <li>Salve e confirme os dados após atualizar a página.</li>
+                </ol>
+                <a href="../CONFIGURACOES PERFIL/configuracoes.html">Ir para configurações</a>
+            </article>
+
+            <article class="support-card">
+                <h2>2. Avance pelas fases</h2>
+                <ol>
+                    <li>Abra a primeira fase disponível.</li>
+                    <li>Marque cada tarefa quando concluí-la.</li>
+                    <li>A próxima fase será liberada automaticamente.</li>
+                </ol>
+            </article>
+
+            <article class="support-card">
+                <h2>3. Acompanhe o histórico</h2>
+                <p>O painel reúne percentual geral, próxima ação, atividade recente e notificações. O progresso fica associado à sua conta.</p>
+            </article>
+
+            <article class="support-card">
+                <h2>4. Salve benefícios</h2>
+                <p>Use busca e filtros na área de benefícios estudantis. O botão de favorito sincroniza suas escolhas entre sessões.</p>
+                <a href="../PLATAFORMAS/plataformas-gratuitas.html">Explorar benefícios</a>
+            </article>
+
+            <article class="support-card support-card--wide">
+                <h2>Boas práticas</h2>
+                <ul>
+                    <li>Use uma senha exclusiva e não compartilhe sua sessão.</li>
+                    <li>Confira as condições na fonte oficial antes de contratar um benefício.</li>
+                    <li>Se algo não sincronizar, mantenha a página aberta e tente novamente com conexão estável.</li>
+                </ul>
+            </article>
+        </div>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../js/config.js"></script>
+    <script src="../../js/auth.js"></script>
+    <script>window.UniCheckAuth?.requireAuth?.();</script>
+</body>
+</html>
