@@ -98,10 +98,13 @@ where table_schema = 'public'
   and grantee = 'authenticated'
 order by table_name, privilege_type, column_name;
 
--- Expected: both functions have an empty, immutable search_path.
+-- Expected: both functions have an empty, immutable search_path and neither
+-- API role can execute these trigger-only functions directly.
 select
     p.proname,
-    p.proconfig
+    p.proconfig,
+    has_function_privilege('anon', p.oid, 'EXECUTE') as anon_can_execute,
+    has_function_privilege('authenticated', p.oid, 'EXECUTE') as authenticated_can_execute
 from pg_proc p
 join pg_namespace n on n.oid = p.pronamespace
 where n.nspname = 'public'
