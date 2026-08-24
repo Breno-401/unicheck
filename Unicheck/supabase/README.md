@@ -1,47 +1,67 @@
 # Supabase do UniCheck
 
-Esta pasta é a fonte versionada das alterações do banco. Mudanças feitas diretamente no painel do Supabase devem ser reproduzidas aqui antes de serem consideradas concluídas.
+Esta pasta é a fonte versionada do banco do MVP. O projeto remoto atual contém somente dados de desenvolvimento, portanto o baseline de pré-release prioriza um schema canônico limpo em vez de migrar registros antigos.
 
-## Antes de aplicar
+## Arquivos ativos
 
-1. Faça um backup ou confirme que existe uma restauração disponível.
-2. Execute primeiro as consultas de inventário no SQL Editor para comparar tabelas, colunas, constraints e policies existentes.
-3. Não remova tabelas ou dados durante a consolidação.
-4. Aplique os arquivos inicialmente em um projeto de desenvolvimento, quando disponível.
+1. `00_inventory.sql`: inventário somente leitura antes de qualquer alteração.
+2. `checklist_progress_and_seed.sql`: reconciliação opcional das 7 fases e 28 itens estruturais.
+3. `20260824_prerelease_reset.sql`: reset canônico dos dados de usuário, RLS, grants, triggers, índices e bucket de avatar.
+4. `20260824_post_reset_validation.sql`: validações somente leitura após o reset.
+5. `AUDIT_2026-08-24.md`: achados, decisões e critérios de aceite.
 
-## Ordem planejada
+## O que o reset remove
 
-1. Confirmar as tabelas estruturais `checklists`, `checklist_items` e `users_profile`.
-2. Executar `checklist_progress_and_seed.sql`.
-3. Executar `users_profile_policies.sql`.
-4. Executar `20260816_create_user_activity.sql`.
-5. Executar `20260816_create_user_notifications.sql`.
-6. Executar `20260816_create_user_platform_favorites.sql`.
-7. Executar `checklist_rls_policies.sql`.
-8. Executar `20260824_consolidate_legacy_schema.sql`.
-9. Executar `20260824_harden_functions_and_indexes.sql`.
-10. Reexecutar os Advisors de segurança e desempenho.
-11. Validar os acessos com dois usuários diferentes.
+`20260824_prerelease_reset.sql` é destrutivo de forma intencional:
 
-Consulte [`AUDIT_2026-08-24.md`](./AUDIT_2026-08-24.md) para o inventário remoto, os riscos encontrados e os critérios de aceite.
+- remove `progresso_item_checklist`, `notificacoes` e `user_progress`;
+- recria vazias `users_profile`, `user_checklist_item_progress`, `user_activity`, `user_notifications` e `user_platform_favorites`;
+- não remove contas de `auth.users`;
+- não remove nem limpa `checklists` ou `checklist_items`;
+- não executa migração ou reconciliação de dados antigos.
 
-Os scripts de políticas usam `drop policy if exists` seguido de `create policy`, permitindo reaplicação controlada. A consolidação migra dados ainda exclusivos das tabelas antigas, desativa o acesso delas pela Data API e mantém seus registros para verificação; nenhuma tabela ou linha é apagada.
+## Ordem para o projeto atual
 
-## Regras de segurança
+1. Executar `00_inventory.sql`.
+2. Confirmar que existem 7 `checklists` e 28 `checklist_items`.
+3. Executar `checklist_progress_and_seed.sql` somente se a estrutura dos checklists precisar ser reconciliada.
+4. Executar `20260824_prerelease_reset.sql` em uma única operação.
+5. Executar `20260824_post_reset_validation.sql`.
+6. Reexecutar os Advisors de segurança e desempenho.
+7. Ativar a proteção contra senhas vazadas em Auth.
+8. Criar uma conta nova e executar o roteiro funcional abaixo.
 
-- O navegador usa somente a chave pública `anon/publishable`.
-- A chave `service_role` nunca deve aparecer no frontend ou no repositório.
-- Toda tabela com dados do aluno deve ter RLS habilitado.
-- Policies de dados pessoais devem comparar `(select auth.uid())` com a chave da conta (`id` em `users_profile`, `user_id` nas demais tabelas).
-- Definições de checklist são somente leitura para usuários autenticados.
-- Notificações permitem ao cliente atualizar apenas a coluna `read`.
-- Atividades não podem ser alteradas ou apagadas pelo cliente.
-- Favoritos não aceitam atualização: o cliente insere ou remove a chave composta.
+## Roteiro obrigatório com uma conta nova
 
-## Validação funcional mínima
+1. cadastro;
+2. criação automática de `users_profile`;
+3. login;
+4. checklist inicialmente limpo;
+5. marcar e desmarcar tarefas;
+6. atualizar a página e confirmar persistência;
+7. confirmar atividade recente;
+8. confirmar notificações;
+9. adicionar e remover favorito;
+10. editar nome e avatar;
+11. logout;
+12. novo login;
+13. confirmar restauração dos dados.
 
-- Usuário A não consegue consultar ou alterar dados do usuário B.
-- Logout seguido de login em outra conta não reaproveita dados remotos da conta anterior.
-- Progresso, favoritos e perfil reaparecem em outro navegador após login.
-- Fila local pendente não sobrescreve uma intenção mais recente.
-- Reexecutar as migrations não cria duplicatas nem falha por policies existentes.
+Depois, usar uma segunda conta para confirmar que nenhum dado da primeira pode ser lido ou alterado.
+
+## Segurança esperada
+
+- o navegador utiliza somente a chave pública;
+- nenhuma chave `service_role` pertence ao frontend;
+- tabelas pessoais usam RLS com `(select auth.uid())`;
+- `users_profile.id` é a FK para `auth.users.id`;
+- o trigger `on_auth_user_created` cria o perfil de novas contas;
+- notificações permitem ao cliente atualizar apenas `read`;
+- atividades permitem apenas `SELECT` e `INSERT`;
+- favoritos permitem `SELECT`, `INSERT` e `DELETE`;
+- definições de checklist são somente leitura;
+- avatares ficam no bucket `avatars`, com escrita isolada pela pasta do usuário.
+
+## Frontend e Netlify
+
+A URL e a chave pública do Supabase permanecem em `js/config.js`. Antes do deploy, a verificação `node scripts/check-local-references.mjs` deve finalizar sem referências quebradas. O deploy não deve ser promovido enquanto arquivos usados pelos HTMLs estiverem ausentes da branch.
