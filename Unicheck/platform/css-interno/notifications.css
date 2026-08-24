@@ -1,0 +1,99 @@
+.notification-center { position: relative; display: inline-flex; flex: 0 0 auto; }
+.notification-center .header-notification-button { position: relative; }
+.notification-count {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  display: grid;
+  place-items: center;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 5px;
+  border: 2px solid var(--surface, #fff);
+  border-radius: 999px;
+  color: #fff;
+  background: var(--danger, #c92a2a);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+}
+.notification-count[hidden], .notification-panel[hidden] { display: none !important; }
+.notification-panel {
+  position: absolute;
+  z-index: 1200;
+  top: calc(100% + 12px);
+  right: 0;
+  width: min(390px, calc(100vw - 2rem));
+  overflow: hidden;
+  border: 1px solid var(--border, #d5e0eb);
+  border-radius: 18px;
+  color: var(--text-primary, #142033);
+  background: var(--surface, #fff);
+  box-shadow: 0 22px 55px rgb(0 8 20 / 24%);
+}
+.notification-panel header,
+.notification-panel footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.1rem;
+}
+.notification-panel header { border-bottom: 1px solid var(--border, #d5e0eb); }
+.notification-panel footer { justify-content: center; border-top: 1px solid var(--border, #d5e0eb); }
+.notification-panel h2 { margin: .1rem 0 0; color: inherit; font-size: 1.08rem; }
+.notification-kicker { color: var(--accent, #0b61ff); font-size: .68rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.notification-close {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--border, #d5e0eb);
+  border-radius: 10px;
+  color: var(--text-secondary, #43536a);
+  background: var(--surface-elevated, #f9fbfd);
+  cursor: pointer;
+}
+.notification-close svg { width: 18px; height: 18px; }
+.notification-list { max-height: min(440px, 62vh); overflow-y: auto; overscroll-behavior: contain; }
+.notification-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) 9px;
+  align-items: start;
+  gap: .75rem;
+  width: 100%;
+  padding: .95rem 1.1rem;
+  border: 0;
+  border-bottom: 1px solid var(--border, #d5e0eb);
+  color: inherit;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+.notification-item:last-child { border-bottom: 0; }
+.notification-item.is-unread { background: var(--accent-soft, rgb(11 97 255 / 10%)); }
+.notification-item:hover { background: var(--hover-bg, #e7eff8); }
+.notification-item-icon { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 11px; color: var(--accent, #0b61ff); background: var(--surface-elevated, #f9fbfd); }
+.notification-item-icon svg { width: 18px; height: 18px; }
+.notification-item-copy { display: grid; gap: .25rem; min-width: 0; }
+.notification-item-copy strong { color: var(--text-primary, #142033); font-size: .86rem; line-height: 1.35; }
+.notification-item-copy > span { color: var(--text-secondary, #43536a); font-size: .78rem; line-height: 1.45; }
+.notification-item-copy time { color: var(--text-muted, #65758b); font-size: .7rem; }
+.notification-item.is-read { opacity: .76; }
+.notification-unread-dot { width: 8px; height: 8px; margin-top: 5px; border-radius: 50%; background: var(--accent, #0b61ff); }
+.notification-mark-all { min-height: 40px; border: 0; color: var(--accent, #0b61ff); background: transparent; font-weight: 700; cursor: pointer; }
+.notification-mark-all:disabled { color: var(--text-disabled, #7b899c); cursor: default; }
+.notification-empty { display: grid; place-items: center; gap: .6rem; min-height: 180px; padding: 1.5rem; color: var(--text-muted, #65758b); text-align: center; }
+.notification-empty p { margin: 0; }
+.notification-empty svg { width: 26px; height: 26px; }
+.notification-center :is(button, [tabindex]):focus-visible { outline: 3px solid var(--focus-ring, rgb(11 97 255 / 28%)); outline-offset: 2px; }
+
+@media (max-width: 540px) {
+  .notification-panel { position: fixed; top: 72px; right: .75rem; left: .75rem; width: auto; max-height: calc(100vh - 84px); }
+  .notification-list { max-height: calc(100vh - 220px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notification-panel, .notification-item { scroll-behavior: auto; transition: none; }
+}
