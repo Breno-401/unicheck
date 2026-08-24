@@ -16,18 +16,25 @@
 <body>
     <h1>Configurações de Perfil — breakpoints</h1>
     <div class="cases">
-        <section class="case"><h2>320 px</h2><iframe title="Perfil em 320px" data-profile-preview width="320" height="760" sandbox="allow-same-origin allow-scripts"></iframe></section>
-        <section class="case"><h2>390 px</h2><iframe title="Perfil em 390px" data-profile-preview width="390" height="760" sandbox="allow-same-origin allow-scripts"></iframe></section>
-        <section class="case"><h2>768 px</h2><iframe title="Perfil em 768px" data-profile-preview width="768" height="760" sandbox="allow-same-origin allow-scripts"></iframe></section>
-        <section class="case"><h2>1024 px</h2><iframe title="Perfil em 1024px" data-profile-preview width="1024" height="760" sandbox="allow-same-origin allow-scripts"></iframe></section>
+        <section class="case"><h2>320 px</h2><iframe title="Perfil em 320px" data-profile-preview width="320" height="760" sandbox="allow-same-origin"></iframe></section>
+        <section class="case"><h2>390 px</h2><iframe title="Perfil em 390px" data-profile-preview width="390" height="760" sandbox="allow-same-origin"></iframe></section>
+        <section class="case"><h2>768 px</h2><iframe title="Perfil em 768px" data-profile-preview width="768" height="760" sandbox="allow-same-origin"></iframe></section>
+        <section class="case"><h2>1024 px</h2><iframe title="Perfil em 1024px" data-profile-preview width="1024" height="760" sandbox="allow-same-origin"></iframe></section>
     </div>
     <script>
-        var target = "https://htmlpreview.github.io/?" +
-            "https://github.com/" +
-            "Breno-401/unicheck/blob/chore/consolidacao-repositorio-supabase/" +
-            "Unicheck/platform/CONFIGURACOES%20PERFIL/configuracoes.html?v=profile";
-        document.querySelectorAll("iframe[data-profile-preview]").forEach(function (frame) {
-            frame.src = target;
+        var rawBase = "https://raw.githubusercontent.com/" +
+            "Breno-401/unicheck/chore/consolidacao-repositorio-supabase/Unicheck/";
+        Promise.all([
+            fetch(rawBase + "platform/CONFIGURACOES%20PERFIL/configuracoes.html").then(function (response) { return response.text(); }),
+            fetch(rawBase + "platform/CONFIGURACOES%20PERFIL/configuracoes.css").then(function (response) { return response.text(); })
+        ]).then(function (files) {
+            var markup = files[0]
+                .replace(/<script[\\s\\S]*?<\\/script>/gi, "")
+                .replace(/<link rel="stylesheet" href="configuracoes\\.css">/i, "")
+                .replace("</head>", "<style>" + files[1] + "</style></head>");
+            document.querySelectorAll("iframe[data-profile-preview]").forEach(function (frame) {
+                frame.srcdoc = markup;
+            });
         });
     </script>
 </body>
