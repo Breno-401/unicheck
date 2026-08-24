@@ -1,5 +1,5 @@
 -- RLS baseline for checklist definitions and user progress.
--- Apply after the checklist tables exist.
+-- Checklist definitions are read-only; progress belongs to one authenticated user.
 
 alter table public.checklists enable row level security;
 alter table public.checklist_items enable row level security;
@@ -20,20 +20,22 @@ to authenticated
 using (true);
 
 drop policy if exists "Users can read their checklist progress" on public.user_checklist_item_progress;
+drop policy if exists "Users can insert their checklist progress" on public.user_checklist_item_progress;
+drop policy if exists "Users can update their checklist progress" on public.user_checklist_item_progress;
+drop policy if exists "Users can delete their checklist progress" on public.user_checklist_item_progress;
+
 create policy "Users can read their checklist progress"
 on public.user_checklist_item_progress
 for select
 to authenticated
 using (auth.uid() = user_id);
 
-drop policy if exists "Users can insert their checklist progress" on public.user_checklist_item_progress;
 create policy "Users can insert their checklist progress"
 on public.user_checklist_item_progress
 for insert
 to authenticated
 with check (auth.uid() = user_id);
 
-drop policy if exists "Users can update their checklist progress" on public.user_checklist_item_progress;
 create policy "Users can update their checklist progress"
 on public.user_checklist_item_progress
 for update
@@ -41,12 +43,12 @@ to authenticated
 using (auth.uid() = user_id)
 with check (auth.uid() = user_id);
 
-drop policy if exists "Users can delete their checklist progress" on public.user_checklist_item_progress;
-create policy "Users can delete their checklist progress"
-on public.user_checklist_item_progress
-for delete
-to authenticated
-using (auth.uid() = user_id);
+revoke all on public.checklists from anon;
+revoke all on public.checklist_items from anon;
+revoke all on public.user_checklist_item_progress from anon;
+revoke all on public.checklists from authenticated;
+revoke all on public.checklist_items from authenticated;
+revoke all on public.user_checklist_item_progress from authenticated;
 
 grant select on public.checklists, public.checklist_items to authenticated;
-grant select, insert, update, delete on public.user_checklist_item_progress to authenticated;
+grant select, insert, update on public.user_checklist_item_progress to authenticated;
