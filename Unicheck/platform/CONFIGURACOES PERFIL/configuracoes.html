@@ -6,234 +6,174 @@
     <title>Configurações de Perfil - UniCheck</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <link rel="stylesheet" href="../css-interno/variaveis.css">
     <link rel="stylesheet" href="configuracoes.css">
-    <link rel="stylesheet" href="../css-interno/notifications.css">
 </head>
 <body>
     <div class="profile-settings-container">
-        <div class="profile-header">
-            <h1 class="profile-title">Configurações de Perfil</h1>
-            <div class="profile-header-actions">
-                <a href="../ajuda/ajuda-suporte.html" class="back-button">
-                    <i data-lucide="help-circle"></i>
-                    <span>Ajuda e Suporte</span>
-                </a>
+        <header class="profile-header">
+            <div class="profile-header-inner">
+                <div>
+                    <p class="profile-eyebrow">Minha conta</p>
+                    <h1 class="profile-title">Configurações de Perfil</h1>
+                    <p class="profile-subtitle">Gerencie seus dados, aparência e segurança.</p>
+                </div>
                 <a href="../index-interno.html" class="back-button">
-                    <i data-lucide="arrow-left"></i>
+                    <i data-lucide="arrow-left" aria-hidden="true"></i>
                     <span>Voltar ao Dashboard</span>
                 </a>
             </div>
-        </div>
+        </header>
 
         <div class="profile-content">
-            <aside class="profile-sidebar">
-                <ul class="profile-menu">
-                    <li class="profile-menu-item">
-                        <a href="#informacoes-pessoais" class="profile-menu-link active">
-                            <i data-lucide="user"></i>
-                            <span>Informações Pessoais</span>
-                        </a>
-                    </li>
-                    <li class="profile-menu-item">
-                        <a href="#preferencias" class="profile-menu-link">
-                            <i data-lucide="settings"></i>
-                            <span>Preferências</span>
-                        </a>
-                    </li>
-                    <li class="profile-menu-item">
-                        <a href="#seguranca" class="profile-menu-link">
-                            <i data-lucide="shield"></i>
-                            <span>Segurança</span>
-                        </a>
-                    </li>
-                    <li class="profile-menu-item">
-                        <a href="#notificacoes" class="profile-menu-link">
-                            <i data-lucide="bell"></i>
-                            <span>Notificações</span>
-                        </a>
-                    </li>
-                    <li class="profile-menu-item">
-                        <a href="#privacidade" class="profile-menu-link">
-                            <i data-lucide="lock"></i>
-                            <span>Privacidade</span>
-                        </a>
-                    </li>
-                </ul>
+            <aside class="profile-sidebar" aria-label="Seções das configurações">
+                <nav>
+                    <ul class="profile-menu">
+                        <li class="profile-menu-item">
+                            <a href="#informacoes-pessoais" class="profile-menu-link active" aria-current="page">
+                                <i data-lucide="user" aria-hidden="true"></i>
+                                <span>Informações Pessoais</span>
+                            </a>
+                        </li>
+                        <li class="profile-menu-item">
+                            <a href="#preferencias" class="profile-menu-link">
+                                <i data-lucide="sun-moon" aria-hidden="true"></i>
+                                <span>Aparência</span>
+                            </a>
+                        </li>
+                        <li class="profile-menu-item">
+                            <a href="#seguranca" class="profile-menu-link">
+                                <i data-lucide="shield" aria-hidden="true"></i>
+                                <span>Segurança</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
             </aside>
 
             <main class="profile-main">
-                <section id="informacoes-pessoais" class="profile-info-section">
-                    <h2 class="section-title">Informações Pessoais</h2>
-                    
-                    <div class="avatar-section">
-                        <div class="avatar-container">
-                            <div class="profile-avatar" id="profile-avatar">JS</div>
-                            <div class="avatar-upload" id="avatar-upload-trigger" title="Clique para alterar foto">
-                                <i data-lucide="camera"></i>
-                            </div>
-                        </div>
-                        <div class="avatar-info">
-                            <h3 id="profile-name-display">João Silva</h3>
-                            <p>Aluno UniSales</p>
-                            <div class="avatar-actions">
-                                <button class="btn btn-primary" id="change-photo-btn" type="button">
-                                    <i data-lucide="upload"></i>
-                                    Alterar Foto
-                                </button>
-                                <button class="btn btn-secondary" id="remove-photo-btn" type="button">
-                                    <i data-lucide="x"></i>
-                                    Remover
-                                </button>
-                            </div>
+                <section id="informacoes-pessoais" class="profile-info-section" aria-labelledby="personal-title">
+                    <div class="section-heading">
+                        <div>
+                            <h2 class="section-title" id="personal-title">Informações pessoais</h2>
+                            <p class="section-description">Esses dados acompanham sua conta em todos os dispositivos.</p>
                         </div>
                     </div>
 
-                    <form class="form-grid" id="profileForm">
-                        <div class="form-group">
-                            <label class="form-label" for="nome">Nome Completo</label>
-                            <input type="text" id="nome" class="form-input" value="João Silva">
+                    <div class="avatar-section">
+                        <div class="avatar-container">
+                            <div class="profile-avatar" id="profile-avatar" aria-label="Avatar do usuário">US</div>
+                            <button class="avatar-upload" id="avatar-upload-trigger" type="button" aria-label="Alterar foto de perfil">
+                                <i data-lucide="camera" aria-hidden="true"></i>
+                            </button>
                         </div>
-                        
+                        <div class="avatar-info">
+                            <h3 id="profile-name-display">Carregando perfil...</h3>
+                            <p id="profile-email-display">Aguarde um instante</p>
+                            <span class="profile-role">Aluno UniSales</span>
+                            <div class="avatar-actions">
+                                <button class="btn btn-primary" id="change-photo-btn" type="button">
+                                    <i data-lucide="upload" aria-hidden="true"></i>
+                                    <span>Alterar foto</span>
+                                </button>
+                                <button class="btn btn-secondary" id="remove-photo-btn" type="button">
+                                    <i data-lucide="trash-2" aria-hidden="true"></i>
+                                    <span>Remover</span>
+                                </button>
+                            </div>
+                            <p class="field-hint">JPG, PNG ou WebP, com no máximo 2 MB.</p>
+                        </div>
+                    </div>
+
+                    <form class="form-grid" id="profileForm" novalidate>
+                        <div class="form-group">
+                            <label class="form-label" for="nome">Nome completo</label>
+                            <input type="text" id="nome" class="form-input" autocomplete="name" minlength="2" maxlength="120" required>
+                        </div>
+
                         <div class="form-group">
                             <label class="form-label" for="email">E-mail</label>
-                            <input type="email" id="email" class="form-input" value="joao.silva@unisales.com.br">
+                            <input type="email" id="email" class="form-input" autocomplete="email" inputmode="email" maxlength="320" required>
+                            <p class="field-hint">A alteração pode exigir confirmação no novo endereço.</p>
                         </div>
                     </form>
                 </section>
 
-                <section id="preferencias" class="profile-info-section is-hidden">
-                    <h2 class="section-title">Preferências</h2>
-                    
+                <section id="preferencias" class="profile-info-section is-hidden" aria-labelledby="appearance-title">
+                    <div class="section-heading">
+                        <div>
+                            <h2 class="section-title" id="appearance-title">Aparência</h2>
+                            <p class="section-description">A preferência de tema fica salva neste dispositivo.</p>
+                        </div>
+                    </div>
+
                     <div class="preferences-grid">
                         <div class="preference-item">
                             <div class="preference-info">
-                                <h4>Modo Escuro</h4>
-                                <p>Ativar o tema escuro para melhor experiência visual</p>
+                                <h3>Modo escuro</h3>
+                                <p>Alterne entre os temas claro e escuro da plataforma.</p>
                             </div>
                             <label class="switch">
+                                <span class="sr-only">Ativar modo escuro</span>
                                 <input type="checkbox" id="theme-toggle-switch">
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        
-                        <div class="preference-item">
-                            <div class="preference-info">
-                                <h4>Idioma</h4>
-                                <p>Selecione o idioma preferido para a interface</p>
-                            </div>
-                            <select class="form-select select-inline">
-                                <option value="pt">Português (Brasil)</option>
-                                <option value="en">English</option>
-                                <option value="es">Español</option>
-                            </select>
-                        </div>
-                        
-                        <div class="preference-item">
-                            <div class="preference-info">
-                                <h4>Fuso Horário</h4>
-                                <p>Defina seu fuso horário para notificações precisas</p>
-                            </div>
-                            <select class="form-select select-inline">
-                                <option value="brt">Brasília (GMT-3)</option>
-                                <option value="est">Eastern Time (GMT-5)</option>
-                                <option value="pst">Pacific Time (GMT-8)</option>
-                            </select>
-                        </div>
-                        
-                        <div class="preference-item">
-                            <div class="preference-info">
-                                <h4>Compactar Sidebar</h4>
-                                <p>Reduzir automaticamente a sidebar ao navegar</p>
-                            </div>
-                            <label class="switch">
-                                <input type="checkbox">
-                                <span class="slider"></span>
+                                <span class="slider" aria-hidden="true"></span>
                             </label>
                         </div>
                     </div>
                 </section>
 
-                <section id="seguranca" class="profile-info-section is-hidden">
-                    <h2 class="section-title">Segurança</h2>
-                    
-                    <form class="form-grid">
-                        <div class="form-group">
-                            <label class="form-label" for="senha-atual">Senha Atual</label>
-                            <input type="password" id="senha-atual" class="form-input" placeholder="Digite sua senha atual">
+                <section id="seguranca" class="profile-info-section is-hidden" aria-labelledby="security-title">
+                    <div class="section-heading">
+                        <div>
+                            <h2 class="section-title" id="security-title">Segurança</h2>
+                            <p class="section-description">Confirme sua senha atual antes de definir uma nova.</p>
                         </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label" for="nova-senha">Nova Senha</label>
-                            <input type="password" id="nova-senha" class="form-input" placeholder="Digite a nova senha">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label" for="confirmar-senha">Confirmar Senha</label>
-                            <input type="password" id="confirmar-senha" class="form-input" placeholder="Confirme a nova senha">
-                        </div>
-                        
+                    </div>
+
+                    <form class="form-grid" id="passwordForm" novalidate>
                         <div class="form-group full-width">
-                            <div class="preference-item">
-                                <div class="preference-info">
-                                    <h4>Autenticação de Dois Fatores</h4>
-                                    <p>Adicione uma camada extra de segurança à sua conta</p>
-                                </div>
-                                <label class="switch">
-                                    <input type="checkbox">
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
+                            <label class="form-label" for="senha-atual">Senha atual</label>
+                            <input type="password" id="senha-atual" class="form-input" autocomplete="current-password" required>
                         </div>
-                        
-                        <div class="form-group full-width">
-                            <div class="preference-item">
-                                <div class="preference-info">
-                                    <h4>Sessões Ativas</h4>
-                                    <p>Veja e gerencie seus dispositivos conectados</p>
-                                </div>
-                                <button class="btn btn-secondary" type="button">Gerenciar Sessões</button>
-                            </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="nova-senha">Nova senha</label>
+                            <input type="password" id="nova-senha" class="form-input" autocomplete="new-password" minlength="8" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="confirmar-senha">Confirmar nova senha</label>
+                            <input type="password" id="confirmar-senha" class="form-input" autocomplete="new-password" minlength="8" required>
                         </div>
                     </form>
                 </section>
 
-                <section id="notificacoes" class="profile-info-section is-hidden">
-                    <h2 class="section-title">Notificações</h2>
-                    <p class="section-empty">Configurações de notificações em desenvolvimento...</p>
-                </section>
-
-                <section id="privacidade" class="profile-info-section is-hidden">
-                    <h2 class="section-title">Privacidade</h2>
-                    <p class="section-empty">Configurações de privacidade em desenvolvimento...</p>
-                </section>
-
-                <div class="actions-section">
+                <div class="actions-section" id="actions-section">
                     <div class="action-buttons">
                         <button class="btn btn-secondary" id="cancelProfileChanges" type="button">
-                            <i data-lucide="x"></i>
-                            Cancelar
+                            <i data-lucide="rotate-ccw" aria-hidden="true"></i>
+                            <span>Cancelar</span>
                         </button>
                         <button class="btn btn-primary" id="saveProfileChanges" type="button">
-                            <i data-lucide="check"></i>
-                            Salvar Alterações
+                            <i data-lucide="check" aria-hidden="true"></i>
+                            <span id="save-action-label">Salvar alterações</span>
                         </button>
                     </div>
                 </div>
             </main>
         </div>
     </div>
-    
+
+    <div id="profile-status" class="sr-only" aria-live="polite"></div>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../../js/config.js"></script>
     <script src="../../js/auth.js"></script>
     <script src="../../js/profile.js"></script>
-    <script src="../../js/notifications.js"></script>
     <script src="../script-interno.js"></script>
     <script src="../script-profile-sync.js"></script>
-    <script src="../script-page-state.js"></script>
     <script src="configuracoes.js"></script>
 </body>
 </html>
