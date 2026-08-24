@@ -81,3 +81,33 @@
   font-size: 0.75rem;
   color: var(--text-muted);
 }
+
+.recent-activity-section {
+  margin-block: var(--spacing-xl);
+}
+
+.activity-content {
+  min-width: 0;
+}
+
+.activity-content h4,
+.activity-content p {
+  overflow-wrap: anywhere;
+}
+
+.activity-empty {
+  margin: 0;
+  padding: var(--spacing-xl);
+  color: var(--text-muted);
+  text-align: center;
+  background: var(--bg-secondary);
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-lg);
+}
+
+@media (max-width: 767px) {
+  .activity-item {
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+  }
+}
