@@ -29,8 +29,8 @@
             fetch(rawBase + "platform/CONFIGURACOES%20PERFIL/configuracoes.css").then(function (response) { return response.text(); })
         ]).then(function (files) {
             var markup = files[0]
-                .replace(/<script[\\s\\S]*?<\\/script>/gi, "")
-                .replace(/<link rel="stylesheet" href="configuracoes\\.css">/i, "")
+                .replace(/<script[\s\S]*?<\/script>/gi, "")
+                .replace(/<link rel="stylesheet" href="configuracoes\.css">/i, "")
                 .replace("</head>", "<style>" + files[1] + "</style></head>");
             document.querySelectorAll("iframe[data-profile-preview]").forEach(function (frame) {
                 frame.srcdoc = markup;
