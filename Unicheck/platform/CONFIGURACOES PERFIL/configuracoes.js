@@ -7,6 +7,7 @@
         profile: {
             nome: "",
             email: "",
+            ra: "",
             foto_url: null,
             avatarImage: null,
             avatarText: "US"
@@ -46,6 +47,7 @@
         return {
             nome: profile?.nome || "",
             email: profile?.email || "",
+            ra: profile?.ra || "",
             foto_url: profile?.foto_url || null,
             avatarImage: profile?.foto_url || profile?.avatarImage || null,
             avatarText: profile?.avatarText || getInitials(profile?.nome, profile?.email)
@@ -101,11 +103,13 @@
     function updateProfileView() {
         const nomeField = document.getElementById("nome");
         const emailField = document.getElementById("email");
+        const raField = document.getElementById("ra");
         const nameDisplay = document.getElementById("profile-name-display");
         const emailDisplay = document.getElementById("profile-email-display");
 
         if (nomeField) nomeField.value = state.profile.nome || "";
         if (emailField) emailField.value = state.profile.email || "";
+        if (raField) raField.value = state.profile.ra || "";
         if (nameDisplay) nameDisplay.textContent = state.profile.nome || "Usuario";
         if (emailDisplay) emailDisplay.textContent = state.profile.email || "E-mail indisponivel";
 
@@ -195,6 +199,7 @@
         const nextProfile = {
             nome: document.getElementById("nome")?.value.trim() || "",
             email: document.getElementById("email")?.value.trim() || "",
+            ra: document.getElementById("ra")?.value.trim() || "",
             foto_url: state.profile.foto_url
         };
 
@@ -222,6 +227,13 @@
             } else {
                 showNotification("Perfil atualizado com sucesso.", "success");
             }
+
+            const user = await getAuthenticatedUser();
+            void window.UniCheckActivity?.record?.(user.id, {
+                type: "profile_updated",
+                title: "Atualizou as configuracoes do perfil",
+                context: "Dados pessoais"
+            });
 
             return true;
         } catch (error) {
