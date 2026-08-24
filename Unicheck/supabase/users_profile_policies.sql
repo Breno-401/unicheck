@@ -13,20 +13,20 @@ create policy "users_profile_select_own"
 on public.users_profile
 for select
 to authenticated
-using (id = auth.uid());
+using (id = (select auth.uid()));
 
 create policy "users_profile_insert_own"
 on public.users_profile
 for insert
 to authenticated
-with check (id = auth.uid());
+with check (id = (select auth.uid()));
 
 create policy "users_profile_update_own"
 on public.users_profile
 for update
 to authenticated
-using (id = auth.uid())
-with check (id = auth.uid());
+using (id = (select auth.uid()))
+with check (id = (select auth.uid()));
 
 revoke all on public.users_profile from anon;
 revoke all on public.users_profile from authenticated;
