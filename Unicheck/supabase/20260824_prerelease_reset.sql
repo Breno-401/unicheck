@@ -113,6 +113,8 @@ begin
 end;
 $$;
 
+revoke all on function public.set_updated_at() from public, anon, authenticated;
+
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
@@ -145,6 +147,10 @@ begin
 end;
 $$;
 
+-- The function is invoked only by the auth.users trigger. Keeping EXECUTE away
+-- from API roles prevents clients from calling a SECURITY DEFINER function.
+revoke all on function public.handle_new_user() from public, anon, authenticated;
+
 create trigger set_users_profile_updated_at
 before update on public.users_profile
 for each row
@@ -162,8 +168,8 @@ execute function public.handle_new_user();
 
 create index user_checklist_progress_user_updated_at_idx
     on public.user_checklist_item_progress (user_id, updated_at desc);
-create index user_checklist_progress_checklist_item_idx
-    on public.user_checklist_item_progress (checklist_item_id);
+create index user_checklist_progress_item_checklist_fk_idx
+    on public.user_checklist_item_progress (checklist_id, checklist_item_id);
 create index user_activity_user_created_at_idx
     on public.user_activity (user_id, created_at desc);
 create index user_notifications_user_created_at_idx
@@ -339,16 +345,13 @@ set public = excluded.public,
     file_size_limit = excluded.file_size_limit,
     allowed_mime_types = excluded.allowed_mime_types;
 
-drop policy if exists "avatars_public_read" on storage.objects;
 drop policy if exists "avatars_insert_own" on storage.objects;
 drop policy if exists "avatars_update_own" on storage.objects;
 drop policy if exists "avatars_delete_own" on storage.objects;
 
-create policy "avatars_public_read"
-on storage.objects
-for select
-to public
-using (bucket_id = 'avatars');
+-- Public delivery is provided by the public bucket URL. A SELECT policy is
+-- intentionally omitted so clients cannot enumerate every stored avatar.
+drop policy if exists "avatars_public_read" on storage.objects;
 
 create policy "avatars_insert_own"
 on storage.objects
