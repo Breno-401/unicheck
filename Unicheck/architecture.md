@@ -95,9 +95,10 @@ Na pratica, a landing explica o produto e leva o usuario para autenticacao. A ar
 
 ### Backend e banco
 
+- [`supabase/00_inventory.sql`](./supabase/00_inventory.sql)
 - [`supabase/checklist_progress_and_seed.sql`](./supabase/checklist_progress_and_seed.sql)
-- [`supabase/users_profile_policies.sql`](./supabase/users_profile_policies.sql)
-- [`supabase/20260816_create_user_platform_favorites.sql`](./supabase/20260816_create_user_platform_favorites.sql)
+- [`supabase/20260824_prerelease_reset.sql`](./supabase/20260824_prerelease_reset.sql)
+- [`supabase/20260824_post_reset_validation.sql`](./supabase/20260824_post_reset_validation.sql)
 
 ## 6. Fluxo funcional do sistema
 
@@ -271,11 +272,13 @@ Arquivos principais:
 
 Fluxo:
 
-- mostra dados pessoais do usuario;
-- permite trocar nome, email e foto;
-- permite salvar a foto como base64 no estado atual do frontend;
-- permite alterar senha via Supabase Auth;
-- permite alternar entre secoes internas de configuracao.
+- carrega e persiste nome e email em `users_profile`, usando `id = auth.users.id`;
+- mantem no perfil somente o email confirmado pelo Supabase Auth;
+- envia JPG, PNG ou WebP de ate 2 MB para o bucket `avatars`, isolado pela pasta do usuario;
+- exige reautenticacao com a senha atual antes de alterar a senha;
+- oferece apenas as secoes funcionais de dados pessoais, aparencia e seguranca;
+- usa grid fluido no desktop, reduz a navegacao no tablet e empilha formulario, avatar e acoes no mobile;
+- nao usa `overflow-x: hidden` como correcao e nao possui larguras fixas maiores que a viewport em 320–390 px.
 
 ### 6.7 Ajuda e Suporte
 
@@ -516,14 +519,11 @@ O projeto funciona, mas existem inconsistencias tecnicas que precisam ser conhec
 - O cache local do checklist e separado por usuario autenticado para evitar vazamento de progresso entre contas no mesmo navegador.
 - Consultas do checklist possuem timeout de 30 segundos e registram `message`, `code`, `details` e `hint` no console quando o Supabase retorna erro.
 - Consultas e gravacoes de atividade possuem timeout de 15 segundos, sem polling ou retries agressivos; novas oportunidades ocorrem na inicializacao, em novas interacoes e no evento `online`.
-- [`supabase/20260816_create_user_activity.sql`](./supabase/20260816_create_user_activity.sql) cria `user_activity`, indice de leitura recente e policies RLS somente para `SELECT` e `INSERT` do proprio usuario. A migration deve ser executada manualmente.
-- [`supabase/20260816_create_user_notifications.sql`](./supabase/20260816_create_user_notifications.sql) cria `user_notifications`, indice, idempotencia por evento e policies RLS para leitura/insercao proprias e atualizacao exclusiva de `read`. A migration deve ser executada manualmente.
-- [`supabase/20260816_create_user_platform_favorites.sql`](./supabase/20260816_create_user_platform_favorites.sql) cria `user_platform_favorites` com chave primaria composta, FK para `auth.users`, RLS e policies proprias de `SELECT`, `INSERT` e `DELETE`. A migration deve ser executada manualmente.
-- [`supabase/checklist_rls_policies.sql`](./supabase/checklist_rls_policies.sql) restaura policies explicitas: usuarios autenticados leem as definicoes e cada usuario le e grava somente o proprio progresso. O arquivo precisa ser aplicado manualmente no projeto remoto.
-- [`supabase/20260824_consolidate_legacy_schema.sql`](./supabase/20260824_consolidate_legacy_schema.sql) migra registros ainda exclusivos das tabelas antigas, bloqueia seu acesso pela Data API e as preserva temporariamente para verificacao.
-- [`supabase/20260824_harden_functions_and_indexes.sql`](./supabase/20260824_harden_functions_and_indexes.sql) fixa o `search_path` das funcoes publicas e cria os indices de FKs apontados pelo Performance Advisor.
-- [`supabase/AUDIT_2026-08-24.md`](./supabase/AUDIT_2026-08-24.md) registra o inventario do projeto remoto, os riscos encontrados, a ordem de aplicacao e os criterios de aceite; as migrations continuam pendentes de execucao no Supabase.
-- [`js/profile.js`](./js/profile.js) e [`supabase/users_profile_policies.sql`](./supabase/users_profile_policies.sql) estao alinhados em `users_profile.id` como chave primaria e relacionamento com `auth.users.id`.
+- [`supabase/20260824_prerelease_reset.sql`](./supabase/20260824_prerelease_reset.sql) remove as tres tabelas legadas, recria vazias as estruturas canônicas de usuario e centraliza RLS, grants, triggers, indices e Storage.
+- O reset preserva `auth.users`, `checklists` e `checklist_items`; nenhum historico de desenvolvimento e migrado.
+- [`supabase/20260824_post_reset_validation.sql`](./supabase/20260824_post_reset_validation.sql) valida contagens, ausencia do legado, RLS, grants, funcoes, trigger e bucket de avatar.
+- [`supabase/AUDIT_2026-08-24.md`](./supabase/AUDIT_2026-08-24.md) registra o inventario remoto, a decisao de descartar dados de teste e os criterios de aceite.
+- [`js/profile.js`](./js/profile.js) e o reset estao alinhados em `users_profile.id` como chave primaria e relacionamento com `auth.users.id`.
 - O total atual e 630 XP para 28 tarefas e 7 fases. Novas fontes devem ser adicionadas na configuracao de [`js/progression.js`](./js/progression.js), sem espalhar valores pelos consumidores.
 - Alguns documentos auxiliares em `platform/PLATAFORMAS/` e `platform/CHECKLIST ACADEMICO/` descrevem funcionalidades de forma mais antiga do que o comportamento atual do codigo.
 
