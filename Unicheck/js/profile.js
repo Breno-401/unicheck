@@ -121,9 +121,10 @@
             return profile;
         }
 
+        const metadataName = (user.user_metadata?.full_name || "").trim();
         const baseProfile = {
             [PROFILE_USER_ID_COLUMN]: user.id,
-            nome: user.user_metadata?.full_name || user.email?.split("@")[0] || "Usuario",
+            nome: metadataName.length >= 2 ? metadataName : "Usuario",
             email: user.email || "",
             foto_url: user.user_metadata?.photo_url || null
         };
@@ -185,7 +186,7 @@
             updatePayload.email = cleanProfile.email;
         }
 
-        const { error: authError } = await client.auth.updateUser(updatePayload);
+        const { data: authData, error: authError } = await client.auth.updateUser(updatePayload);
         if (authError) {
             console.error("[UniCheckProfile] Erro ao atualizar auth.users", {
                 userId: user.id || null,
@@ -193,6 +194,15 @@
             });
             throw authError;
         }
+
+        // Com confirmacao de troca de e-mail habilitada, auth.users continua
+        // retornando o endereco atual ate o usuario confirmar o novo.
+        const confirmedEmail = authData?.user?.email || user.email || cleanProfile.email;
+        const persistedProfile = {
+            nome: cleanProfile.nome,
+            email: confirmedEmail,
+            foto_url: cleanProfile.foto_url
+        };
 
         let data = null;
         let tableError = null;
@@ -203,7 +213,7 @@
                 .upsert(
                     {
                         [PROFILE_USER_ID_COLUMN]: user.id,
-                        ...cleanProfile
+                        ...persistedProfile
                     },
                     { onConflict: PROFILE_USER_ID_COLUMN }
                 )
@@ -214,17 +224,18 @@
         }
 
         if (tableError) {
-            console.warn("[UniCheckProfile] Falha ao atualizar users_profile, mantendo perfil local.", {
+            console.error("[UniCheckProfile] Falha ao atualizar users_profile.", {
                 userId: user.id || null,
                 message: tableError?.message || tableError
             });
+            throw tableError;
         }
 
-        const profile = normalizeProfile(data || cleanProfile, {
-            ...user,
-            email: cleanProfile.email || user.email,
+        const profile = normalizeProfile(data || persistedProfile, {
+            ...(authData?.user || user),
+            email: confirmedEmail,
             user_metadata: {
-                ...(user.user_metadata || {}),
+                ...(authData?.user?.user_metadata || user.user_metadata || {}),
                 full_name: cleanProfile.nome,
                 photo_url: cleanProfile.foto_url
             }
