@@ -51,7 +51,7 @@ O reset e a validação abaixo já foram executados em 2026-08-24. A ordem perma
 12. novo login;
 13. confirmar restauração dos dados.
 
-Depois, usar uma segunda conta para confirmar que nenhum dado da primeira pode ser lido ou alterado. Esse roteiro A/B foi executado após o reset e está registrado em `AUDIT_2026-08-24.md`.
+Depois, usar uma segunda conta para confirmar que nenhum dado da primeira pode ser lido ou alterado. O isolamento A/B, a criação automática de perfil e a persistência após refresh foram executados após o reset e estão registrados em `AUDIT_2026-08-24.md`. Logout seguido de novo login e upload real de avatar permanecem como smoke test do preview do Netlify.
 
 ## Segurança esperada
 
