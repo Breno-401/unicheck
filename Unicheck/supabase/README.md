@@ -18,9 +18,10 @@ Esta pasta é a fonte versionada das alterações do banco. Mudanças feitas dir
 5. Executar `20260816_create_user_notifications.sql`.
 6. Executar `20260816_create_user_platform_favorites.sql`.
 7. Executar `checklist_rls_policies.sql`.
-8. Validar os acessos com dois usuários diferentes.
+8. Executar `20260824_consolidate_legacy_schema.sql`.
+9. Validar os acessos com dois usuários diferentes.
 
-Os scripts de políticas usam `drop policy if exists` seguido de `create policy`, permitindo reaplicação controlada. Os scripts não apagam registros das tabelas.
+Os scripts de políticas usam `drop policy if exists` seguido de `create policy`, permitindo reaplicação controlada. A consolidação migra dados ainda exclusivos das tabelas antigas, desativa o acesso delas pela Data API e mantém seus registros para verificação; nenhuma tabela ou linha é apagada.
 
 ## Regras de segurança
 
