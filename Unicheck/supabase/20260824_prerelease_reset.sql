@@ -123,11 +123,11 @@ begin
     insert into public.users_profile (id, nome, email, foto_url)
     values (
         new.id,
-        coalesce(
-            nullif(trim(new.raw_user_meta_data ->> 'full_name'), ''),
-            split_part(new.email, '@', 1),
-            'Usuario'
-        ),
+        case
+            when char_length(trim(coalesce(new.raw_user_meta_data ->> 'full_name', ''))) between 2 and 120
+                then trim(new.raw_user_meta_data ->> 'full_name')
+            else 'Usuario'
+        end,
         new.email,
         nullif(
             coalesce(
