@@ -19,7 +19,11 @@ Esta pasta é a fonte versionada das alterações do banco. Mudanças feitas dir
 6. Executar `20260816_create_user_platform_favorites.sql`.
 7. Executar `checklist_rls_policies.sql`.
 8. Executar `20260824_consolidate_legacy_schema.sql`.
-9. Validar os acessos com dois usuários diferentes.
+9. Executar `20260824_harden_functions_and_indexes.sql`.
+10. Reexecutar os Advisors de segurança e desempenho.
+11. Validar os acessos com dois usuários diferentes.
+
+Consulte [`AUDIT_2026-08-24.md`](./AUDIT_2026-08-24.md) para o inventário remoto, os riscos encontrados e os critérios de aceite.
 
 Os scripts de políticas usam `drop policy if exists` seguido de `create policy`, permitindo reaplicação controlada. A consolidação migra dados ainda exclusivos das tabelas antigas, desativa o acesso delas pela Data API e mantém seus registros para verificação; nenhuma tabela ou linha é apagada.
 
@@ -28,7 +32,7 @@ Os scripts de políticas usam `drop policy if exists` seguido de `create policy`
 - O navegador usa somente a chave pública `anon/publishable`.
 - A chave `service_role` nunca deve aparecer no frontend ou no repositório.
 - Toda tabela com dados do aluno deve ter RLS habilitado.
-- Policies de dados pessoais devem comparar `auth.uid()` com `user_id`.
+- Policies de dados pessoais devem comparar `(select auth.uid())` com a chave da conta (`id` em `users_profile`, `user_id` nas demais tabelas).
 - Definições de checklist são somente leitura para usuários autenticados.
 - Notificações permitem ao cliente atualizar apenas a coluna `read`.
 - Atividades não podem ser alteradas ou apagadas pelo cliente.
