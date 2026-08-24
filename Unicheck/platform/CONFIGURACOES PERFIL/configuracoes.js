@@ -1,397 +1,526 @@
-let userProfile = {
-    nome: "",
-    email: "",
-    foto_url: null,
-    avatarImage: null,
-    avatarText: "US"
-};
+(function () {
+    const AVATAR_BUCKET = "avatars";
+    const MAX_AVATAR_SIZE = 2 * 1024 * 1024;
+    const ALLOWED_AVATAR_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
-function initializeTheme() {
-    try {
+    const state = {
+        profile: {
+            nome: "",
+            email: "",
+            foto_url: null,
+            avatarImage: null,
+            avatarText: "US"
+        },
+        initialProfile: null,
+        pendingPhotoFile: null,
+        photoRemoved: false,
+        previewObjectUrl: null,
+        activeSection: "informacoes-pessoais",
+        busy: false
+    };
+
+    function getClient() {
+        const client = window.UniCheckSupabase?.client;
+        if (!client) {
+            throw new Error("Supabase nao configurado.");
+        }
+        return client;
+    }
+
+    async function getAuthenticatedUser() {
+        const { data, error } = await getClient().auth.getUser();
+        if (error) throw error;
+        if (!data.user) throw new Error("Nenhum usuario autenticado.");
+        return data.user;
+    }
+
+    function getInitials(name, email) {
+        const source = (name || email || "Usuario").trim();
+        const parts = source.split(/\s+/).filter(Boolean);
+        return parts.slice(0, 2).map(function (part) {
+            return part[0]?.toUpperCase() || "";
+        }).join("") || "US";
+    }
+
+    function cloneProfile(profile) {
+        return {
+            nome: profile?.nome || "",
+            email: profile?.email || "",
+            foto_url: profile?.foto_url || null,
+            avatarImage: profile?.foto_url || profile?.avatarImage || null,
+            avatarText: profile?.avatarText || getInitials(profile?.nome, profile?.email)
+        };
+    }
+
+    function revokePreviewUrl() {
+        if (state.previewObjectUrl) {
+            URL.revokeObjectURL(state.previewObjectUrl);
+            state.previewObjectUrl = null;
+        }
+    }
+
+    function initializeTheme() {
         const themeKey = window.UniCheckConfig?.STORAGE_KEYS?.THEME || "theme";
         const savedTheme = localStorage.getItem(themeKey) ||
             (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
 
+        document.documentElement.setAttribute("data-theme", savedTheme);
         document.body.setAttribute("data-theme", savedTheme);
-        updateThemeToggleState(savedTheme);
-    } catch (error) {
-        console.warn("Erro ao inicializar tema:", error);
-        document.body.setAttribute("data-theme", "light");
+
+        const toggle = document.getElementById("theme-toggle-switch");
+        if (toggle) toggle.checked = savedTheme === "dark";
     }
-}
 
-function updateThemeToggleState(theme) {
-    const darkModeToggle = document.querySelector("#preferencias .switch input[type='checkbox']");
-    if (!darkModeToggle) return;
-
-    const newToggle = darkModeToggle.cloneNode(true);
-    darkModeToggle.parentNode.replaceChild(newToggle, darkModeToggle);
-    newToggle.checked = theme === "dark";
-    newToggle.addEventListener("change", handleThemeToggle);
-}
-
-function handleThemeToggle(event) {
-    try {
-        const newTheme = event.target.checked ? "dark" : "light";
+    function handleThemeToggle(event) {
+        const theme = event.target.checked ? "dark" : "light";
         const themeKey = window.UniCheckConfig?.STORAGE_KEYS?.THEME || "theme";
-        document.body.setAttribute("data-theme", newTheme);
-        localStorage.setItem(themeKey, newTheme);
-        showNotification(`Modo ${newTheme === "dark" ? "escuro" : "claro"} ativado`, "success");
-    } catch (error) {
-        console.error("Erro ao alternar tema:", error);
-    }
-}
 
-function setupThemeToggle() {
-    const themeToggle = document.querySelector("#preferencias .switch input[type='checkbox']");
-    if (!themeToggle) return;
-    themeToggle.removeEventListener("change", handleThemeToggle);
-    themeToggle.addEventListener("change", handleThemeToggle);
-}
-
-function getInitials(name, email) {
-    const source = (name || email || "Usuario").trim();
-    const parts = source.split(/\s+/).filter(Boolean);
-    return parts.slice(0, 2).map(part => part[0]?.toUpperCase() || "").join("") || "US";
-}
-
-function updateAvatarDisplay() {
-    const avatar = document.getElementById("profile-avatar");
-    if (!avatar) return;
-
-    if (userProfile.avatarImage) {
-        avatar.style.backgroundImage = `url(${userProfile.avatarImage})`;
-        avatar.style.backgroundSize = "cover";
-        avatar.style.backgroundPosition = "center";
-        avatar.textContent = "";
-        return;
+        document.documentElement.setAttribute("data-theme", theme);
+        document.body.setAttribute("data-theme", theme);
+        localStorage.setItem(themeKey, theme);
+        showNotification("Tema " + (theme === "dark" ? "escuro" : "claro") + " ativado.", "success");
     }
 
-    avatar.style.backgroundImage = "none";
-    avatar.style.backgroundSize = "";
-    avatar.style.backgroundPosition = "";
-    avatar.textContent = userProfile.avatarText || "US";
-}
+    function updateAvatarDisplay() {
+        const avatar = document.getElementById("profile-avatar");
+        if (!avatar) return;
 
-function updateFormFields() {
-    const nomeField = document.getElementById("nome");
-    const emailField = document.getElementById("email");
-    const profileNameDisplay = document.getElementById("profile-name-display");
-
-    if (nomeField) nomeField.value = userProfile.nome || "";
-    if (emailField) emailField.value = userProfile.email || "";
-    if (profileNameDisplay) profileNameDisplay.textContent = userProfile.nome || "Usuario";
-
-    updateAvatarDisplay();
-}
-
-function validateProfileData(profile) {
-    if (!profile.nome || profile.nome.trim().length < 3) {
-        showNotification("Nome deve ter pelo menos 3 caracteres.", "error");
-        return false;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(profile.email || "")) {
-        showNotification("Informe um e-mail valido.", "error");
-        return false;
-    }
-
-    return true;
-}
-
-async function loadProfileData() {
-    try {
-        const profile = await window.UniCheckProfile.getMyProfile();
-        userProfile = {
-            ...userProfile,
-            ...profile,
-            avatarImage: profile.foto_url || profile.avatarImage || null,
-            avatarText: profile.avatarText || getInitials(profile.nome, profile.email)
-        };
-        updateFormFields();
-    } catch (error) {
-        console.error("Erro ao carregar perfil:", error);
-        showNotification("Nao foi possivel carregar seu perfil.", "error");
-    }
-}
-
-async function saveProfileData() {
-    const nomeField = document.getElementById("nome");
-    const emailField = document.getElementById("email");
-
-    const nextProfile = {
-        nome: nomeField ? nomeField.value.trim() : userProfile.nome,
-        email: emailField ? emailField.value.trim() : userProfile.email,
-        foto_url: userProfile.avatarImage || null
-    };
-
-    if (!validateProfileData(nextProfile)) {
-        return false;
-    }
-
-    try {
-        const savedProfile = await window.UniCheckProfile.updateMyProfile(nextProfile);
-        userProfile = {
-            ...userProfile,
-            ...savedProfile,
-            avatarImage: savedProfile.foto_url || null,
-            avatarText: savedProfile.avatarText || getInitials(savedProfile.nome, savedProfile.email)
-        };
-        updateFormFields();
-
-        if (nextProfile.email !== savedProfile.email) {
-            showNotification("Perfil salvo. Confirme o novo e-mail no fluxo do Supabase, se solicitado.", "info");
-        } else {
-            showNotification("Perfil atualizado com sucesso!", "success");
-        }
-
-        return true;
-    } catch (error) {
-        console.error("Erro ao salvar perfil:", error);
-        showNotification(
-            window.UniCheckAuth?.normalizeErrorMessage?.(error) || "Nao foi possivel salvar seu perfil.",
-            "error"
-        );
-        return false;
-    }
-}
-
-function setupPhotoUpload() {
-    const fileInput = document.createElement("input");
-    fileInput.type = "file";
-    fileInput.accept = "image/*";
-    fileInput.style.display = "none";
-    fileInput.id = "avatar-file-input";
-    document.body.appendChild(fileInput);
-
-    const openPicker = event => {
-        event.preventDefault();
-        fileInput.click();
-    };
-
-    const changePhotoBtn = document.getElementById("change-photo-btn");
-    if (changePhotoBtn) {
-        changePhotoBtn.addEventListener("click", openPicker);
-    }
-
-    const cameraIcon = document.getElementById("avatar-upload-trigger");
-    if (cameraIcon) {
-        cameraIcon.addEventListener("click", openPicker);
-        cameraIcon.style.cursor = "pointer";
-    }
-
-    fileInput.addEventListener("change", event => {
-        const file = event.target.files?.[0];
-        if (!file) return;
-        handlePhotoUpload(file);
-        fileInput.value = "";
-    });
-
-    const removePhotoBtn = document.getElementById("remove-photo-btn");
-    if (removePhotoBtn) {
-        removePhotoBtn.addEventListener("click", event => {
-            event.preventDefault();
-            userProfile.avatarImage = null;
-            userProfile.foto_url = null;
-            updateAvatarDisplay();
-            showNotification("Foto removida. Clique em salvar para confirmar.", "info");
-        });
-    }
-}
-
-function handlePhotoUpload(file) {
-    if (!file.type.startsWith("image/")) {
-        showNotification("Selecione uma imagem valida.", "error");
-        return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-        showNotification("A imagem deve ter no maximo 5MB.", "error");
-        return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = event => {
-        const imageUrl = event.target?.result;
-        if (typeof imageUrl !== "string") {
-            showNotification("Nao foi possivel processar a imagem.", "error");
+        const imageUrl = state.profile.avatarImage || state.profile.foto_url;
+        if (imageUrl) {
+            avatar.style.backgroundImage = "url('" + String(imageUrl).replaceAll("'", "%27") + "')";
+            avatar.textContent = "";
+            avatar.setAttribute("aria-label", "Foto de perfil de " + (state.profile.nome || "usuario"));
             return;
         }
 
-        userProfile.avatarImage = imageUrl;
-        userProfile.foto_url = imageUrl;
+        avatar.style.backgroundImage = "none";
+        avatar.textContent = state.profile.avatarText || getInitials(state.profile.nome, state.profile.email);
+        avatar.setAttribute("aria-label", "Iniciais de " + (state.profile.nome || "usuario"));
+    }
+
+    function updateProfileView() {
+        const nomeField = document.getElementById("nome");
+        const emailField = document.getElementById("email");
+        const nameDisplay = document.getElementById("profile-name-display");
+        const emailDisplay = document.getElementById("profile-email-display");
+
+        if (nomeField) nomeField.value = state.profile.nome || "";
+        if (emailField) emailField.value = state.profile.email || "";
+        if (nameDisplay) nameDisplay.textContent = state.profile.nome || "Usuario";
+        if (emailDisplay) emailDisplay.textContent = state.profile.email || "E-mail indisponivel";
+
+        state.profile.avatarText = getInitials(state.profile.nome, state.profile.email);
         updateAvatarDisplay();
-        showNotification("Foto pronta para salvar.", "success");
-    };
-    reader.onerror = () => {
-        showNotification("Erro ao carregar a imagem.", "error");
-    };
-    reader.readAsDataURL(file);
-}
-
-async function updatePassword() {
-    const senhaAtualField = document.getElementById("senha-atual");
-    const novaSenhaField = document.getElementById("nova-senha");
-    const confirmarSenhaField = document.getElementById("confirmar-senha");
-
-    const novaSenha = novaSenhaField ? novaSenhaField.value : "";
-    const confirmarSenha = confirmarSenhaField ? confirmarSenhaField.value : "";
-
-    if (!novaSenha || !confirmarSenha) {
-        showNotification("Preencha a nova senha e a confirmacao.", "error");
-        return false;
     }
 
-    if (novaSenha.length < 8) {
-        showNotification("A nova senha deve ter pelo menos 8 caracteres.", "error");
-        return false;
-    }
-
-    if (novaSenha !== confirmarSenha) {
-        showNotification("As senhas nao coincidem.", "error");
-        return false;
-    }
-
-    try {
-        const client = window.UniCheckSupabase?.client;
-        const { error } = await client.auth.updateUser({ password: novaSenha });
-        if (error) throw error;
-
-        if (senhaAtualField) senhaAtualField.value = "";
-        if (novaSenhaField) novaSenhaField.value = "";
-        if (confirmarSenhaField) confirmarSenhaField.value = "";
-
-        showNotification("Senha atualizada com sucesso!", "success");
-        return true;
-    } catch (error) {
-        console.error("Erro ao atualizar senha:", error);
-        showNotification("Nao foi possivel atualizar a senha.", "error");
-        return false;
-    }
-}
-
-function setupNavigation() {
-    document.querySelectorAll(".profile-menu-link").forEach(link => {
-        link.addEventListener("click", function (event) {
-            event.preventDefault();
-
-            document.querySelectorAll(".profile-menu-link").forEach(item => {
-                item.classList.remove("active");
-            });
-            this.classList.add("active");
-
-            document.querySelectorAll(".profile-info-section").forEach(section => {
-                section.classList.add("is-hidden");
-            });
-
-            const targetId = this.getAttribute("href").substring(1);
-            const targetSection = document.getElementById(targetId);
-            if (targetSection) {
-                targetSection.classList.remove("is-hidden");
-            }
-
-            setTimeout(() => {
-                if (typeof lucide !== "undefined") {
-                    lucide.createIcons();
-                }
-            }, 100);
-        });
-    });
-}
-
-function setupActionButtons() {
-    const saveButton = document.getElementById("saveProfileChanges");
-    if (saveButton) {
-        saveButton.addEventListener("click", async event => {
-            event.preventDefault();
-            const activeSection = document.querySelector(".profile-info-section:not(.is-hidden)");
-
-            if (activeSection?.id === "seguranca") {
-                await updatePassword();
-                return;
-            }
-
-            await saveProfileData();
+    function setBusy(isBusy) {
+        state.busy = isBusy;
+        document.querySelectorAll("button, input").forEach(function (element) {
+            if (element.id === "theme-toggle-switch") return;
+            element.disabled = isBusy;
         });
     }
 
-    const cancelButton = document.getElementById("cancelProfileChanges");
-    if (cancelButton) {
-        cancelButton.addEventListener("click", async event => {
-            event.preventDefault();
-            await loadProfileData();
-            showNotification("Alteracoes descartadas.", "info");
-        });
-    }
-}
-
-function showNotification(message, type = "info") {
-    const existingNotification = document.querySelector(".profile-notification");
-    if (existingNotification) {
-        existingNotification.remove();
-    }
-
-    const notification = document.createElement("div");
-    notification.className = `profile-notification notification-${type}`;
-    notification.innerHTML = `
-        <div class="notification-content">
-            <i data-lucide="${getNotificationIcon(type)}"></i>
-            <span>${message}</span>
-        </div>
-    `;
-
-    document.body.appendChild(notification);
-
-    if (typeof lucide !== "undefined") {
-        lucide.createIcons();
-    }
-
-    setTimeout(() => {
-        notification.classList.add("show");
-    }, 10);
-
-    setTimeout(() => {
-        notification.classList.remove("show");
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
-}
-
-function getNotificationIcon(type) {
-    const icons = {
-        success: "check-circle",
-        error: "alert-circle",
-        info: "info",
-        warning: "alert-triangle"
-    };
-    return icons[type] || "info";
-}
-
-async function initializeConfigPage() {
-    try {
-        if (typeof lucide !== "undefined") {
-            lucide.createIcons();
+    function validateProfile(profile) {
+        if (!profile.nome || profile.nome.trim().length < 2) {
+            showNotification("Informe um nome com pelo menos 2 caracteres.", "error");
+            return false;
         }
 
-        initializeTheme();
-        setupNavigation();
-        setupThemeToggle();
-        setupPhotoUpload();
-        setupActionButtons();
-        await loadProfileData();
-    } catch (error) {
-        console.error("Erro ao inicializar pagina de configuracoes:", error);
-    }
-}
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(profile.email || "")) {
+            showNotification("Informe um e-mail valido.", "error");
+            return false;
+        }
 
-if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initializeConfigPage);
-} else {
-    initializeConfigPage();
-}
-
-window.addEventListener("load", function () {
-    if (typeof lucide !== "undefined") {
-        lucide.createIcons();
+        return true;
     }
-});
+
+    async function loadProfileData() {
+        setBusy(true);
+        try {
+            const profile = await window.UniCheckProfile.getMyProfile();
+            state.profile = cloneProfile(profile);
+            state.initialProfile = cloneProfile(profile);
+            state.pendingPhotoFile = null;
+            state.photoRemoved = false;
+            revokePreviewUrl();
+            updateProfileView();
+        } catch (error) {
+            console.error("[ProfileSettings] Falha ao carregar perfil", error);
+            showNotification("Nao foi possivel carregar seu perfil.", "error");
+            throw error;
+        } finally {
+            setBusy(false);
+        }
+    }
+
+    async function uploadPendingAvatar() {
+        if (!state.pendingPhotoFile) {
+            return state.photoRemoved ? null : state.profile.foto_url;
+        }
+
+        const user = await getAuthenticatedUser();
+        const objectPath = user.id + "/avatar";
+        const { error } = await getClient()
+            .storage
+            .from(AVATAR_BUCKET)
+            .upload(objectPath, state.pendingPhotoFile, {
+                upsert: true,
+                contentType: state.pendingPhotoFile.type,
+                cacheControl: "3600"
+            });
+
+        if (error) throw error;
+
+        const { data } = getClient().storage.from(AVATAR_BUCKET).getPublicUrl(objectPath);
+        if (!data?.publicUrl) {
+            throw new Error("O Supabase nao retornou a URL publica do avatar.");
+        }
+
+        return data.publicUrl + "?v=" + Date.now();
+    }
+
+    async function removeStoredAvatar() {
+        const user = await getAuthenticatedUser();
+        const { error } = await getClient()
+            .storage
+            .from(AVATAR_BUCKET)
+            .remove([user.id + "/avatar"]);
+
+        if (error) throw error;
+    }
+
+    async function saveProfileData() {
+        const nextProfile = {
+            nome: document.getElementById("nome")?.value.trim() || "",
+            email: document.getElementById("email")?.value.trim() || "",
+            foto_url: state.profile.foto_url
+        };
+
+        if (!validateProfile(nextProfile) || state.busy) return false;
+
+        setBusy(true);
+        try {
+            if (state.photoRemoved && !state.pendingPhotoFile && state.initialProfile?.foto_url) {
+                await removeStoredAvatar();
+            }
+
+            nextProfile.foto_url = await uploadPendingAvatar();
+            const savedProfile = await window.UniCheckProfile.updateMyProfile(nextProfile);
+
+            const requestedEmail = nextProfile.email;
+            state.profile = cloneProfile(savedProfile);
+            state.initialProfile = cloneProfile(savedProfile);
+            state.pendingPhotoFile = null;
+            state.photoRemoved = false;
+            revokePreviewUrl();
+            updateProfileView();
+
+            if (requestedEmail !== savedProfile.email) {
+                showNotification("Perfil salvo. Confirme o novo e-mail antes que ele substitua o atual.", "info");
+            } else {
+                showNotification("Perfil atualizado com sucesso.", "success");
+            }
+
+            return true;
+        } catch (error) {
+            console.error("[ProfileSettings] Falha ao salvar perfil", error);
+            showNotification(
+                window.UniCheckAuth?.normalizeErrorMessage?.(error) || "Nao foi possivel salvar o perfil.",
+                "error"
+            );
+            return false;
+        } finally {
+            setBusy(false);
+        }
+    }
+
+    function handlePhotoSelection(file) {
+        if (!ALLOWED_AVATAR_TYPES.has(file.type)) {
+            showNotification("Use uma imagem JPG, PNG ou WebP.", "error");
+            return;
+        }
+
+        if (file.size > MAX_AVATAR_SIZE) {
+            showNotification("A imagem deve ter no maximo 2 MB.", "error");
+            return;
+        }
+
+        revokePreviewUrl();
+        state.previewObjectUrl = URL.createObjectURL(file);
+        state.pendingPhotoFile = file;
+        state.photoRemoved = false;
+        state.profile.avatarImage = state.previewObjectUrl;
+        updateAvatarDisplay();
+        showNotification("Foto pronta. Salve para enviar ao seu perfil.", "info");
+    }
+
+    function setupPhotoControls() {
+        const fileInput = document.createElement("input");
+        fileInput.type = "file";
+        fileInput.accept = "image/jpeg,image/png,image/webp";
+        fileInput.hidden = true;
+        fileInput.id = "avatar-file-input";
+        document.body.appendChild(fileInput);
+
+        function openPicker(event) {
+            event.preventDefault();
+            if (!state.busy) fileInput.click();
+        }
+
+        document.getElementById("change-photo-btn")?.addEventListener("click", openPicker);
+        document.getElementById("avatar-upload-trigger")?.addEventListener("click", openPicker);
+
+        fileInput.addEventListener("change", function (event) {
+            const file = event.target.files?.[0];
+            if (file) handlePhotoSelection(file);
+            fileInput.value = "";
+        });
+
+        document.getElementById("remove-photo-btn")?.addEventListener("click", function () {
+            revokePreviewUrl();
+            state.pendingPhotoFile = null;
+            state.photoRemoved = true;
+            state.profile.avatarImage = null;
+            state.profile.foto_url = null;
+            updateAvatarDisplay();
+            showNotification("Foto marcada para remocao. Salve para confirmar.", "info");
+        });
+    }
+
+    function validatePassword(currentPassword, nextPassword, confirmation) {
+        if (!currentPassword) {
+            showNotification("Informe sua senha atual.", "error");
+            return false;
+        }
+
+        if (nextPassword.length < 8) {
+            showNotification("A nova senha deve ter pelo menos 8 caracteres.", "error");
+            return false;
+        }
+
+        if (nextPassword !== confirmation) {
+            showNotification("As novas senhas nao coincidem.", "error");
+            return false;
+        }
+
+        if (currentPassword === nextPassword) {
+            showNotification("A nova senha deve ser diferente da atual.", "error");
+            return false;
+        }
+
+        return true;
+    }
+
+    async function updatePassword() {
+        const currentField = document.getElementById("senha-atual");
+        const nextField = document.getElementById("nova-senha");
+        const confirmationField = document.getElementById("confirmar-senha");
+        const currentPassword = currentField?.value || "";
+        const nextPassword = nextField?.value || "";
+        const confirmation = confirmationField?.value || "";
+
+        if (!validatePassword(currentPassword, nextPassword, confirmation) || state.busy) return false;
+
+        setBusy(true);
+        try {
+            const user = await getAuthenticatedUser();
+            if (!user.email) throw new Error("A conta autenticada nao possui e-mail.");
+
+            const { error: signInError } = await getClient().auth.signInWithPassword({
+                email: user.email,
+                password: currentPassword
+            });
+            if (signInError) throw new Error("A senha atual esta incorreta.");
+
+            const { error: updateError } = await getClient().auth.updateUser({ password: nextPassword });
+            if (updateError) throw updateError;
+
+            document.getElementById("passwordForm")?.reset();
+            showNotification("Senha atualizada com sucesso.", "success");
+            return true;
+        } catch (error) {
+            console.error("[ProfileSettings] Falha ao atualizar senha", error);
+            showNotification(
+                window.UniCheckAuth?.normalizeErrorMessage?.(error) || error.message || "Nao foi possivel atualizar a senha.",
+                "error"
+            );
+            return false;
+        } finally {
+            setBusy(false);
+        }
+    }
+
+    function syncActionArea() {
+        const actions = document.getElementById("actions-section");
+        const saveLabel = document.getElementById("save-action-label");
+        const cancelLabel = document.querySelector("#cancelProfileChanges span");
+
+        if (!actions) return;
+
+        if (state.activeSection === "preferencias") {
+            actions.classList.add("is-hidden");
+            return;
+        }
+
+        actions.classList.remove("is-hidden");
+        if (state.activeSection === "seguranca") {
+            if (saveLabel) saveLabel.textContent = "Atualizar senha";
+            if (cancelLabel) cancelLabel.textContent = "Limpar campos";
+        } else {
+            if (saveLabel) saveLabel.textContent = "Salvar alterações";
+            if (cancelLabel) cancelLabel.textContent = "Cancelar";
+        }
+    }
+
+    function activateSection(targetId) {
+        const target = document.getElementById(targetId);
+        if (!target) return;
+
+        state.activeSection = targetId;
+
+        document.querySelectorAll(".profile-info-section").forEach(function (section) {
+            section.classList.toggle("is-hidden", section.id !== targetId);
+        });
+
+        document.querySelectorAll(".profile-menu-link").forEach(function (link) {
+            const active = link.getAttribute("href") === "#" + targetId;
+            link.classList.toggle("active", active);
+            if (active) {
+                link.setAttribute("aria-current", "page");
+            } else {
+                link.removeAttribute("aria-current");
+            }
+        });
+
+        syncActionArea();
+        history.replaceState(null, "", "#" + targetId);
+
+        if (typeof lucide !== "undefined") lucide.createIcons();
+    }
+
+    function setupNavigation() {
+        document.querySelectorAll(".profile-menu-link").forEach(function (link) {
+            link.addEventListener("click", function (event) {
+                event.preventDefault();
+                activateSection(link.getAttribute("href").slice(1));
+            });
+        });
+
+        const requestedSection = window.location.hash.slice(1);
+        if (requestedSection && document.getElementById(requestedSection)) {
+            activateSection(requestedSection);
+        } else {
+            syncActionArea();
+        }
+    }
+
+    function cancelCurrentChanges() {
+        if (state.activeSection === "seguranca") {
+            document.getElementById("passwordForm")?.reset();
+            showNotification("Campos de senha limpos.", "info");
+            return;
+        }
+
+        if (state.initialProfile) {
+            revokePreviewUrl();
+            state.profile = cloneProfile(state.initialProfile);
+            state.pendingPhotoFile = null;
+            state.photoRemoved = false;
+            updateProfileView();
+            showNotification("Alteracoes descartadas.", "info");
+        }
+    }
+
+    function setupActions() {
+        document.getElementById("saveProfileChanges")?.addEventListener("click", async function () {
+            if (state.activeSection === "seguranca") {
+                await updatePassword();
+            } else {
+                await saveProfileData();
+            }
+        });
+
+        document.getElementById("cancelProfileChanges")?.addEventListener("click", cancelCurrentChanges);
+
+        document.getElementById("profileForm")?.addEventListener("submit", async function (event) {
+            event.preventDefault();
+            await saveProfileData();
+        });
+
+        document.getElementById("passwordForm")?.addEventListener("submit", async function (event) {
+            event.preventDefault();
+            await updatePassword();
+        });
+    }
+
+    function showNotification(message, type) {
+        document.querySelector(".profile-notification")?.remove();
+
+        const notification = document.createElement("div");
+        notification.className = "profile-notification notification-" + (type || "info");
+        notification.setAttribute("role", type === "error" ? "alert" : "status");
+
+        const content = document.createElement("div");
+        content.className = "notification-content";
+
+        const icon = document.createElement("i");
+        const iconNames = {
+            success: "check-circle",
+            error: "alert-circle",
+            warning: "alert-triangle",
+            info: "info"
+        };
+        icon.setAttribute("data-lucide", iconNames[type] || "info");
+
+        const text = document.createElement("span");
+        text.textContent = String(message || "");
+
+        content.append(icon, text);
+        notification.appendChild(content);
+        document.body.appendChild(notification);
+
+        const liveRegion = document.getElementById("profile-status");
+        if (liveRegion) liveRegion.textContent = String(message || "");
+        if (typeof lucide !== "undefined") lucide.createIcons();
+
+        requestAnimationFrame(function () {
+            notification.classList.add("show");
+        });
+
+        window.setTimeout(function () {
+            notification.classList.remove("show");
+            window.setTimeout(function () {
+                notification.remove();
+            }, 200);
+        }, 3600);
+    }
+
+    async function initializeConfigPage() {
+        try {
+            if (typeof lucide !== "undefined") lucide.createIcons();
+
+            initializeTheme();
+            setupNavigation();
+            setupPhotoControls();
+            setupActions();
+            document.getElementById("theme-toggle-switch")?.addEventListener("change", handleThemeToggle);
+
+            const session = await window.UniCheckAuth.requireAuth();
+            if (!session) return;
+
+            await loadProfileData();
+        } catch (error) {
+            console.error("[ProfileSettings] Falha ao inicializar pagina", error);
+        }
+    }
+
+    window.addEventListener("beforeunload", revokePreviewUrl);
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initializeConfigPage, { once: true });
+    } else {
+        initializeConfigPage();
+    }
+})();
