@@ -20,7 +20,11 @@ Esta pasta é a fonte versionada do banco do MVP. O projeto remoto atual contém
 - não remove nem limpa `checklists` ou `checklist_items`;
 - não executa migração ou reconciliação de dados antigos.
 
-## Ordem para o projeto atual
+## Estado do projeto remoto
+
+O reset e a validação abaixo já foram executados em 2026-08-24. A ordem permanece documentada para reconstrução de um ambiente limpo, não para ser repetida automaticamente no projeto atual.
+
+## Ordem de reconstrução
 
 1. Executar `00_inventory.sql`.
 2. Confirmar que existem 7 `checklists` e 28 `checklist_items`.
@@ -28,7 +32,7 @@ Esta pasta é a fonte versionada do banco do MVP. O projeto remoto atual contém
 4. Executar `20260824_prerelease_reset.sql` em uma única operação.
 5. Executar `20260824_post_reset_validation.sql`.
 6. Reexecutar os Advisors de segurança e desempenho.
-7. Ativar a proteção contra senhas vazadas em Auth.
+7. Ativar a proteção contra senhas vazadas em Auth quando o projeto estiver no plano Pro.
 8. Criar uma conta nova e executar o roteiro funcional abaixo.
 
 ## Roteiro obrigatório com uma conta nova
@@ -47,7 +51,7 @@ Esta pasta é a fonte versionada do banco do MVP. O projeto remoto atual contém
 12. novo login;
 13. confirmar restauração dos dados.
 
-Depois, usar uma segunda conta para confirmar que nenhum dado da primeira pode ser lido ou alterado.
+Depois, usar uma segunda conta para confirmar que nenhum dado da primeira pode ser lido ou alterado. Esse roteiro A/B foi executado após o reset e está registrado em `AUDIT_2026-08-24.md`.
 
 ## Segurança esperada
 
@@ -64,4 +68,4 @@ Depois, usar uma segunda conta para confirmar que nenhum dado da primeira pode s
 
 ## Frontend e Netlify
 
-A URL e a chave pública do Supabase permanecem em `js/config.js`. Antes do deploy, a verificação `node scripts/check-local-references.mjs` deve finalizar sem referências quebradas. O deploy não deve ser promovido enquanto arquivos usados pelos HTMLs estiverem ausentes da branch.
+A URL e a chave pública do Supabase permanecem em `js/config.js`. A verificação `node scripts/check-local-references.mjs` finaliza sem referências quebradas na branch consolidada. O próximo passo de entrega é gerar um deploy de preview no Netlify e repetir o smoke test no domínio definitivo.
