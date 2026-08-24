@@ -1,0 +1,61 @@
+.progression-profile {
+  padding: 0.9rem 1rem;
+  border-block: 1px solid var(--border-color, #dce5e7);
+}
+
+.progression-profile-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.55rem;
+  font-size: 0.75rem;
+}
+
+.progression-profile-heading span,
+.progression-profile small {
+  color: var(--text-muted, #6b7d80);
+}
+
+.progression-profile-track {
+  height: 0.45rem;
+  overflow: hidden;
+  background: var(--bg-secondary, #edf3f4);
+  border-radius: 999px;
+}
+
+.progression-profile-track span {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: var(--gradient-primary, linear-gradient(90deg, #0b61ff, #18c58f));
+  border-radius: inherit;
+  transition: width 240ms ease;
+}
+
+.progression-profile small {
+  display: block;
+  margin-top: 0.45rem;
+  font-size: 0.7rem;
+}
+
+img,
+svg {
+  max-width: 100%;
+}
+
+:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--unisales-blue, #0b61ff) 45%, transparent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
