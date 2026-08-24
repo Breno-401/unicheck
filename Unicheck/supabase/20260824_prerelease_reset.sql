@@ -184,6 +184,28 @@ alter table public.user_activity enable row level security;
 alter table public.user_notifications enable row level security;
 alter table public.user_platform_favorites enable row level security;
 
+-- Checklist definitions are preserved, so remove every previous policy before
+-- installing the single canonical read policy for each table.
+do $policy_cleanup$
+declare
+    existing_policy record;
+begin
+    for existing_policy in
+        select schemaname, tablename, policyname
+        from pg_policies
+        where schemaname = 'public'
+          and tablename in ('checklists', 'checklist_items')
+    loop
+        execute format(
+            'drop policy %I on %I.%I',
+            existing_policy.policyname,
+            existing_policy.schemaname,
+            existing_policy.tablename
+        );
+    end loop;
+end;
+$policy_cleanup$;
+
 drop policy if exists "Authenticated users can read checklists" on public.checklists;
 create policy "Authenticated users can read checklists"
 on public.checklists
