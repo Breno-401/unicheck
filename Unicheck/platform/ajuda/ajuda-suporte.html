@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajuda e suporte | UniCheck</title>
+    <link rel="stylesheet" href="../css-interno/base.css">
+    <link rel="stylesheet" href="../css-interno/variaveis.css">
+    <link rel="stylesheet" href="../css-interno/support-pages.css">
+</head>
+<body>
+    <main class="support-shell">
+        <section class="support-hero">
+            <span class="dashboard-eyebrow">Central de ajuda</span>
+            <h1>Resolva o essencial rapidamente.</h1>
+            <p>Consulte as respostas do MVP e, se o problema continuar, registre o contexto com clareza para a equipe conseguir reproduzir.</p>
+            <div class="support-actions">
+                <a class="support-action" href="../index-interno.html">Voltar ao painel</a>
+                <a class="support-action" href="../manual/manual-aluno.html">Ler o manual</a>
+            </div>
+        </section>
+
+        <div class="support-grid">
+            <article class="support-card support-card--wide">
+                <h2>Perguntas frequentes</h2>
+                <details>
+                    <summary>Meu progresso não apareceu em outro dispositivo</summary>
+                    <p>Confirme que você entrou com o mesmo e-mail e aguarde a sincronização. Atualize a página somente depois que a conexão estiver estável.</p>
+                </details>
+                <details>
+                    <summary>Não consigo editar meu perfil</summary>
+                    <p>Verifique se a sessão continua ativa. Tente salvar novamente; se o e-mail foi alterado, confira também a caixa de entrada para a confirmação do Supabase Auth.</p>
+                </details>
+                <details>
+                    <summary>Uma fase continua bloqueada</summary>
+                    <p>A fase seguinte é liberada quando todas as tarefas da fase atual estão concluídas. Volte ao detalhe da fase e confira cada item.</p>
+                </details>
+                <details>
+                    <summary>Um benefício mudou de condição</summary>
+                    <p>Ofertas estudantis podem mudar. Use o link da fonte oficial no card antes de tomar uma decisão ou contratar um serviço.</p>
+                </details>
+            </article>
+
+            <article class="support-card">
+                <h2>Antes de reportar</h2>
+                <ul>
+                    <li>Anote a página e a ação realizada.</li>
+                    <li>Informe o horário aproximado.</li>
+                    <li>Não envie senha, token ou código de confirmação.</li>
+                </ul>
+            </article>
+
+            <article class="support-card">
+                <h2>Próximo passo</h2>
+                <p>Durante o pré-release, encaminhe o relato pelo canal interno da equipe responsável pelo UniCheck.</p>
+            </article>
+        </div>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../js/config.js"></script>
+    <script src="../../js/auth.js"></script>
+    <script>window.UniCheckAuth?.requireAuth?.();</script>
+</body>
+</html>
