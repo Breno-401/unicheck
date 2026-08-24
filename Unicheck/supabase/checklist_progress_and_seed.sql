@@ -1,53 +1,5 @@
-create table if not exists public.user_checklist_item_progress (
-    user_id uuid not null references auth.users (id) on delete cascade,
-    checklist_id uuid not null references public.checklists (id) on delete cascade,
-    checklist_item_id uuid not null references public.checklist_items (id) on delete cascade,
-    completed boolean not null default false,
-    created_at timestamptz not null default now(),
-    updated_at timestamptz not null default now(),
-    primary key (user_id, checklist_item_id)
-);
-
-alter table public.user_checklist_item_progress enable row level security;
-
-drop policy if exists "Users can read their checklist progress" on public.user_checklist_item_progress;
-create policy "Users can read their checklist progress"
-on public.user_checklist_item_progress
-for select
-to authenticated
-using ((select auth.uid()) = user_id);
-
-drop policy if exists "Users can insert their checklist progress" on public.user_checklist_item_progress;
-create policy "Users can insert their checklist progress"
-on public.user_checklist_item_progress
-for insert
-to authenticated
-with check ((select auth.uid()) = user_id);
-
-drop policy if exists "Users can update their checklist progress" on public.user_checklist_item_progress;
-create policy "Users can update their checklist progress"
-on public.user_checklist_item_progress
-for update
-to authenticated
-using ((select auth.uid()) = user_id)
-with check ((select auth.uid()) = user_id);
-
-create or replace function public.set_updated_at()
-returns trigger
-language plpgsql
-set search_path = ''
-as $
-begin
-    new.updated_at = now();
-    return new;
-end;
-$$;
-
-drop trigger if exists set_user_checklist_item_progress_updated_at on public.user_checklist_item_progress;
-create trigger set_user_checklist_item_progress_updated_at
-before update on public.user_checklist_item_progress
-for each row
-execute function public.set_updated_at();
+-- Seed estrutural do produto. O schema, as policies e os triggers pertencem ao
+-- baseline canonico 20260824_prerelease_reset.sql e nao sao redefinidos aqui.
 
 with fase1 as (
     select id
