@@ -30,4 +30,6 @@ with check (id = auth.uid());
 
 revoke all on public.users_profile from anon;
 revoke all on public.users_profile from authenticated;
-grant select, insert, update (nome, email, foto_url) on public.users_profile to authenticated;
+grant select on public.users_profile to authenticated;
+grant insert (id, nome, email, foto_url) on public.users_profile to authenticated;
+grant update (nome, email, foto_url) on public.users_profile to authenticated;
