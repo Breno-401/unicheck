@@ -15,27 +15,28 @@ create policy "Users can read their checklist progress"
 on public.user_checklist_item_progress
 for select
 to authenticated
-using (auth.uid() = user_id);
+using ((select auth.uid()) = user_id);
 
 drop policy if exists "Users can insert their checklist progress" on public.user_checklist_item_progress;
 create policy "Users can insert their checklist progress"
 on public.user_checklist_item_progress
 for insert
 to authenticated
-with check (auth.uid() = user_id);
+with check ((select auth.uid()) = user_id);
 
 drop policy if exists "Users can update their checklist progress" on public.user_checklist_item_progress;
 create policy "Users can update their checklist progress"
 on public.user_checklist_item_progress
 for update
 to authenticated
-using (auth.uid() = user_id)
-with check (auth.uid() = user_id);
+using ((select auth.uid()) = user_id)
+with check ((select auth.uid()) = user_id);
 
 create or replace function public.set_updated_at()
 returns trigger
 language plpgsql
-as $$
+set search_path = ''
+as $
 begin
     new.updated_at = now();
     return new;
