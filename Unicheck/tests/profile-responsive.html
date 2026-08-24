@@ -16,14 +16,18 @@
 <body>
     <h1>Configurações de Perfil — breakpoints</h1>
     <div class="cases">
-        <section class="case"><h2>320 px</h2><iframe title="Perfil em 320px" data-src="https://htmlpreview.github.io/?https://github.com/Breno-401/unicheck/blob/chore/consolidacao-repositorio-supabase/Unicheck/platform/CONFIGURACOES%20PERFIL/configuracoes.html?v=profile" width="320" height="760" sandbox="allow-same-origin allow-scripts"></iframe></section>
-        <section class="case"><h2>390 px</h2><iframe title="Perfil em 390px" data-src="https://htmlpreview.github.io/?https://github.com/Breno-401/unicheck/blob/chore/consolidacao-repositorio-supabase/Unicheck/platform/CONFIGURACOES%20PERFIL/configuracoes.html?v=profile" width="390" height="760" sandbox="allow-same-origin allow-scripts"></iframe></section>
-        <section class="case"><h2>768 px</h2><iframe title="Perfil em 768px" data-src="https://htmlpreview.github.io/?https://github.com/Breno-401/unicheck/blob/chore/consolidacao-repositorio-supabase/Unicheck/platform/CONFIGURACOES%20PERFIL/configuracoes.html?v=profile" width="768" height="760" sandbox="allow-same-origin allow-scripts"></iframe></section>
-        <section class="case"><h2>1024 px</h2><iframe title="Perfil em 1024px" data-src="https://htmlpreview.github.io/?https://github.com/Breno-401/unicheck/blob/chore/consolidacao-repositorio-supabase/Unicheck/platform/CONFIGURACOES%20PERFIL/configuracoes.html?v=profile" width="1024" height="760" sandbox="allow-same-origin allow-scripts"></iframe></section>
+        <section class="case"><h2>320 px</h2><iframe title="Perfil em 320px" data-profile-preview width="320" height="760" sandbox="allow-same-origin allow-scripts"></iframe></section>
+        <section class="case"><h2>390 px</h2><iframe title="Perfil em 390px" data-profile-preview width="390" height="760" sandbox="allow-same-origin allow-scripts"></iframe></section>
+        <section class="case"><h2>768 px</h2><iframe title="Perfil em 768px" data-profile-preview width="768" height="760" sandbox="allow-same-origin allow-scripts"></iframe></section>
+        <section class="case"><h2>1024 px</h2><iframe title="Perfil em 1024px" data-profile-preview width="1024" height="760" sandbox="allow-same-origin allow-scripts"></iframe></section>
     </div>
     <script>
-        document.querySelectorAll("iframe[data-src]").forEach(function (frame) {
-            frame.src = frame.dataset.src;
+        var target = "https://htmlpreview.github.io/?" +
+            "https://github.com/" +
+            "Breno-401/unicheck/blob/chore/consolidacao-repositorio-supabase/" +
+            "Unicheck/platform/CONFIGURACOES%20PERFIL/configuracoes.html?v=profile";
+        document.querySelectorAll("iframe[data-profile-preview]").forEach(function (frame) {
+            frame.src = target;
         });
     </script>
 </body>
