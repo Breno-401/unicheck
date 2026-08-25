@@ -1,5 +1,7 @@
 # UniCheck - Plataforma Integrada
 
+> Documento historico preservado para contexto. Os caminhos desta arvore representam a estrutura anterior; consulte o `README.md` da raiz e `docs/architecture/application.md` para a organizacao atual.
+
 Sistema completo integrado do UniCheck com Landing Page e Plataforma Interna.
 
 ## 📁 Estrutura do Projeto

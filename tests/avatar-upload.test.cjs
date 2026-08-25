@@ -3,10 +3,10 @@ const fs = require("node:fs");
 const test = require("node:test");
 const vm = require("node:vm");
 
-const settingsPath = require.resolve("../platform/CONFIGURACOES PERFIL/configuracoes.js");
+const settingsPath = require.resolve("../Unicheck/platform/CONFIGURACOES PERFIL/configuracoes.js");
 const originalSource = fs.readFileSync(settingsPath, "utf8");
-const profileSource = fs.readFileSync(require.resolve("../js/profile.js"), "utf8");
-const migrationSource = fs.readFileSync(require.resolve("../supabase/20260824_prerelease_reset.sql"), "utf8");
+const profileSource = fs.readFileSync(require.resolve("../Unicheck/js/services/profile.js"), "utf8");
+const migrationSource = fs.readFileSync(require.resolve("../Unicheck/supabase/migrations/20260824_prerelease_reset.sql"), "utf8");
 const instrumentedSource = originalSource.replace(
     /\}\)\(\);\s*$/,
     "window.__avatarTest = { optimizeAvatar, validateAvatarFile }; })();"

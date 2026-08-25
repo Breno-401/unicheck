@@ -12,7 +12,7 @@
     function getClient() {
         const client = window.UniCheckSupabase?.client;
         if (!client) {
-            throw new Error("Supabase nao configurado. Verifique js/config.js.");
+            throw new Error("Supabase nao configurado. Verifique js/core/config.js.");
         }
         return client;
     }

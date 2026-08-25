@@ -3,10 +3,12 @@ import { dirname, extname, join, normalize, relative, resolve } from "node:path"
 
 const repositoryRoot = resolve(process.cwd());
 const ignoredDirectories = new Set([".git", "node_modules"]);
-const supportedFiles = new Set([".html", ".css"]);
+const supportedFiles = new Set([".html", ".css", ".js", ".md"]);
 const referencePatterns = {
   ".html": /(?:src|href)=["']([^"'#?]+)["']/gi,
-  ".css": /url\(\s*["']?([^"'?#)]+)["']?\s*\)/gi
+  ".css": /url\(\s*["']?([^"'?#)]+)["']?\s*\)/gi,
+  ".js": /["'`]((?:\.{1,2}\/)[^"'`?#]+\.(?:avif|css|jpe?g|json|png|svg|webp))["'`]/gi,
+  ".md": /\[[^\]]*\]\(([^)#?]+)(?:#[^)]*)?\)/gi
 };
 
 function collectFiles(directory) {
@@ -65,4 +67,4 @@ if (missingReferences.length) {
   process.exit(1);
 }
 
-console.log("Todas as referências locais de HTML e CSS apontam para arquivos existentes.");
+console.log("Todas as referencias locais de HTML, CSS, JavaScript e Markdown apontam para arquivos existentes.");
