@@ -166,6 +166,27 @@ after insert on auth.users
 for each row
 execute function public.handle_new_user();
 
+-- O reset recria users_profile sem recriar auth.users. Reponha as linhas dos
+-- usuários já existentes; o trigger acima cobre apenas cadastros futuros.
+insert into public.users_profile (id, nome, email, foto_url)
+select
+    auth_user.id,
+    case
+        when char_length(trim(coalesce(auth_user.raw_user_meta_data ->> 'full_name', ''))) between 2 and 120
+            then trim(auth_user.raw_user_meta_data ->> 'full_name')
+        else 'Usuario'
+    end,
+    auth_user.email,
+    case
+        when char_length(coalesce(auth_user.raw_user_meta_data ->> 'photo_url', auth_user.raw_user_meta_data ->> 'foto_url', '')) between 1 and 4096
+            then coalesce(auth_user.raw_user_meta_data ->> 'photo_url', auth_user.raw_user_meta_data ->> 'foto_url')
+        else null
+    end
+from auth.users auth_user
+on conflict (id) do update
+set email = excluded.email,
+    updated_at = now();
+
 create index user_checklist_progress_user_updated_at_idx
     on public.user_checklist_item_progress (user_id, updated_at desc);
 create index user_checklist_progress_item_checklist_fk_idx

@@ -122,9 +122,17 @@
     function open() {
         ensurePanel();
         if (!panel) return;
+        positionPanel();
         panel.hidden = false;
         button?.setAttribute("aria-expanded", "true");
         panel.querySelector(".notifications-close")?.focus();
+    }
+
+    function positionPanel() {
+        if (!panel || !button || window.innerWidth < 768) return;
+        const anchor = button.getBoundingClientRect();
+        panel.style.top = `${Math.min(anchor.bottom + 10, window.innerHeight - 160)}px`;
+        panel.style.right = `${Math.max(12, window.innerWidth - anchor.right)}px`;
     }
 
     function close() {
@@ -226,6 +234,7 @@
         document.addEventListener("keydown", event => {
             if (event.key === "Escape" && panel?.hidden === false) close();
         });
+        window.addEventListener("resize", positionPanel);
         const session = await window.UniCheckAuth?.getSession?.();
         if (session?.user?.id) {
             try {

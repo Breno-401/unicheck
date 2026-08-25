@@ -492,16 +492,13 @@ function renderJourneyTimeline(summary) {
             stateLabel = 'Concluída';
             detail = `${phase.tasks.length} de ${phase.tasks.length} itens`;
             icon = 'check';
-        } else if (index === currentIndex && phase.completedTasks > 0) {
-            state = 'current';
-            stateLabel = 'Em andamento';
-            detail = `${phase.completedTasks} de ${phase.tasks.length} itens`;
-            icon = 'circle-dot';
         } else if (index === currentIndex) {
-            state = 'next';
-            stateLabel = 'Próxima';
-            detail = 'Não iniciada';
-            icon = 'circle';
+            state = 'current';
+            stateLabel = 'Atual';
+            detail = phase.completedTasks > 0
+                ? `${phase.completedTasks} de ${phase.tasks.length} itens`
+                : 'Não iniciada';
+            icon = 'circle-dot';
         }
 
         const title = escapeDashboardHtml(phase.title);

@@ -1,5 +1,6 @@
 // Gerencia sincronização de perfil entre páginas
 (function () {
+    let autoSyncBound = false;
     function getProfile() {
         try {
             const key = window.UniCheckConfig?.STORAGE_KEYS?.USER_PROFILE || 'userProfile';
@@ -139,6 +140,8 @@
     }
 
     function bindAutoSync() {
+        if (autoSyncBound) return;
+        autoSyncBound = true;
         window.addEventListener('focus', sync);
         window.addEventListener('storage', event => {
             const key = window.UniCheckConfig?.STORAGE_KEYS?.USER_PROFILE || 'userProfile';
