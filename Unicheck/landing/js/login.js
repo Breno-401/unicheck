@@ -89,7 +89,6 @@ document.addEventListener("DOMContentLoaded", () => {
         else if (!emailRegex.test(emailInput.value.trim())) valid = setFieldError(emailInput, "Informe um e-mail valido.");
 
         if (!passwordInput.value) valid = setFieldError(passwordInput, "Informe sua senha.");
-        else if (!passwordRegex.test(passwordInput.value)) valid = setFieldError(passwordInput, "Senha deve ter 8+ caracteres, letra maiuscula e numero.");
 
         return valid;
     }
