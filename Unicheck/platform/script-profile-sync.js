@@ -162,11 +162,14 @@
         if (cachedProfile) updateProfileDisplay(cachedProfile);
         loadProfileData();
 
-        window.addEventListener('focus', loadProfileData);
+        window.addEventListener('unicheck:profile-updated', event => {
+            if (event.detail?.profile) updateProfileDisplay(event.detail.profile);
+        });
         window.addEventListener('storage', event => {
             const key = window.UniCheckConfig?.STORAGE_KEYS?.USER_PROFILE || 'userProfile';
             if (event.key === key) {
-                loadProfileData();
+                const profile = getStoredProfile();
+                if (profile) updateProfileDisplay(profile);
             }
         });
     }

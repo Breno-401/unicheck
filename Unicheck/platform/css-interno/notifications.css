@@ -23,10 +23,10 @@
 .notifications-panel {
   position: fixed;
   z-index: 1200;
-  inset-block-start: 5.25rem;
-  inset-inline-end: 1.25rem;
-  width: min(25rem, calc(100vw - 2rem));
-  max-height: min(36rem, calc(100vh - 7rem));
+  inset-block-start: 4.5rem;
+  inset-inline-end: 1rem;
+  width: min(22rem, calc(100vw - 2rem));
+  max-height: min(28rem, calc(100vh - 6rem));
   overflow: hidden;
   color: var(--text-primary, #142528);
   background: var(--bg-primary, #fff);
@@ -73,7 +73,7 @@
 }
 
 .notifications-list {
-  max-height: calc(min(36rem, 100vh - 7rem) - 4.8rem);
+  max-height: calc(min(28rem, 100vh - 6rem) - 4.8rem);
   overflow-y: auto;
   overscroll-behavior: contain;
 }
@@ -120,5 +120,7 @@
     inset-inline: 0.75rem;
     width: auto;
     max-height: calc(100vh - 5.25rem);
+    top: auto !important;
+    right: 0.75rem !important;
   }
 }

@@ -3,6 +3,11 @@
     const PROFILE_TABLE = "users_profile";
     const PROFILE_USER_ID_COLUMN = "id";
     const STORAGE_KEY = "userProfile";
+    const SUCCESS_TTL_MS = 5 * 60 * 1000;
+    const ERROR_COOLDOWN_MS = 30 * 1000;
+    let inFlight = null;
+    let memoryEntry = null;
+    let retryAfter = 0;
 
     function getClient() {
         const client = window.UniCheckSupabase?.client;
@@ -66,10 +71,19 @@
 
     function persistLocalProfile(profile) {
         localStorage.setItem(getStorageKey(), JSON.stringify(profile));
-        if (window.ProfileManager?.sync) {
-            window.ProfileManager.sync();
-        }
+        window.dispatchEvent(new CustomEvent("unicheck:profile-updated", { detail: { profile } }));
         return profile;
+    }
+
+    function logRemoteError(context, error, userId) {
+        console.error(context, {
+            userId: userId || null,
+            code: error?.code || null,
+            message: error?.message || String(error),
+            details: error?.details || null,
+            hint: error?.hint || null,
+            status: error?.status || error?.statusCode || error?.response?.status || null
+        });
     }
 
     async function ensureProfileRow() {
@@ -102,10 +116,8 @@
         }
 
         if (error) {
-            console.error("[UniCheckProfile] Erro ao consultar users_profile", {
-                userId: user.id || null,
-                message: error?.message || error
-            });
+            logRemoteError("[UniCheckProfile] Erro ao consultar users_profile", error, user.id);
+            retryAfter = Date.now() + ERROR_COOLDOWN_MS;
             const fallbackProfile = normalizeProfile(cachedProfile, user);
             persistLocalProfile(fallbackProfile);
             return fallbackProfile;
@@ -137,10 +149,8 @@
             .single();
 
         if (insertError) {
-            console.error("[UniCheckProfile] Erro ao criar perfil base", {
-                userId: user.id || null,
-                message: insertError?.message || insertError
-            });
+            logRemoteError("[UniCheckProfile] Erro ao criar perfil base", insertError, user.id);
+            retryAfter = Date.now() + ERROR_COOLDOWN_MS;
             const fallbackProfile = normalizeProfile(cachedProfile || baseProfile, user);
             persistLocalProfile(fallbackProfile);
             return fallbackProfile;
@@ -157,7 +167,20 @@
     }
 
     async function getMyProfile() {
-        return ensureProfileRow();
+        const cachedProfile = getStoredProfile();
+        const userId = (await window.UniCheckAuth?.getSession?.())?.user?.id || cachedProfile?.id || null;
+        if (memoryEntry?.userId === userId && Date.now() - memoryEntry.loadedAt < SUCCESS_TTL_MS) return memoryEntry.profile;
+        if (Date.now() < retryAfter && cachedProfile?.id === userId) return cachedProfile;
+        if (inFlight?.userId === userId) return inFlight.promise;
+
+        const promise = ensureProfileRow().then(profile => {
+            memoryEntry = { userId: profile.id, profile, loadedAt: Date.now() };
+            return profile;
+        }).finally(() => {
+            if (inFlight?.promise === promise) inFlight = null;
+        });
+        inFlight = { userId, promise };
+        return promise;
     }
 
     async function updateMyProfile({ nome, email, foto_url, ra }) {
@@ -233,10 +256,7 @@
         }
 
         if (tableError) {
-            console.error("[UniCheckProfile] Falha ao atualizar users_profile.", {
-                userId: user.id || null,
-                message: tableError?.message || tableError
-            });
+            logRemoteError("[UniCheckProfile] Falha ao atualizar users_profile.", tableError, user.id);
             throw tableError;
         }
 
@@ -256,6 +276,7 @@
             email: profile.email
         });
         persistLocalProfile(profile);
+        memoryEntry = { userId: profile.id, profile, loadedAt: Date.now() };
         return profile;
     }
 

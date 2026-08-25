@@ -1,6 +1,85 @@
 -- Seed estrutural do produto. O schema, as policies e os triggers pertencem ao
 -- baseline canonico 20260824_prerelease_reset.sql e nao sao redefinidos aqui.
 
+-- IDs determinísticos mantêm o catálogo local-first e a persistência remota no
+-- mesmo contrato, inclusive quando o baseline é aplicado sobre tabelas vazias.
+insert into public.checklists (id, titulo, descricao, ordem)
+values
+    ('10000000-0000-4000-8000-000000000001', 'Primeiros passos na faculdade', 'Estruture os combinados iniciais da turma, defina os contatos principais e prepare o onboarding para a rotina academica.', 1),
+    ('10000000-0000-4000-8000-000000000002', 'Portal Acadêmico TOTVS', 'Aprenda a acessar o Portal do Aluno, entrar com RA e senha e localizar a central do aluno e os documentos mais usados.', 2),
+    ('10000000-0000-4000-8000-000000000003', 'Configuração de Email', 'Valide o email institucional, entre no Outlook/Webmail e prepare a conta para avisos, comunicados e recuperacao.', 3),
+    ('10000000-0000-4000-8000-000000000004', 'Biblioteca Virtual', 'Prepare a consulta ao acervo, livros, artigos e bases digitais para estudo e pesquisa.', 4),
+    ('10000000-0000-4000-8000-000000000005', 'Microsoft Teams', 'Organize a conta, os canais e a rotina de uso do Teams para aulas, recados, encontros e arquivos da turma.', 5),
+    ('10000000-0000-4000-8000-000000000006', 'Plataforma A+', 'Conclua a configuracao minima da Plataforma A+ para materiais e recursos extras do fluxo academico.', 6),
+    ('10000000-0000-4000-8000-000000000007', 'Mentorias', 'Entenda como acionar o acompanhamento, registrar demandas e usar os canais de apoio ao estudante.', 7)
+on conflict (id) do update set
+    titulo = excluded.titulo,
+    descricao = excluded.descricao,
+    ordem = excluded.ordem;
+
+insert into public.checklist_items (id, checklist_id, ordem, titulo)
+values
+    ('20000000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001', 1, 'Definir o lider da turma'),
+    ('20000000-0000-4000-8000-000000000002', '10000000-0000-4000-8000-000000000001', 2, 'Criar o grupo oficial da turma'),
+    ('20000000-0000-4000-8000-000000000003', '10000000-0000-4000-8000-000000000001', 3, 'Entrar no grupo da turma'),
+    ('20000000-0000-4000-8000-000000000004', '10000000-0000-4000-8000-000000000001', 4, 'Confirmar calendario e canais da coordenacao'),
+    ('20000000-0000-4000-8000-000000000005', '10000000-0000-4000-8000-000000000002', 1, 'Abrir o Portal do Aluno UniSales'),
+    ('20000000-0000-4000-8000-000000000006', '10000000-0000-4000-8000-000000000002', 2, 'Fazer login com RA e senha inicial'),
+    ('20000000-0000-4000-8000-000000000007', '10000000-0000-4000-8000-000000000002', 3, 'Localizar a Central do Aluno e a Secretaria'),
+    ('20000000-0000-4000-8000-000000000008', '10000000-0000-4000-8000-000000000002', 4, 'Baixar boletos, comprovantes e relatorios'),
+    ('20000000-0000-4000-8000-000000000009', '10000000-0000-4000-8000-000000000003', 1, 'Confirmar o email institucional'),
+    ('20000000-0000-4000-8000-000000000010', '10000000-0000-4000-8000-000000000003', 2, 'Entrar no Outlook/Webmail'),
+    ('20000000-0000-4000-8000-000000000011', '10000000-0000-4000-8000-000000000003', 3, 'Alterar a senha provisoria'),
+    ('20000000-0000-4000-8000-000000000012', '10000000-0000-4000-8000-000000000003', 4, 'Testar envio e recebimento de mensagens'),
+    ('20000000-0000-4000-8000-000000000013', '10000000-0000-4000-8000-000000000004', 1, 'Entrar na biblioteca virtual'),
+    ('20000000-0000-4000-8000-000000000014', '10000000-0000-4000-8000-000000000004', 2, 'Buscar um livro da disciplina'),
+    ('20000000-0000-4000-8000-000000000015', '10000000-0000-4000-8000-000000000004', 3, 'Abrir uma base digital ou artigo'),
+    ('20000000-0000-4000-8000-000000000016', '10000000-0000-4000-8000-000000000004', 4, 'Verificar reservas, downloads ou historico'),
+    ('20000000-0000-4000-8000-000000000017', '10000000-0000-4000-8000-000000000005', 1, 'Entrar com a conta institucional'),
+    ('20000000-0000-4000-8000-000000000018', '10000000-0000-4000-8000-000000000005', 2, 'Abrir a equipe da turma ou disciplina'),
+    ('20000000-0000-4000-8000-000000000019', '10000000-0000-4000-8000-000000000005', 3, 'Ajustar notificacoes e perfil'),
+    ('20000000-0000-4000-8000-000000000020', '10000000-0000-4000-8000-000000000005', 4, 'Localizar canais, arquivos e reunioes'),
+    ('20000000-0000-4000-8000-000000000021', '10000000-0000-4000-8000-000000000006', 1, 'Acessar a Plataforma A+'),
+    ('20000000-0000-4000-8000-000000000022', '10000000-0000-4000-8000-000000000006', 2, 'Concluir o login inicial'),
+    ('20000000-0000-4000-8000-000000000023', '10000000-0000-4000-8000-000000000006', 3, 'Identificar materiais e recursos principais'),
+    ('20000000-0000-4000-8000-000000000024', '10000000-0000-4000-8000-000000000006', 4, 'Registrar acesso ou pendencias da ferramenta'),
+    ('20000000-0000-4000-8000-000000000025', '10000000-0000-4000-8000-000000000007', 1, 'Identificar o canal de apoio'),
+    ('20000000-0000-4000-8000-000000000026', '10000000-0000-4000-8000-000000000007', 2, 'Localizar regras ou agenda de atendimento'),
+    ('20000000-0000-4000-8000-000000000027', '10000000-0000-4000-8000-000000000007', 3, 'Registrar duvidas ou necessidades'),
+    ('20000000-0000-4000-8000-000000000028', '10000000-0000-4000-8000-000000000007', 4, 'Confirmar o encaminhamento ou retorno')
+on conflict (id) do update set
+    checklist_id = excluded.checklist_id,
+    ordem = excluded.ordem,
+    titulo = excluded.titulo;
+
+-- Se um catálogo anterior usava UUIDs aleatórios, preserve o progresso pela
+-- posição estrutural antes de remover a cópia legada.
+insert into public.user_checklist_item_progress (user_id, checklist_id, checklist_item_id, completed)
+select
+    progress.user_id,
+    canonical_phase.id,
+    canonical_item.id,
+    progress.completed
+from public.user_checklist_item_progress progress
+join public.checklists legacy_phase on legacy_phase.id = progress.checklist_id
+join public.checklist_items legacy_item on legacy_item.id = progress.checklist_item_id
+join public.checklists canonical_phase
+  on canonical_phase.ordem = legacy_phase.ordem
+ and canonical_phase.id::text like '10000000-0000-4000-8000-%'
+join public.checklist_items canonical_item
+  on canonical_item.checklist_id = canonical_phase.id
+ and canonical_item.ordem = legacy_item.ordem
+where progress.checklist_id::text not like '10000000-0000-4000-8000-%'
+on conflict (user_id, checklist_item_id) do update
+set completed = public.user_checklist_item_progress.completed or excluded.completed,
+    updated_at = now();
+
+delete from public.user_checklist_item_progress
+where checklist_id::text not like '10000000-0000-4000-8000-%';
+
+delete from public.checklists
+where id::text not like '10000000-0000-4000-8000-%';
+
 with fase1 as (
     select id
     from public.checklists
@@ -273,7 +352,7 @@ fase5_items as (
 update public.checklist_items ci
 set titulo = case fase5_items.pos
     when 1 then 'Entrar com a conta institucional'
-    when 2 then 'Abrir a equipe da turma'
+    when 2 then 'Abrir a equipe da turma ou disciplina'
     when 3 then 'Ajustar notificacoes e perfil'
     when 4 then 'Localizar canais, arquivos e reunioes'
     else ci.titulo
