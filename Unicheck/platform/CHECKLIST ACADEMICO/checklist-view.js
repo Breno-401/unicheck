@@ -1,6 +1,6 @@
 (function () {
-    const STORAGE_KEY = "unicheck_checklist_progress_v2";
-    const PENDING_SYNC_KEY = "unicheck_checklist_pending_sync_v1";
+    const STORAGE_KEY = "unicheck_checklist_progress_v3";
+    const PENDING_SYNC_KEY = "unicheck_checklist_pending_sync_v2";
     const ROUTE_PREFIX = "#checklist=";
     const FALLBACK_IMAGE = "../img-interno/logo.png";
     const PHASE_ACCENTS = [
@@ -157,6 +157,9 @@
 
     function getPendingSync(userId) {
         if (!userId) return {};
+        if (window.UniCheckChecklist?.readPendingProgress) {
+            return window.UniCheckChecklist.readPendingProgress(userId);
+        }
         try {
             const raw = localStorage.getItem(getPendingSyncKey(userId));
             return raw ? JSON.parse(raw) : {};
@@ -168,6 +171,10 @@
 
     function savePendingSync(userId, pending) {
         if (!userId) return;
+        if (window.UniCheckChecklist?.writePendingProgress) {
+            window.UniCheckChecklist.writePendingProgress(userId, pending);
+            return;
+        }
         try {
             localStorage.setItem(getPendingSyncKey(userId), JSON.stringify(pending));
         } catch (error) {
@@ -215,12 +222,14 @@
             }
             synced = true;
         } catch (error) {
-            console.error("[UniCheckChecklistView] Sincronizacao remota pendente; progresso local preservado", {
-                message: error?.message || String(error),
-                code: error?.code || null,
-                itemCount: entries.length,
-                userId
-            });
+            if (!error?.unicheckChecklistLogged) {
+                console.error("[UniCheckChecklistView] Sincronizacao remota pendente; progresso local preservado", {
+                    message: error?.message || String(error),
+                    code: error?.code || null,
+                    itemCount: entries.length,
+                    userId
+                });
+            }
         } finally {
             state.syncInFlight = false;
             if (synced && Object.keys(getPendingSync(userId)).length) {
@@ -237,22 +246,13 @@
                 getPendingSync(state.user?.id)
             );
         }
-        const merged = { ...remoteMap };
-
-        // O estado local e atualizado antes da chamada remota. Ele prevalece
-        // para que uma sincronizacao temporariamente indisponivel nao desmarque
-        // uma acao que o usuario acabou de realizar neste navegador.
-        Object.entries(localMap).forEach(([checklistId, value]) => {
-            merged[checklistId] = {
-                ...(merged[checklistId] || {}),
-                ...(value || {}),
-                tasks: {
-                    ...((merged[checklistId] || {}).tasks || {}),
-                    ...((value || {}).tasks || {})
-                }
-            };
+        const merged = JSON.parse(JSON.stringify(remoteMap || {}));
+        Object.entries(getPendingSync(state.user?.id)).forEach(([taskId, pending]) => {
+            if (!pending?.checklistId) return;
+            merged[pending.checklistId] ||= { tasks: {} };
+            merged[pending.checklistId].tasks ||= {};
+            merged[pending.checklistId].tasks[taskId] = Boolean(pending.completed);
         });
-
         return merged;
     }
 
@@ -817,6 +817,9 @@
                 throw new Error("Usuario autenticado nao encontrado para carregar checklists.");
             }
 
+            // Envia apenas operacoes explicitamente enfileiradas e faz um unico
+            // SELECT final para confirmar o estado remoto autoritativo.
+            await flushPendingSync();
             const remoteProgress = await window.UniCheckChecklist.fetchUserProgressMap(state.user.id);
             state.progress = mergeProgressMaps(remoteProgress, state.progress);
             saveStoredProgress(state.user.id);
@@ -826,14 +829,18 @@
             syncFromLocation();
             renderListView();
         } catch (error) {
-            console.error("[UniCheckChecklistView] Progresso remoto indisponivel; mantendo progresso local", {
-                message: error?.message || error,
-                code: error?.code || null,
-                details: error?.details || null,
-                hint: error?.hint || null,
-                userId: state.user?.id || null
-            });
-            showNotification("Progresso local carregado; sincronizacao pendente.", "info");
+            if (!error?.unicheckChecklistLogged) {
+                console.error("[UniCheckChecklistView] Progresso remoto indisponivel; mantendo progresso local", {
+                    message: error?.message || error,
+                    code: error?.code || null,
+                    details: error?.details || null,
+                    hint: error?.hint || null,
+                    userId: state.user?.id || null
+                });
+            }
+            if (Object.keys(getPendingSync(state.user?.id)).length) {
+                showNotification("Alteracoes locais pendentes de sincronizacao.", "info");
+            }
         }
     }
 

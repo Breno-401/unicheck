@@ -201,9 +201,9 @@ Fluxo canônico com cache local:
 
 - `js/checklist-data.js` consulta fases e tarefas em `checklists` e `checklist_items`, normaliza o catalogo e salva `unicheck_checklist_catalog_v1`;
 - se uma consulta posterior falhar e ja houver catalogo valido em cache, usa essa copia local como fallback;
-- identifica o usuario pela sessao ja validada e le `unicheck_checklist_progress_v2:<user_id>`;
+- identifica o usuario pela sessao ja validada e le `unicheck_checklist_progress_v3:<user_id>`;
 - renderiza o progresso local assim que o catalogo esta disponivel;
-- faz em background uma unica consulta a `user_checklist_item_progress` e combina o resultado com o estado local;
+- faz em background uma unica consulta a `user_checklist_item_progress`, substitui o cache pela resposta valida e aplica somente operacoes explicitamente pendentes;
 - aplica regra de bloqueio entre fases;
 - mostra lista de fases;
 - abre a visao detalhada de uma fase com o mesmo padrao de cards de conclusao para todas as etapas;
@@ -456,7 +456,7 @@ Chaves relevantes atualmente:
 - `unicheck_favorites_sync_queue:<user_id>` (ultima operacao de adicionar/remover ainda pendente por plataforma)
 - `unicheck_favorites_remote_ready:<user_id>` (marca a migracao inicial do antigo cache somente local)
 - `unicheck_checklist_catalog_v1` (ultima copia valida de `checklists` e `checklist_items`)
-- `unicheck_checklist_progress_v2:<user_id>`
+- `unicheck_checklist_progress_v3:<user_id>`
 - `unicheck_activity_v1:<user_id>` (historico local, limitado a 20 eventos; dashboard exibe os 5 mais recentes)
 - `unicheck_notifications_v1:<user_id>` (cache de ate 30 notificacoes da conta)
 
@@ -498,7 +498,7 @@ Distincao de persistencia:
 - Alteracoes de tarefa atualizam primeiro a UI e o cache por usuario e depois sincronizam com Supabase.
 - XP e a funcao `tarefas concluidas * 10 + fases completas * 50`; desmarcar e remarcar nunca acumula pontos fora do estado atual.
 - Nao existe `user_xp`: em outro dispositivo, o mesmo progresso restaurado produz o mesmo XP e nivel.
-- O dashboard calcula imediatamente progresso e proxima acao usando `js/checklist-data.js` e o cache `unicheck_checklist_progress_v2:<user_id>`, depois reconcilia esse cache com `user_checklist_item_progress` em background.
+- O dashboard calcula imediatamente progresso e proxima acao usando `js/checklist-data.js` e o cache `unicheck_checklist_progress_v3:<user_id>`; online, o estado remoto confirmado substitui o cache e somente operacoes explicitas de `unicheck_checklist_pending_sync_v2:<user_id>` podem sobrepor temporariamente o remoto.
 - Atividades recentes sao isoladas por `user_id`, persistidas em `user_activity` e copiadas para um cache local depois da confirmacao remota.
 - Notificacoes sao isoladas por `user_id`, persistidas em `user_notifications` e mantidas em cache apos confirmacao remota; atividade recente e notificacao nao sao tratadas como o mesmo registro.
 - Quando ja existe um catalogo valido em cache, uma falha temporaria ao consultar a estrutura remota nao impede o checklist de aparecer; alteracoes de progresso continuam na fila local ate a sincronizacao.
