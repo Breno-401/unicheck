@@ -56,7 +56,9 @@
     function normalizeProfile(row, user) {
         const nome = row?.nome || user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Usuario";
         const email = row?.email || user?.email || "";
-        const fotoUrl = row?.foto_url || user?.user_metadata?.photo_url || null;
+        // Avatar is sourced exclusively from public.users_profile. Auth metadata
+        // must never become an image store (especially for data URLs/base64).
+        const fotoUrl = row?.foto_url || null;
 
         return {
             id: user?.id || "",
@@ -139,7 +141,7 @@
             [PROFILE_USER_ID_COLUMN]: user.id,
             nome: metadataName.length >= 2 ? metadataName : "Usuario",
             email: user.email || "",
-            foto_url: user.user_metadata?.photo_url || null
+            foto_url: null
         };
 
         const { data: inserted, error: insertError } = await client
@@ -201,9 +203,11 @@
 
         const updatePayload = {
             data: {
-                ...(user.user_metadata || {}),
                 full_name: cleanProfile.nome,
-                photo_url: cleanProfile.foto_url
+                // Supabase merges metadata updates. Explicit nulls also purge any
+                // avatar left by the legacy base64 implementation.
+                photo_url: null,
+                foto_url: null
             }
         };
 
@@ -265,8 +269,7 @@
             email: confirmedEmail,
             user_metadata: {
                 ...(authData?.user?.user_metadata || user.user_metadata || {}),
-                full_name: cleanProfile.nome,
-                photo_url: cleanProfile.foto_url
+                full_name: cleanProfile.nome
             }
         });
 
