@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let toastTimeout = null;
 
     if (!auth) {
-        console.error("UniCheckAuth nao encontrado. Verifique a inclusao de js/config.js e js/auth.js.");
+        console.error("UniCheckAuth nao encontrado. Verifique a inclusao de js/core/config.js e js/core/auth.js.");
     }
 
     function showToast(message, type) {

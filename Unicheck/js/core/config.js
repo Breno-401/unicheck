@@ -10,7 +10,7 @@
     let client = null;
 
     if (!hasLibrary) {
-        console.warn("Supabase JS nao foi carregado. Inclua o CDN antes de js/config.js.");
+        console.warn("Supabase JS nao foi carregado. Inclua o CDN antes de js/core/config.js.");
     } else {
         client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
             auth: {

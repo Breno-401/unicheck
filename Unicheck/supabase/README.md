@@ -4,15 +4,15 @@ Esta pasta é a fonte versionada do banco do MVP. O projeto remoto atual contém
 
 ## Arquivos ativos
 
-1. `00_inventory.sql`: inventário somente leitura antes de qualquer alteração.
-2. `checklist_progress_and_seed.sql`: reconciliação opcional das 7 fases e 28 itens estruturais.
-3. `20260824_prerelease_reset.sql`: reset canônico dos dados de usuário, RLS, grants, triggers, índices e bucket de avatar.
-4. `20260824_post_reset_validation.sql`: validações somente leitura após o reset.
-5. `AUDIT_2026-08-24.md`: achados, decisões e critérios de aceite.
+1. `diagnostics/00_inventory.sql`: inventário somente leitura antes de qualquer alteração.
+2. `seeds/checklist_progress_and_seed.sql`: reconciliação opcional das 7 fases e 28 itens estruturais.
+3. `migrations/20260824_prerelease_reset.sql`: reset canônico dos dados de usuário, RLS, grants, triggers, índices e bucket de avatar.
+4. `diagnostics/20260824_post_reset_validation.sql`: validações somente leitura após o reset.
+5. `../../docs/audits/supabase-2026-08-24.md`: achados, decisões e critérios de aceite.
 
 ## O que o reset remove
 
-`20260824_prerelease_reset.sql` é destrutivo de forma intencional:
+`migrations/20260824_prerelease_reset.sql` é destrutivo de forma intencional:
 
 - remove `progresso_item_checklist`, `notificacoes` e `user_progress`;
 - recria vazias `users_profile`, `user_checklist_item_progress`, `user_activity`, `user_notifications` e `user_platform_favorites`;
@@ -26,11 +26,11 @@ O reset e a validação abaixo já foram executados em 2026-08-24. A ordem perma
 
 ## Ordem de reconstrução
 
-1. Executar `00_inventory.sql`.
+1. Executar `diagnostics/00_inventory.sql`.
 2. Confirmar que existem 7 `checklists` e 28 `checklist_items`.
-3. Executar `checklist_progress_and_seed.sql` somente se a estrutura dos checklists precisar ser reconciliada.
-4. Executar `20260824_prerelease_reset.sql` em uma única operação.
-5. Executar `20260824_post_reset_validation.sql`.
+3. Executar `seeds/checklist_progress_and_seed.sql` somente se a estrutura dos checklists precisar ser reconciliada.
+4. Executar `migrations/20260824_prerelease_reset.sql` em uma única operação.
+5. Executar `diagnostics/20260824_post_reset_validation.sql`.
 6. Reexecutar os Advisors de segurança e desempenho.
 7. Ativar a proteção contra senhas vazadas em Auth quando o projeto estiver no plano Pro.
 8. Criar uma conta nova e executar o roteiro funcional abaixo.
@@ -51,7 +51,7 @@ O reset e a validação abaixo já foram executados em 2026-08-24. A ordem perma
 12. novo login;
 13. confirmar restauração dos dados.
 
-Depois, usar uma segunda conta para confirmar que nenhum dado da primeira pode ser lido ou alterado. O isolamento A/B, a criação automática de perfil e a persistência após refresh foram executados após o reset e estão registrados em `AUDIT_2026-08-24.md`. Logout seguido de novo login e upload real de avatar permanecem como smoke test do preview do Netlify.
+Depois, usar uma segunda conta para confirmar que nenhum dado da primeira pode ser lido ou alterado. O isolamento A/B, a criação automática de perfil e a persistência após refresh foram executados após o reset e estão registrados em `../../docs/audits/supabase-2026-08-24.md`. Logout seguido de novo login e upload real de avatar permanecem como smoke test do preview do Netlify.
 
 ## Segurança esperada
 
@@ -68,4 +68,4 @@ Depois, usar uma segunda conta para confirmar que nenhum dado da primeira pode s
 
 ## Frontend e Netlify
 
-A URL e a chave pública do Supabase permanecem em `js/config.js`. A verificação `node scripts/check-local-references.mjs` finaliza sem referências quebradas na branch consolidada. O próximo passo de entrega é gerar um deploy de preview no Netlify e repetir o smoke test no domínio definitivo.
+A URL e a chave pública do Supabase permanecem em `../js/core/config.js`. A verificação `node scripts/check-local-references.mjs` finaliza sem referências quebradas na branch consolidada. O próximo passo de entrega é gerar um deploy de preview no Netlify e repetir o smoke test no domínio definitivo.

@@ -11,7 +11,7 @@
     function getClient() {
         const client = window.UniCheckSupabase?.client;
         if (!client) {
-            throw new Error("Supabase nao configurado. Preencha as chaves em js/config.js.");
+            throw new Error("Supabase nao configurado. Preencha as chaves em js/core/config.js.");
         }
         return client;
     }

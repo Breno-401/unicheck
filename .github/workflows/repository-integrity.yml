@@ -24,5 +24,5 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Check HTML and CSS references
+      - name: Check local references
         run: node scripts/check-local-references.mjs

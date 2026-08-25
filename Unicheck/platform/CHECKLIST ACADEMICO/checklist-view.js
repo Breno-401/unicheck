@@ -2,7 +2,7 @@
     const STORAGE_KEY = "unicheck_checklist_progress_v3";
     const PENDING_SYNC_KEY = "unicheck_checklist_pending_sync_v2";
     const ROUTE_PREFIX = "#checklist=";
-    const FALLBACK_IMAGE = "../img-interno/logo.png";
+    const FALLBACK_IMAGE = "../assets/images/logo.png";
     const PHASE_ACCENTS = [
         { color: "#0b61ff", gradient: "linear-gradient(135deg, #0b61ff, #31b0ff)" },
         { color: "#06b6d4", gradient: "linear-gradient(135deg, #06b6d4, #22d3ee)" },
@@ -14,12 +14,12 @@
     ];
 
     const checklistImages = {
-        "Portal Academico TOTVS": "../img-interno/TOTVS.jpg",
-        "Configuracao de Email": "../img-interno/outlook.png",
-        "Biblioteca Virtual": "../img-interno/bibliotecaV.png",
-        "Microsoft Teams": "../img-interno/MicrosoftT.png",
-        "Plataforma A+": "../img-interno/platafromaA.png",
-        "Mentorias": "../img-interno/logo.png"
+        "Portal Academico TOTVS": "../assets/images/TOTVS.jpg",
+        "Configuracao de Email": "../assets/images/outlook.png",
+        "Biblioteca Virtual": "../assets/images/bibliotecaV.png",
+        "Microsoft Teams": "../assets/images/MicrosoftT.png",
+        "Plataforma A+": "../assets/images/platafromaA.png",
+        "Mentorias": "../assets/images/logo.png"
     };
 
     const cardCopy = {

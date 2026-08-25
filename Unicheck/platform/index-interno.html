@@ -4,27 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UniCheck - Dashboard Institucional</title>
-    <link rel="icon" href="../landing/img/logomernor.png" type="image/png">
+    <link rel="icon" href="../landing/assets/images/logomernor.png" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Importar Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <!-- Arquivos CSS e JS separados -->
-    <link rel="stylesheet" href="css-interno/base.css">
-    <link rel="stylesheet" href="css-interno/componente-logo.css">
-    <link rel="stylesheet" href="css-interno/componentes-atividades-recentes.css">
-    <link rel="stylesheet" href="css-interno/componentes-cards-status.css">
-    <link rel="stylesheet" href="css-interno/componentes-header.css">
-    <link rel="stylesheet" href="css-interno/componentes-parceiros.css">
-    <link rel="stylesheet" href="css-interno/componentes-sidebar.css">
-    <link rel="stylesheet" href="css-interno/layout.css">
-    <link rel="stylesheet" href="css-interno/responsividade.css">
-    <link rel="stylesheet" href="css-interno/variaveis.css">
-    <link rel="stylesheet" href="css-interno/style.css">
-    <link rel="stylesheet" href="css-interno/ui-polish.css">
-    <link rel="stylesheet" href="css-interno/dashboard-restored.css">
-    <link rel="stylesheet" href="css-interno/notifications.css">
+    <link rel="stylesheet" href="css/base/base.css">
+    <link rel="stylesheet" href="css/components/componente-logo.css">
+    <link rel="stylesheet" href="css/components/componentes-atividades-recentes.css">
+    <link rel="stylesheet" href="css/components/componentes-cards-status.css">
+    <link rel="stylesheet" href="css/components/componentes-header.css">
+    <link rel="stylesheet" href="css/components/componentes-parceiros.css">
+    <link rel="stylesheet" href="css/components/componentes-sidebar.css">
+    <link rel="stylesheet" href="css/shared/layout.css">
+    <link rel="stylesheet" href="css/shared/responsividade.css">
+    <link rel="stylesheet" href="css/base/variaveis.css">
+    <link rel="stylesheet" href="css/shared/style.css">
+    <link rel="stylesheet" href="css/shared/ui-polish.css">
+    <link rel="stylesheet" href="css/pages/dashboard-restored.css">
+    <link rel="stylesheet" href="css/components/notifications.css">
 </head>
 <body class="page-dashboard">
     <!-- Container Principal do Dashboard -->
@@ -35,7 +35,7 @@
                 <div class="logo-section">
                     <div class="sidebar-logo-enhanced">
                         <!-- Logo UniCheck Original -->
-                        <img src="img-interno/logo.png" alt="UniCheck Logo" class="sidebar-logo-image">
+                        <img src="assets/images/logo.png" alt="UniCheck Logo" class="sidebar-logo-image">
                     </div>
                     <span class="logo-text">UniCheck</span>
                 </div>
@@ -225,7 +225,7 @@
 
             <section class="educational-partner" aria-labelledby="educationalPartnerTitle">
                 <div class="educational-partner-logo">
-                    <img src="img-interno/fundacao bradesco.png" alt="Fundação Bradesco">
+                    <img src="assets/images/fundacao bradesco.png" alt="Fundação Bradesco">
                 </div>
                 <div class="educational-partner-copy">
                     <span class="dashboard-eyebrow">Parceiro educacional</span>
@@ -247,20 +247,20 @@
 
     <!-- Script JavaScript separado -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../js/config.js"></script>
-    <script src="../js/auth.js"></script>
-    <script src="../js/profile.js"></script>
-    <script src="../js/checklist-data.js"></script>
-    <script src="../js/checklist.js"></script>
-    <script src="../js/progression.js"></script>
-    <script src="../js/activity.js"></script>
-    <script src="../js/notifications.js"></script>
-    <script src="js/core-config.js"></script>
-    <script src="js/profile-manager.js"></script>
-    <script src="js/progression-profile.js"></script>
-    <script src="js/loading-navigation.js"></script>
-    <script src="script-interno.js"></script>
-    <script src="script-profile-sync.js"></script>
+    <script src="../js/core/config.js"></script>
+    <script src="../js/core/auth.js"></script>
+    <script src="../js/services/profile.js"></script>
+    <script src="../js/data/checklist-data.js"></script>
+    <script src="../js/services/checklist.js"></script>
+    <script src="../js/services/progression.js"></script>
+    <script src="../js/services/activity.js"></script>
+    <script src="../js/services/notifications.js"></script>
+    <script src="js/shared/core-config.js"></script>
+    <script src="js/shared/profile-manager.js"></script>
+    <script src="js/shared/progression-profile.js"></script>
+    <script src="js/shared/loading-navigation.js"></script>
+    <script src="js/shared/script-interno.js"></script>
+    <script src="js/shared/script-profile-sync.js"></script>
     
 
 </body>

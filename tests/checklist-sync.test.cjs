@@ -3,7 +3,7 @@ const fs = require("node:fs");
 const test = require("node:test");
 const vm = require("node:vm");
 
-const checklistSource = fs.readFileSync(require.resolve("../js/checklist.js"), "utf8");
+const checklistSource = fs.readFileSync(require.resolve("../Unicheck/js/services/checklist.js"), "utf8");
 
 function createStorage(initial = {}) {
     const values = new Map(Object.entries(initial));
