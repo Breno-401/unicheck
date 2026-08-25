@@ -367,12 +367,23 @@ set public = excluded.public,
     allowed_mime_types = excluded.allowed_mime_types;
 
 drop policy if exists "avatars_insert_own" on storage.objects;
+drop policy if exists "avatars_select_own" on storage.objects;
 drop policy if exists "avatars_update_own" on storage.objects;
 drop policy if exists "avatars_delete_own" on storage.objects;
 
--- Public delivery is provided by the public bucket URL. A SELECT policy is
--- intentionally omitted so clients cannot enumerate every stored avatar.
+-- Public delivery continues through the public bucket URL. Authenticated
+-- clients still need SELECT on their own path because Storage upsert requires
+-- INSERT + SELECT + UPDATE to create or overwrite an object safely.
 drop policy if exists "avatars_public_read" on storage.objects;
+
+create policy "avatars_select_own"
+on storage.objects
+for select
+to authenticated
+using (
+    bucket_id = 'avatars'
+    and (storage.foldername(name))[1] = (select auth.uid())::text
+);
 
 create policy "avatars_insert_own"
 on storage.objects

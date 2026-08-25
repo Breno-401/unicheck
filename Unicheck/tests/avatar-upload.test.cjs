@@ -5,6 +5,8 @@ const vm = require("node:vm");
 
 const settingsPath = require.resolve("../platform/CONFIGURACOES PERFIL/configuracoes.js");
 const originalSource = fs.readFileSync(settingsPath, "utf8");
+const profileSource = fs.readFileSync(require.resolve("../js/profile.js"), "utf8");
+const migrationSource = fs.readFileSync(require.resolve("../supabase/20260824_prerelease_reset.sql"), "utf8");
 const instrumentedSource = originalSource.replace(
     /\}\)\(\);\s*$/,
     "window.__avatarTest = { optimizeAvatar, validateAvatarFile }; })();"
@@ -111,4 +113,16 @@ test("limites, mensagens e destino remoto permanecem explicitos", () => {
     assert.match(originalSource, /Use uma imagem JPG, PNG ou WebP\./);
     assert.match(originalSource, /user\.id \+ "\/avatar\.webp"/);
     assert.match(originalSource, /\.from\(AVATAR_BUCKET\)[\s\S]*?\.upload\([\s\S]*?upsert: true/);
+});
+
+test("migration canonica concede somente SELECT do proprio avatar", () => {
+    const avatarPolicies = migrationSource.slice(migrationSource.indexOf("-- Public avatars"));
+    assert.match(avatarPolicies, /create policy "avatars_select_own"[\s\S]*?for select[\s\S]*?to authenticated[\s\S]*?using \([\s\S]*?bucket_id = 'avatars'[\s\S]*?\(storage\.foldername\(name\)\)\[1\] = \(select auth\.uid\(\)\)::text[\s\S]*?\);/i);
+    assert.doesNotMatch(avatarPolicies, /create policy[^;]*for select[^;]*using\s*\(\s*true\s*\)/i);
+});
+
+test("avatar nao e persistido no Auth metadata", () => {
+    assert.match(profileSource, /full_name: cleanProfile\.nome[\s\S]*?photo_url: null[\s\S]*?foto_url: null/);
+    assert.doesNotMatch(profileSource, /photo_url:\s*cleanProfile\.foto_url/);
+    assert.doesNotMatch(profileSource, /foto_url:\s*cleanProfile\.foto_url[\s\S]*?auth\.updateUser/);
 });
