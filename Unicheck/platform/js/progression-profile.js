@@ -1,12 +1,7 @@
 (function () {
     "use strict";
 
-    function isDashboard() {
-        return document.body.classList.contains("page-dashboard");
-    }
-
     function ensureSurface() {
-        if (!isDashboard()) return null;
         const profile = document.querySelector(".sidebar .user-profile");
         if (!profile) return null;
         let surface = profile.querySelector(".sidebar-profile-progression");
