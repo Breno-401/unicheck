@@ -6,6 +6,7 @@
         /^sb-.*auth-token-challenge/i,
         /^supabase\.auth\.token$/i
     ];
+    let authGuardPromise = null;
 
     function getClient() {
         const client = window.UniCheckSupabase?.client;
@@ -238,6 +239,17 @@
     }
 
     async function requireAuth(options = {}) {
+        if (authGuardPromise) return authGuardPromise;
+
+        authGuardPromise = requireAuthOnce(options);
+        try {
+            return await authGuardPromise;
+        } finally {
+            authGuardPromise = null;
+        }
+    }
+
+    async function requireAuthOnce(options = {}) {
         const redirectTo = options.redirectTo === undefined ? getLoginPage() : options.redirectTo;
         let session;
 
