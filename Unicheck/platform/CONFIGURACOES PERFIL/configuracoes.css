@@ -1,9 +1,9 @@
 /* Configurações de Perfil — alinhado ao layout responsivo do UniCheck */
 
 :root {
-  --profile-primary: var(--unicheck-primary, #6cbdb5);
-  --profile-primary-dark: #4a8a7a;
-  --profile-primary-soft: rgba(108, 189, 181, 0.14);
+  --profile-primary: var(--unisales-blue, #0b61ff);
+  --profile-primary-dark: #084ed1;
+  --profile-primary-soft: rgb(11 97 255 / 10%);
   --profile-text: var(--text-primary, #1a1f2e);
   --profile-muted: var(--text-secondary, #667085);
   --profile-surface: var(--surface, #ffffff);
@@ -15,7 +15,7 @@
   --profile-radius: 0.875rem;
   --profile-radius-lg: 1.125rem;
   --profile-shadow: 0 12px 32px rgba(26, 31, 46, 0.08);
-  --profile-focus: 0 0 0 3px rgba(108, 189, 181, 0.24);
+  --profile-focus: 0 0 0 3px rgb(11 97 255 / 24%);
 }
 
 [data-theme="dark"] {
