@@ -3,67 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manual do aluno | UniCheck</title>
+    <title>Manual do Aluno - UniCheck</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <link rel="stylesheet" href="../css-interno/base.css">
+    <link rel="stylesheet" href="../css-interno/componente-logo.css">
+    <link rel="stylesheet" href="../css-interno/componentes-header.css">
+    <link rel="stylesheet" href="../css-interno/componentes-sidebar.css">
+    <link rel="stylesheet" href="../css-interno/layout.css">
+    <link rel="stylesheet" href="../css-interno/responsividade.css">
     <link rel="stylesheet" href="../css-interno/variaveis.css">
-    <link rel="stylesheet" href="../css-interno/support-pages.css">
+    <link rel="stylesheet" href="../css-interno/style.css">
+    <link rel="stylesheet" href="../css-interno/ui-polish.css">
+    <link rel="stylesheet" href="../css-interno/notifications.css">
+    <link rel="stylesheet" href="manual-aluno.css">
 </head>
-<body>
-    <main class="support-shell">
-        <section class="support-hero">
-            <span class="dashboard-eyebrow">Manual UniCheck</span>
-            <h1>Comece pela próxima ação.</h1>
-            <p>Este guia resume o fluxo do MVP: organize o perfil, avance pelas fases acadêmicas e salve os benefícios que fazem sentido para sua rotina.</p>
-            <div class="support-actions">
-                <a class="support-action" href="../index-interno.html">Voltar ao painel</a>
-                <a class="support-action" href="../CHECKLIST ACADEMICO/checklist-academico.html">Abrir checklists</a>
+<body class="page-manual">
+    <div class="dashboard-container" id="dashboardContainer">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-section"><div class="sidebar-logo-enhanced"><img src="../img-interno/logo.png" alt="UniCheck Logo" class="sidebar-logo-image"></div><span class="logo-text">UniCheck</span></div>
+                <button class="sidebar-toggle" id="sidebarToggle" type="button" title="Recolher ou expandir menu lateral" aria-label="Recolher ou expandir menu lateral"><span class="hamburger-menu" aria-hidden="true"><span class="hamburger-line"></span><span class="hamburger-line"></span><span class="hamburger-line"></span></span></button>
             </div>
-        </section>
-
-        <div class="support-grid">
-            <article class="support-card">
-                <h2>1. Configure seu perfil</h2>
-                <ol>
-                    <li>Abra Configurações no menu do usuário.</li>
-                    <li>Revise nome, e-mail, RA e foto.</li>
-                    <li>Salve e confirme os dados após atualizar a página.</li>
-                </ol>
-                <a href="../CONFIGURACOES PERFIL/configuracoes.html">Ir para configurações</a>
-            </article>
-
-            <article class="support-card">
-                <h2>2. Avance pelas fases</h2>
-                <ol>
-                    <li>Abra a primeira fase disponível.</li>
-                    <li>Marque cada tarefa quando concluí-la.</li>
-                    <li>A próxima fase será liberada automaticamente.</li>
-                </ol>
-            </article>
-
-            <article class="support-card">
-                <h2>3. Acompanhe o histórico</h2>
-                <p>O painel reúne percentual geral, próxima ação, atividade recente e notificações. O progresso fica associado à sua conta.</p>
-            </article>
-
-            <article class="support-card">
-                <h2>4. Salve benefícios</h2>
-                <p>Use busca e filtros na área de benefícios estudantis. O botão de favorito sincroniza suas escolhas entre sessões.</p>
-                <a href="../PLATAFORMAS/plataformas-gratuitas.html">Explorar benefícios</a>
-            </article>
-
-            <article class="support-card support-card--wide">
-                <h2>Boas práticas</h2>
-                <ul>
-                    <li>Use uma senha exclusiva e não compartilhe sua sessão.</li>
-                    <li>Confira as condições na fonte oficial antes de contratar um benefício.</li>
-                    <li>Se algo não sincronizar, mantenha a página aberta e tente novamente com conexão estável.</li>
+            <div class="user-profile"><div class="user-avatar"><span>JS</span></div><div class="user-info"><h4>João Silva</h4><p>Aluno UniSales</p></div><div class="user-status"><span class="status-indicator online"></span></div></div>
+            <nav class="sidebar-nav" aria-label="Navegação principal">
+                <ul class="nav-menu">
+                    <li class="nav-item"><a href="../index-interno.html" class="nav-link" data-tooltip="Início"><i data-lucide="home"></i><span>Início</span></a></li>
+                    <li class="nav-item"><a href="../CHECKLIST ACADEMICO/checklist-academico.html" class="nav-link" data-tooltip="Checklists Acadêmicos"><i data-lucide="graduation-cap"></i><span>Checklists Acadêmicos</span></a></li>
+                    <li class="nav-item active"><a href="manual-aluno.html" class="nav-link" aria-current="page" data-tooltip="Manual do Aluno"><i data-lucide="book-open"></i><span>Manual do Aluno</span></a></li>
+                    <li class="nav-item"><a href="../PLATAFORMAS/plataformas-gratuitas.html" class="nav-link" data-tooltip="Benefícios Estudantis"><i data-lucide="badge-percent"></i><span>Benefícios Estudantis</span></a></li>
+                    <li class="nav-item"><a href="../ajuda/ajuda-suporte.html" class="nav-link" data-tooltip="Ajuda e Suporte"><i data-lucide="help-circle"></i><span>Ajuda e Suporte</span></a></li>
                 </ul>
-            </article>
-        </div>
-    </main>
+                <div class="nav-footer">
+                    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Alternar tema claro ou escuro"><i data-lucide="moon"></i><span>Modo Escuro</span></button>
+                    <button class="logout-btn logout-action" data-action="logout"><i data-lucide="log-out"></i><span>Sair</span></button>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content" id="mainContent">
+            <header class="main-header manual-header">
+                <div class="header-top">
+                    <div class="header-mobile-controls"><button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-label="Abrir menu lateral"><i data-lucide="menu"></i></button></div>
+                    <div class="welcome-section"><p class="manual-eyebrow">Central de orientação acadêmica</p><h1 class="welcome-title">Manual do Aluno</h1><p class="welcome-subtitle">Tudo o que você precisa saber para navegar pela vida acadêmica.</p></div>
+                </div>
+                <div class="header-bottom-enhanced manual-header-actions"><div aria-hidden="true"></div><div class="header-actions-enhanced">
+                    <button class="theme-toggle-mobile" id="themeToggleMobile" type="button" aria-label="Alternar tema claro ou escuro"><i data-lucide="moon"></i></button>
+                    <button class="header-notification-button" type="button" aria-label="Notificações"><i data-lucide="bell"></i></button>
+                    <div class="user-menu"><button class="user-menu-trigger" id="userMenuTrigger" type="button" aria-label="Abrir menu do usuário" aria-expanded="false"><div class="user-avatar-small"><span>JS</span></div><span class="user-name-indicator">João Silva</span><i data-lucide="chevron-down" class="dropdown-indicator"></i></button>
+                        <div class="user-dropdown" id="userDropdown"><div class="user-dropdown-header"><div class="user-dropdown-avatar"><span>JS</span></div><div class="user-dropdown-info"><h4>João Silva</h4><p>joao.silva@unisales.com.br</p></div></div><div class="user-dropdown-menu"><a href="../CONFIGURACOES PERFIL/configuracoes.html" class="user-dropdown-item"><i data-lucide="user"></i><span>Meu Perfil</span></a><a href="../CONFIGURACOES PERFIL/configuracoes.html" class="user-dropdown-item"><i data-lucide="settings"></i><span>Configurações</span></a><a href="../ajuda/ajuda-suporte.html" class="user-dropdown-item"><i data-lucide="help-circle"></i><span>Ajuda e Suporte</span></a><button class="user-dropdown-item logout-action" data-action="logout"><i data-lucide="log-out"></i><span>Sair</span></button></div></div>
+                    </div>
+                </div></div>
+            </header>
+
+            <div class="manual-content">
+                <section id="manualDiscovery" aria-labelledby="manualDiscoveryTitle">
+                    <div class="manual-intro"><div><span class="manual-kicker">Orientação sem complicação</span><h2 id="manualDiscoveryTitle">Encontre respostas para sua vida acadêmica</h2><p>Procedimentos, serviços e orientações do UniSales organizados de forma simples para você entender o que importa e onde resolver.</p><span class="manual-source-note"><i data-lucide="book-open-check"></i> Baseado no Manual do Aluno oficial do UniSales</span></div></div>
+                    <div class="manual-search-area">
+                        <label for="manualSearch">Buscar no Manual do Aluno</label>
+                        <div class="manual-search-box"><i data-lucide="search" aria-hidden="true"></i><input id="manualSearch" type="search" autocomplete="off" placeholder="Buscar no Manual do Aluno..."><button id="clearManualSearch" type="button" aria-label="Limpar busca" hidden><i data-lucide="x"></i></button></div>
+                        <p id="manualResultsStatus" class="manual-results-status" role="status" aria-live="polite"></p>
+                    </div>
+                    <section class="manual-quick-section" aria-labelledby="manualQuickTitle"><div class="manual-section-heading"><div><span class="manual-kicker">Direto ao assunto</span><h2 id="manualQuickTitle">Acessos rápidos</h2></div></div><div class="manual-quick-links" id="manualQuickLinks"></div></section>
+                    <div class="manual-filters" id="manualFilters" role="group" aria-label="Filtrar conteúdos por categoria"></div>
+                    <div class="manual-section-heading"><div><span class="manual-kicker">Navegue por assunto</span><h2 id="manualGridTitle">Categorias do Manual</h2></div><span id="manualCount"></span></div>
+                    <div class="manual-grid" id="manualGrid" aria-labelledby="manualGridTitle"></div>
+                    <div class="manual-empty" id="manualEmpty" hidden><i data-lucide="search-x"></i><h3>Nenhum conteúdo encontrado</h3><p>Tente outro termo ou consulte todas as categorias.</p><button id="resetManualFilters" type="button">Ver todo o Manual</button></div>
+                </section>
+
+                <article class="manual-detail" id="manualDetail" hidden aria-labelledby="manualDetailTitle">
+                    <nav class="manual-breadcrumb" id="manualBreadcrumb" aria-label="Trilha de navegação"></nav>
+                    <button class="manual-back" id="manualBack" type="button"><i data-lucide="arrow-left"></i><span id="manualBackLabel">Voltar ao Manual</span></button>
+                    <div class="manual-detail-layout"><div class="manual-article"><div class="manual-detail-meta"><span id="manualDetailCategory"></span><span><i data-lucide="clock"></i><span id="manualDetailTime"></span></span></div><h1 id="manualDetailTitle" tabindex="-1"></h1><p class="manual-detail-summary" id="manualDetailSummary"></p><div class="manual-detail-body" id="manualDetailBody"></div><div class="manual-temporal-note" id="manualTemporalNote" hidden><i data-lucide="refresh-cw"></i><div><strong>Informação sujeita a atualização</strong><p id="manualTemporalText"></p></div></div><footer class="manual-source-footer"><i data-lucide="book-marked"></i><div><span>Fonte institucional</span><strong>Manual do Aluno 2024 — UniSales</strong><small id="manualSourcePages"></small></div></footer></div>
+                        <aside class="manual-detail-aside"><section class="manual-related" aria-labelledby="manualRelatedTitle"><span class="manual-kicker">Continue explorando</span><h2 id="manualRelatedTitle">Você também pode precisar</h2><div id="manualRelatedList"></div></section></aside></div>
+                    <nav class="manual-article-navigation" aria-label="Navegação entre conteúdos"><button id="manualPrevious" type="button"></button><button id="manualNext" type="button"></button></nav>
+                </article>
+            </div>
+        </main>
+    </div>
+    <div class="mobile-overlay" id="mobileOverlay"></div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../../js/config.js"></script>
-    <script src="../../js/auth.js"></script>
-    <script>window.UniCheckAuth?.requireAuth?.();</script>
+    <script src="../../js/config.js"></script><script src="../../js/auth.js"></script><script src="../../js/profile.js"></script><script src="../../js/checklist-data.js"></script><script src="../../js/checklist.js"></script><script src="../../js/progression.js"></script><script src="../../js/notifications.js"></script>
+    <script src="../js/core-config.js"></script><script src="../js/profile-manager.js"></script><script src="../js/progression-profile.js"></script><script src="../js/loading-navigation.js"></script><script src="../script-interno.js"></script><script src="../script-profile-sync.js"></script><script src="../script-page-state.js"></script>
+    <script src="../../js/manual-data.js"></script><script src="manual-aluno.js"></script>
 </body>
 </html>

@@ -3,62 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ajuda e suporte | UniCheck</title>
+    <title>Ajuda e Suporte - UniCheck</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <link rel="stylesheet" href="../css-interno/base.css">
+    <link rel="stylesheet" href="../css-interno/componente-logo.css">
+    <link rel="stylesheet" href="../css-interno/componentes-header.css">
+    <link rel="stylesheet" href="../css-interno/componentes-sidebar.css">
+    <link rel="stylesheet" href="../css-interno/layout.css">
+    <link rel="stylesheet" href="../css-interno/responsividade.css">
     <link rel="stylesheet" href="../css-interno/variaveis.css">
-    <link rel="stylesheet" href="../css-interno/support-pages.css">
+    <link rel="stylesheet" href="../css-interno/style.css">
+    <link rel="stylesheet" href="../css-interno/ui-polish.css">
+    <link rel="stylesheet" href="../css-interno/notifications.css">
+    <link rel="stylesheet" href="ajuda-suporte.css">
 </head>
-<body>
-    <main class="support-shell">
-        <section class="support-hero">
-            <span class="dashboard-eyebrow">Central de ajuda</span>
-            <h1>Resolva o essencial rapidamente.</h1>
-            <p>Consulte as respostas do MVP e, se o problema continuar, registre o contexto com clareza para a equipe conseguir reproduzir.</p>
-            <div class="support-actions">
-                <a class="support-action" href="../index-interno.html">Voltar ao painel</a>
-                <a class="support-action" href="../manual/manual-aluno.html">Ler o manual</a>
+<body class="page-help">
+    <div class="dashboard-container" id="dashboardContainer">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-section">
+                    <div class="sidebar-logo-enhanced"><img src="../img-interno/logo.png" alt="UniCheck Logo" class="sidebar-logo-image"></div>
+                    <span class="logo-text">UniCheck</span>
+                </div>
+                <button class="sidebar-toggle" id="sidebarToggle" type="button" title="Recolher ou expandir menu lateral" aria-label="Recolher ou expandir menu lateral">
+                    <span class="hamburger-menu" aria-hidden="true"><span class="hamburger-line"></span><span class="hamburger-line"></span><span class="hamburger-line"></span></span>
+                </button>
             </div>
-        </section>
-
-        <div class="support-grid">
-            <article class="support-card support-card--wide">
-                <h2>Perguntas frequentes</h2>
-                <details>
-                    <summary>Meu progresso não apareceu em outro dispositivo</summary>
-                    <p>Confirme que você entrou com o mesmo e-mail e aguarde a sincronização. Atualize a página somente depois que a conexão estiver estável.</p>
-                </details>
-                <details>
-                    <summary>Não consigo editar meu perfil</summary>
-                    <p>Verifique se a sessão continua ativa. Tente salvar novamente; se o e-mail foi alterado, confira também a caixa de entrada para a confirmação do Supabase Auth.</p>
-                </details>
-                <details>
-                    <summary>Uma fase continua bloqueada</summary>
-                    <p>A fase seguinte é liberada quando todas as tarefas da fase atual estão concluídas. Volte ao detalhe da fase e confira cada item.</p>
-                </details>
-                <details>
-                    <summary>Um benefício mudou de condição</summary>
-                    <p>Ofertas estudantis podem mudar. Use o link da fonte oficial no card antes de tomar uma decisão ou contratar um serviço.</p>
-                </details>
-            </article>
-
-            <article class="support-card">
-                <h2>Antes de reportar</h2>
-                <ul>
-                    <li>Anote a página e a ação realizada.</li>
-                    <li>Informe o horário aproximado.</li>
-                    <li>Não envie senha, token ou código de confirmação.</li>
+            <div class="user-profile">
+                <div class="user-avatar"><span>JS</span></div>
+                <div class="user-info"><h4>João Silva</h4><p>Aluno UniSales</p></div>
+                <div class="user-status"><span class="status-indicator online"></span></div>
+            </div>
+            <nav class="sidebar-nav" aria-label="Navegação principal">
+                <ul class="nav-menu">
+                    <li class="nav-item"><a href="../index-interno.html" class="nav-link" data-tooltip="Início"><i data-lucide="home"></i><span>Início</span></a></li>
+                    <li class="nav-item"><a href="../CHECKLIST ACADEMICO/checklist-academico.html" class="nav-link" data-tooltip="Checklists Acadêmicos"><i data-lucide="graduation-cap"></i><span>Checklists Acadêmicos</span></a></li>
+                    <li class="nav-item"><a href="../manual/manual-aluno.html" class="nav-link" data-tooltip="Manual do Aluno"><i data-lucide="book-open"></i><span>Manual do Aluno</span></a></li>
+                    <li class="nav-item"><a href="../PLATAFORMAS/plataformas-gratuitas.html" class="nav-link" data-tooltip="Benefícios Estudantis"><i data-lucide="badge-percent"></i><span>Benefícios Estudantis</span></a></li>
+                    <li class="nav-item active"><a href="ajuda-suporte.html" class="nav-link" aria-current="page" data-tooltip="Ajuda e Suporte"><i data-lucide="help-circle"></i><span>Ajuda e Suporte</span></a></li>
                 </ul>
-            </article>
+                <div class="nav-footer">
+                    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Alternar tema claro ou escuro"><i data-lucide="moon"></i><span>Modo Escuro</span></button>
+                    <button class="logout-btn logout-action" data-action="logout"><i data-lucide="log-out"></i><span>Sair</span></button>
+                </div>
+            </nav>
+        </aside>
 
-            <article class="support-card">
-                <h2>Próximo passo</h2>
-                <p>Durante o pré-release, encaminhe o relato pelo canal interno da equipe responsável pelo UniCheck.</p>
-            </article>
-        </div>
-    </main>
+        <main class="main-content" id="mainContent">
+            <header class="main-header help-header">
+                <div class="header-top">
+                    <div class="header-mobile-controls"><button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-label="Abrir menu lateral"><i data-lucide="menu"></i></button></div>
+                    <div class="welcome-section">
+                        <p class="help-eyebrow">Central de ajuda</p>
+                        <h1 class="welcome-title">Ajuda e Suporte</h1>
+                        <p class="welcome-subtitle">Encontre respostas rápidas para usar o UniCheck e aproveitar os principais recursos da sua jornada acadêmica.</p>
+                    </div>
+                </div>
+                <div class="header-bottom-enhanced help-header-actions">
+                    <div aria-hidden="true"></div>
+                    <div class="header-actions-enhanced">
+                        <button class="theme-toggle-mobile" id="themeToggleMobile" type="button" aria-label="Alternar tema claro ou escuro"><i data-lucide="moon"></i></button>
+                        <button class="header-notification-button" type="button" aria-label="Notificações"><i data-lucide="bell"></i></button>
+                        <div class="user-menu">
+                            <button class="user-menu-trigger" id="userMenuTrigger" type="button" aria-label="Abrir menu do usuário" aria-expanded="false">
+                                <div class="user-avatar-small"><span>JS</span></div><span class="user-name-indicator">João Silva</span><i data-lucide="chevron-down" class="dropdown-indicator"></i>
+                            </button>
+                            <div class="user-dropdown" id="userDropdown">
+                                <div class="user-dropdown-header"><div class="user-dropdown-avatar"><span>JS</span></div><div class="user-dropdown-info"><h4>João Silva</h4><p>joao.silva@unisales.com.br</p></div></div>
+                                <div class="user-dropdown-menu">
+                                    <a href="../CONFIGURACOES PERFIL/configuracoes.html" class="user-dropdown-item"><i data-lucide="user"></i><span>Meu Perfil</span></a>
+                                    <a href="../CONFIGURACOES PERFIL/configuracoes.html" class="user-dropdown-item"><i data-lucide="settings"></i><span>Configurações</span></a>
+                                    <a href="ajuda-suporte.html" class="user-dropdown-item" aria-current="page"><i data-lucide="help-circle"></i><span>Ajuda e Suporte</span></a>
+                                    <button class="user-dropdown-item logout-action" data-action="logout"><i data-lucide="log-out"></i><span>Sair</span></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="help-content">
+                <section class="help-search-section" aria-labelledby="helpSearchTitle">
+                    <h2 id="helpSearchTitle">O que você precisa resolver?</h2>
+                    <label class="sr-only" for="helpSearch">Buscar nas perguntas e categorias de ajuda</label>
+                    <div class="help-search-box"><i data-lucide="search" aria-hidden="true"></i><input id="helpSearch" type="search" autocomplete="off" placeholder="Digite uma dúvida, recurso ou palavra-chave..."><button id="clearHelpSearch" type="button" aria-label="Limpar busca" hidden><i data-lucide="x"></i></button></div>
+                    <p class="help-results-status" id="helpResultsStatus" role="status" aria-live="polite"></p>
+                </section>
+
+                <section aria-labelledby="helpCategoriesTitle">
+                    <div class="help-section-heading"><div><span class="help-section-kicker">Navegue por assunto</span><h2 id="helpCategoriesTitle">Categorias</h2></div><button class="help-clear-filter" id="clearCategoryFilter" type="button" hidden>Ver todas</button></div>
+                    <div class="help-categories" id="helpCategories">
+                        <button class="help-category" type="button" data-category="conta"><i data-lucide="key-round"></i><span><strong>Conta e acesso</strong><small>Login, senha e acesso em dispositivos.</small></span></button>
+                        <button class="help-category" type="button" data-category="portal"><i data-lucide="school"></i><span><strong>Portal Acadêmico</strong><small>Orientações disponíveis na jornada.</small></span></button>
+                        <button class="help-category" type="button" data-category="email"><i data-lucide="mail"></i><span><strong>Email institucional</strong><small>Dúvidas sobre o recurso acadêmico.</small></span></button>
+                        <button class="help-category" type="button" data-category="checklist"><i data-lucide="list-checks"></i><span><strong>Checklists</strong><small>Progresso, etapas e fases.</small></span></button>
+                        <button class="help-category" type="button" data-category="plataformas"><i data-lucide="monitor"></i><span><strong>Plataformas Gratuitas</strong><small>Busca, filtros e favoritos.</small></span></button>
+                        <button class="help-category" type="button" data-category="perfil"><i data-lucide="user-round"></i><span><strong>Perfil</strong><small>Nome, foto e senha.</small></span></button>
+                        <button class="help-category" type="button" data-category="sincronizacao"><i data-lucide="refresh-cw"></i><span><strong>Sincronização e progresso</strong><small>Conexão e preservação das alterações.</small></span></button>
+                        <button class="help-category" type="button" data-category="outros"><i data-lucide="circle-ellipsis"></i><span><strong>Outros problemas</strong><small>Consulte todas as respostas ou os canais.</small></span></button>
+                    </div>
+                </section>
+
+                <section class="help-faq-section" id="faqSection" aria-labelledby="faqTitle">
+                    <div class="help-section-heading"><div><span class="help-section-kicker">Respostas rápidas</span><h2 id="faqTitle">Perguntas frequentes</h2></div></div>
+                    <div class="faq-list" id="faqList"></div>
+                    <div class="help-empty" id="helpEmpty" hidden><i data-lucide="search-x"></i><h3>Nenhuma resposta encontrada</h3><p>Tente outra palavra ou veja todas as perguntas. Para categorias ainda sem conteúdo, consulte os canais ao final da página.</p><button type="button" id="resetHelpFilters">Ver todas as perguntas</button></div>
+                </section>
+
+                <section class="help-contact" aria-labelledby="helpContactTitle">
+                    <div class="help-contact-intro"><span class="help-section-kicker">Canais de atendimento</span><h2 id="helpContactTitle">Ainda precisa de ajuda?</h2><p>Os canais institucionais serão exibidos aqui assim que forem configurados.</p></div>
+                    <div class="help-contact-grid" id="helpContactChannels"></div>
+                </section>
+            </div>
+        </main>
+    </div>
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../../js/config.js"></script>
     <script src="../../js/auth.js"></script>
-    <script>window.UniCheckAuth?.requireAuth?.();</script>
+    <script src="../../js/profile.js"></script>
+    <script src="../../js/checklist-data.js"></script>
+    <script src="../../js/checklist.js"></script>
+    <script src="../../js/progression.js"></script>
+    <script src="../../js/notifications.js"></script>
+    <script src="../js/core-config.js"></script>
+    <script src="../js/profile-manager.js"></script>
+    <script src="../js/progression-profile.js"></script>
+    <script src="../js/loading-navigation.js"></script>
+    <script src="../script-interno.js"></script>
+    <script src="../script-profile-sync.js"></script>
+    <script src="../script-page-state.js"></script>
+    <script src="support-config.js"></script>
+    <script src="ajuda-suporte.js"></script>
 </body>
 </html>
