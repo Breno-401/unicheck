@@ -1,6 +1,8 @@
 (function () {
     const AVATAR_BUCKET = "avatars";
-    const MAX_AVATAR_SIZE = 2 * 1024 * 1024;
+    const MAX_ORIGINAL_AVATAR_SIZE = 5 * 1024 * 1024;
+    const AVATAR_DIMENSION = 512;
+    const AVATAR_QUALITY = 0.82;
     const ALLOWED_AVATAR_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
     const state = {
@@ -59,6 +61,68 @@
             URL.revokeObjectURL(state.previewObjectUrl);
             state.previewObjectUrl = null;
         }
+    }
+
+    function loadImage(file) {
+        return new Promise(function (resolve, reject) {
+            const objectUrl = URL.createObjectURL(file);
+            const image = new Image();
+            image.onload = function () {
+                URL.revokeObjectURL(objectUrl);
+                resolve(image);
+            };
+            image.onerror = function () {
+                URL.revokeObjectURL(objectUrl);
+                reject(new Error("Nao foi possivel carregar a imagem selecionada."));
+            };
+            image.src = objectUrl;
+        });
+    }
+
+    function canvasToWebpBlob(canvas) {
+        return new Promise(function (resolve, reject) {
+            canvas.toBlob(function (blob) {
+                if (!blob || blob.type !== "image/webp") {
+                    reject(new Error("Este navegador nao conseguiu converter a imagem para WebP."));
+                    return;
+                }
+                resolve(blob);
+            }, "image/webp", AVATAR_QUALITY);
+        });
+    }
+
+    function validateAvatarFile(file) {
+        if (!ALLOWED_AVATAR_TYPES.has(file.type)) {
+            return "Use uma imagem JPG, PNG ou WebP.";
+        }
+        if (file.size > MAX_ORIGINAL_AVATAR_SIZE) {
+            return "A imagem deve ter no máximo 5 MB.";
+        }
+        return null;
+    }
+
+    async function optimizeAvatar(file) {
+        const image = await loadImage(file);
+        const sourceSize = Math.min(image.naturalWidth, image.naturalHeight);
+        const sourceX = (image.naturalWidth - sourceSize) / 2;
+        const sourceY = (image.naturalHeight - sourceSize) / 2;
+        const canvas = document.createElement("canvas");
+        canvas.width = AVATAR_DIMENSION;
+        canvas.height = AVATAR_DIMENSION;
+        const context = canvas.getContext("2d");
+
+        if (!context) throw new Error("Nao foi possivel processar a imagem neste navegador.");
+        context.drawImage(
+            image,
+            sourceX, sourceY, sourceSize, sourceSize,
+            0, 0, AVATAR_DIMENSION, AVATAR_DIMENSION
+        );
+
+        const blob = await canvasToWebpBlob(canvas);
+        return new File([blob], "avatar.webp", {
+            type: "image/webp",
+            lastModified: Date.now()
+        });
     }
 
     function initializeTheme() {
@@ -165,7 +229,7 @@
         }
 
         const user = await getAuthenticatedUser();
-        const objectPath = user.id + "/avatar";
+        const objectPath = user.id + "/avatar.webp";
         const { error } = await getClient()
             .storage
             .from(AVATAR_BUCKET)
@@ -190,7 +254,7 @@
         const { error } = await getClient()
             .storage
             .from(AVATAR_BUCKET)
-            .remove([user.id + "/avatar"]);
+            .remove([user.id + "/avatar.webp"]);
 
         if (error) throw error;
     }
@@ -248,24 +312,30 @@
         }
     }
 
-    function handlePhotoSelection(file) {
-        if (!ALLOWED_AVATAR_TYPES.has(file.type)) {
-            showNotification("Use uma imagem JPG, PNG ou WebP.", "error");
+    async function handlePhotoSelection(file) {
+        const validationError = validateAvatarFile(file);
+        if (validationError) {
+            showNotification(validationError, "error");
             return;
         }
 
-        if (file.size > MAX_AVATAR_SIZE) {
-            showNotification("A imagem deve ter no maximo 2 MB.", "error");
-            return;
+        setBusy(true);
+        showNotification("Otimizando foto...", "info");
+        try {
+            const optimizedFile = await optimizeAvatar(file);
+            revokePreviewUrl();
+            state.previewObjectUrl = URL.createObjectURL(optimizedFile);
+            state.pendingPhotoFile = optimizedFile;
+            state.photoRemoved = false;
+            state.profile.avatarImage = state.previewObjectUrl;
+            updateAvatarDisplay();
+            showNotification("Foto otimizada. Salve para enviar ao seu perfil.", "info");
+        } catch (error) {
+            console.error("[ProfileSettings] Falha ao otimizar avatar", error);
+            showNotification(error.message || "Nao foi possivel otimizar a foto.", "error");
+        } finally {
+            setBusy(false);
         }
-
-        revokePreviewUrl();
-        state.previewObjectUrl = URL.createObjectURL(file);
-        state.pendingPhotoFile = file;
-        state.photoRemoved = false;
-        state.profile.avatarImage = state.previewObjectUrl;
-        updateAvatarDisplay();
-        showNotification("Foto pronta. Salve para enviar ao seu perfil.", "info");
     }
 
     function setupPhotoControls() {
@@ -284,9 +354,9 @@
         document.getElementById("change-photo-btn")?.addEventListener("click", openPicker);
         document.getElementById("avatar-upload-trigger")?.addEventListener("click", openPicker);
 
-        fileInput.addEventListener("change", function (event) {
+        fileInput.addEventListener("change", async function (event) {
             const file = event.target.files?.[0];
-            if (file) handlePhotoSelection(file);
+            if (file) await handlePhotoSelection(file);
             fileInput.value = "";
         });
 
