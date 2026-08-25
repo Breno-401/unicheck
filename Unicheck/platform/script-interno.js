@@ -315,7 +315,7 @@ function getStoredProfile() {
 }
 
 function getChecklistProgressKey(userId) {
-    return `unicheck_checklist_progress_v2:${userId || 'anonymous'}`;
+    return `unicheck_checklist_progress_v3:${userId || 'anonymous'}`;
 }
 
 function getStoredChecklistProgress(userId) {
@@ -391,11 +391,10 @@ async function reconcileDashboardRemote(userId) {
     ]);
 
     if (progressResult.status === 'fulfilled' && progressResult.value) {
-        const localProgress = window.UniCheckChecklist.readCachedProgress(userId);
         const pendingProgress = window.UniCheckChecklist.readPendingProgress(userId);
         const reconciled = window.UniCheckChecklist.reconcileProgressMaps(
             progressResult.value,
-            localProgress,
+            {},
             pendingProgress
         );
         window.UniCheckChecklist.writeCachedProgress(userId, reconciled);

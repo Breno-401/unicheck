@@ -1,7 +1,8 @@
 (function () {
     const CHECKLIST_PROGRESS_TABLE = "user_checklist_item_progress";
-    const PROGRESS_STORAGE_PREFIX = "unicheck_checklist_progress_v2";
-    const PENDING_STORAGE_PREFIX = "unicheck_checklist_pending_sync_v1";
+    // Reset estrutural do MVP em 2026-08-24: progresso legado nao e migrado.
+    const PROGRESS_STORAGE_PREFIX = "unicheck_checklist_progress_v3";
+    const PENDING_STORAGE_PREFIX = "unicheck_checklist_pending_sync_v2";
     const REQUEST_TIMEOUT_MS = 30000;
 
     // Conexão com o cliente Supabase configurado globalmente
@@ -14,6 +15,10 @@
     }
 
     function logSupabaseError(context, error, extra = {}) {
+        if (error?.unicheckChecklistLogged) return;
+        if (error && typeof error === "object") {
+            error.unicheckChecklistLogged = true;
+        }
         console.error(`[UniCheckChecklist] ${context}`, {
             message: error?.message || String(error),
             code: error?.code || null,
@@ -102,20 +107,16 @@
         }
     }
 
-    function reconcileProgressMaps(remoteMap = {}, localMap = {}, pendingMap = {}) {
-        const merged = {};
-        const checklistIds = new Set([...Object.keys(localMap), ...Object.keys(remoteMap)]);
-
-        checklistIds.forEach(checklistId => {
-            merged[checklistId] = {
-                ...(localMap[checklistId] || {}),
-                ...(remoteMap[checklistId] || {}),
-                tasks: {
-                    ...(localMap[checklistId]?.tasks || {}),
-                    ...(remoteMap[checklistId]?.tasks || {})
-                }
+    function reconcileProgressMaps(remoteMap = {}, _cachedMap = {}, pendingMap = {}) {
+        // Uma resposta remota valida, inclusive vazia, e a fonte de verdade.
+        // Cache nunca vira operacao: somente a fila explicita pode sobrepor o remoto.
+        const merged = Object.entries(remoteMap).reduce((result, [checklistId, value]) => {
+            result[checklistId] = {
+                ...(value || {}),
+                tasks: { ...((value || {}).tasks || {}) }
             };
-        });
+            return result;
+        }, {});
 
         Object.entries(pendingMap).forEach(([taskId, pending]) => {
             const checklistId = pending?.checklistId;
@@ -274,6 +275,7 @@
         readCachedProgress,
         writeCachedProgress,
         readPendingProgress,
+        writePendingProgress,
         flushPendingProgress,
         reconcileProgressMaps,
         getCurrentUser,
