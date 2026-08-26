@@ -21,7 +21,7 @@
 
         if (action === 'navigate-platforms') {
             event.preventDefault();
-            navigateDirectly('PLATAFORMAS/plataformas-gratuitas.html');
+            navigateDirectly('pages/beneficios-estudantis/beneficios-estudantis.html');
         }
     }
 

@@ -446,7 +446,7 @@ function renderAcademicProgress(summary) {
         if (currentEl) currentEl.textContent = 'Jornada acadêmica concluída';
         if (nextTaskEl) nextTaskEl.textContent = 'Revise suas fases sempre que precisar.';
         if (continueButton) {
-            continueButton.href = 'CHECKLIST ACADEMICO/checklist-academico.html';
+            continueButton.href = 'pages/checklist-academico/checklist-academico.html';
             continueButton.querySelector('span').textContent = 'Revisar checklists';
         }
         return;
@@ -455,7 +455,7 @@ function renderAcademicProgress(summary) {
     if (currentEl) currentEl.textContent = summary.currentPhase.title;
     if (nextTaskEl) nextTaskEl.textContent = summary.nextTask?.title || summary.nextTask?.text || 'Continue de onde parou.';
     if (continueButton) {
-        continueButton.href = `CHECKLIST ACADEMICO/checklist-academico.html#checklist=${encodeURIComponent(summary.currentPhase.id)}`;
+        continueButton.href = `pages/checklist-academico/checklist-academico.html#checklist=${encodeURIComponent(summary.currentPhase.id)}`;
         continueButton.querySelector('span').textContent = 'Continuar';
     }
 }
@@ -513,7 +513,7 @@ function renderJourneyTimeline(summary) {
             return `<li class="journey-phase journey-phase--locked"><div class="journey-phase-content" aria-label="${accessibleLabel}" aria-disabled="true">${content}</div></li>`;
         }
 
-        const href = `CHECKLIST ACADEMICO/checklist-academico.html#checklist=${encodeURIComponent(phase.id)}`;
+        const href = `pages/checklist-academico/checklist-academico.html#checklist=${encodeURIComponent(phase.id)}`;
         return `<li class="journey-phase journey-phase--${state}"><a class="journey-phase-content" href="${href}" aria-label="${accessibleLabel}">${content}</a></li>`;
     }).join('');
     initializeIcons();
@@ -536,12 +536,12 @@ function setActiveMenuItemBasedOnCurrentPage() {
     let activeLink = null;
     
     // Verificar se estamos na página de checklist acadêmico
-    if (currentPath.includes('CHECKLIST ACADEMICO') || currentPath.includes('checklist-academico')) {
+    if (currentPath.includes('checklist-academico')) {
         activeLink = document.querySelector('.nav-link[href*="checklist-academico"]');
     } 
     // Verificar se estamos na página de checklist de plataformas
-    else if (currentPath.includes('plataformas-gratuitas')) {
-        activeLink = document.querySelector('.nav-link[href*="plataformas-gratuitas"]');
+    else if (currentPath.includes('beneficios-estudantis')) {
+        activeLink = document.querySelector('.nav-link[href*="beneficios-estudantis"]');
     }
     // Verificar se estamos na página de configurações
     else if (currentPath.includes('CONFIGURACOES') || currentPath.includes('configuracoes')) {

@@ -4,22 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checklist Academico - UniCheck</title>
-    <link rel="icon" href="../../landing/assets/images/logomernor.png" type="image/png">
+    <link rel="icon" href="../../../landing/assets/images/logomernor.png" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-    <link rel="stylesheet" href="../css/base/base.css">
-    <link rel="stylesheet" href="../css/components/componente-logo.css">
-    <link rel="stylesheet" href="../css/components/componentes-header.css">
-    <link rel="stylesheet" href="../css/components/componentes-sidebar.css">
-    <link rel="stylesheet" href="../css/shared/layout.css">
-    <link rel="stylesheet" href="../css/shared/responsividade.css">
-    <link rel="stylesheet" href="../css/base/variaveis.css">
-    <link rel="stylesheet" href="../css/shared/style.css">
+    <link rel="stylesheet" href="../../shared/css/base/base.css">
+    <link rel="stylesheet" href="../../shared/css/components/componente-logo.css">
+    <link rel="stylesheet" href="../../shared/css/components/componentes-header.css">
+    <link rel="stylesheet" href="../../shared/css/components/componentes-sidebar.css">
+    <link rel="stylesheet" href="../../shared/css/layout/layout.css">
+    <link rel="stylesheet" href="../../shared/css/layout/responsividade.css">
+    <link rel="stylesheet" href="../../shared/css/base/variaveis.css">
+    <link rel="stylesheet" href="../../shared/css/layout/style.css">
     <link rel="stylesheet" href="checklist-academico.css">
-    <link rel="stylesheet" href="../css/shared/ui-polish.css">
-    <link rel="stylesheet" href="../css/components/notifications.css">
+    <link rel="stylesheet" href="../../shared/css/layout/ui-polish.css">
+    <link rel="stylesheet" href="../../shared/css/components/notifications.css">
 </head>
 <body class="page-checklist">
     <div class="dashboard-container" id="dashboardContainer">
@@ -27,7 +27,7 @@
             <div class="sidebar-header">
                 <div class="logo-section">
                     <div class="sidebar-logo-enhanced">
-                        <img src="../assets/images/logo.png" alt="UniCheck Logo" class="sidebar-logo-image">
+                        <img src="../../assets/images/logo.png" alt="UniCheck Logo" class="sidebar-logo-image">
                     </div>
                     <span class="logo-text">UniCheck</span>
                 </div>
@@ -56,7 +56,7 @@
             <nav class="sidebar-nav">
                 <ul class="nav-menu">
                     <li class="nav-item">
-                        <a href="../index-interno.html" class="nav-link" data-tooltip="Inicio">
+                        <a href="../../index-interno.html" class="nav-link" data-tooltip="Inicio">
                             <i data-lucide="home"></i>
                             <span>Inicio</span>
                         </a>
@@ -68,19 +68,19 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="../manual/manual-aluno.html" class="nav-link" data-tooltip="Manual do Aluno">
+                        <a href="../manual-aluno/manual-aluno.html" class="nav-link" data-tooltip="Manual do Aluno">
                             <i data-lucide="book-open"></i>
                             <span>Manual do Aluno</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="../PLATAFORMAS/plataformas-gratuitas.html" class="nav-link" data-tooltip="Benefícios Estudantis">
+                        <a href="../beneficios-estudantis/beneficios-estudantis.html" class="nav-link" data-tooltip="Benefícios Estudantis">
                             <i data-lucide="badge-percent"></i>
                             <span>Benefícios Estudantis</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="../ajuda/ajuda-suporte.html" class="nav-link" data-tooltip="Ajuda e Suporte">
+                        <a href="../ajuda-suporte/ajuda-suporte.html" class="nav-link" data-tooltip="Ajuda e Suporte">
                             <i data-lucide="help-circle"></i>
                             <span>Ajuda e Suporte</span>
                         </a>
@@ -152,16 +152,16 @@
                                     </div>
                                 </div>
                                 <div class="user-dropdown-menu">
-                                    <a href="../CONFIGURACOES PERFIL/configuracoes.html" class="user-dropdown-item">
+                                    <a href="../configuracoes-perfil/configuracoes-perfil.html" class="user-dropdown-item">
                                         <i data-lucide="user"></i>
                                         <span>Meu Perfil</span>
                                     </a>
-                                    <a href="../CONFIGURACOES PERFIL/configuracoes.html" class="user-dropdown-item">
+                                    <a href="../configuracoes-perfil/configuracoes-perfil.html" class="user-dropdown-item">
                                         <i data-lucide="settings"></i>
                                         <span>Configuracoes</span>
                                     </a>
                                     <div class="user-dropdown-divider"></div>
-                                    <a href="../ajuda/ajuda-suporte.html" class="user-dropdown-item">
+                                    <a href="../ajuda-suporte/ajuda-suporte.html" class="user-dropdown-item">
                                         <i data-lucide="help-circle"></i>
                                         <span>Ajuda e Suporte</span>
                                     </a>
@@ -203,18 +203,18 @@
     <div class="mobile-overlay" id="mobileOverlay"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../../js/core/config.js"></script>
-    <script src="../../js/core/auth.js"></script>
-    <script src="../../js/services/profile.js"></script>
-    <script src="../../js/services/activity.js"></script>
-    <script src="../../js/services/notifications.js"></script>
-    <script src="../../js/data/checklist-data.js"></script>
-    <script src="../../js/services/checklist.js"></script>
-    <script src="../../js/services/progression.js"></script>
-    <script src="../js/shared/progression-profile.js"></script>
-    <script src="../js/shared/script-interno.js"></script>
-    <script src="../js/shared/script-profile-sync.js"></script>
-    <script src="../js/shared/script-page-state.js"></script>
+    <script src="../../../js/core/config.js"></script>
+    <script src="../../../js/core/auth.js"></script>
+    <script src="../../../js/services/profile.js"></script>
+    <script src="../../../js/services/activity.js"></script>
+    <script src="../../../js/services/notifications.js"></script>
+    <script src="../../../js/data/checklist-data.js"></script>
+    <script src="../../../js/services/checklist.js"></script>
+    <script src="../../../js/services/progression.js"></script>
+    <script src="../../shared/js/progression-ui.js"></script>
+    <script src="../../shared/js/platform-shell.js"></script>
+    <script src="../../shared/js/profile-sync.js"></script>
+    <script src="../../shared/js/page-state.js"></script>
     <script src="checklist-detail.js"></script>
     <script src="checklist-view.js"></script>
     <script src="checklist-academico.js"></script>

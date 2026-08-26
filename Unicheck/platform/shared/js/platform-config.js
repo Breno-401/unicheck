@@ -8,9 +8,9 @@
 
     const ROUTES = {
         LANDING: '../landing/index.html',
-        MANUAL: 'manual/manual-aluno.html',
-        PLATFORMS: 'PLATAFORMAS/plataformas-gratuitas.html',
-        HELP: 'ajuda/ajuda-suporte.html'
+        MANUAL: 'pages/manual-aluno/manual-aluno.html',
+        PLATFORMS: 'pages/beneficios-estudantis/beneficios-estudantis.html',
+        HELP: 'pages/ajuda-suporte/ajuda-suporte.html'
     };
 
     function normalizePath(pathname) {
