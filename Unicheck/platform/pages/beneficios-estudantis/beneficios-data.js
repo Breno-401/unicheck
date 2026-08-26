@@ -56,7 +56,7 @@
             officialUrl: 'https://www.jetbrains.com/community/education/#students',
             lastVerified: verifiedOn,
             status: 'verified',
-            logo: '../assets/images/jetbrains-logo.png'
+            logo: '../../assets/images/jetbrains-logo.png'
         },
         {
             id: 'notion',
@@ -74,7 +74,7 @@
             officialUrl: 'https://www.notion.com/help/notion-for-education',
             lastVerified: verifiedOn,
             status: 'verified',
-            logo: '../assets/images/notion_logo.png'
+            logo: '../../assets/images/notion_logo.png'
         },
         {
             id: 'figma',
@@ -92,7 +92,7 @@
             officialUrl: 'https://www.figma.com/education/higher-education/',
             lastVerified: verifiedOn,
             status: 'verified',
-            logo: '../assets/images/figma_logo_6.png'
+            logo: '../../assets/images/figma_logo_6.png'
         },
         {
             id: 'miro',
@@ -128,7 +128,7 @@
             officialUrl: 'https://azure.microsoft.com/pt-br/free/students',
             lastVerified: verifiedOn,
             status: 'verified',
-            logo: '../assets/images/azure-logo.png',
+            logo: '../../assets/images/azure-logo.png',
             volatileFields: ['benefitLabel']
         },
         {
@@ -147,7 +147,7 @@
             officialUrl: 'https://aws.amazon.com/education/awseducate/',
             lastVerified: verifiedOn,
             status: 'verified',
-            logo: '../assets/images/aws_logo_9.png'
+            logo: '../../assets/images/aws_logo_9.png'
         },
         {
             id: 'autodesk',
@@ -201,7 +201,7 @@
             officialUrl: 'https://www.mongodb.com/students',
             lastVerified: verifiedOn,
             status: 'verified',
-            logo: '../assets/images/mongodb_logo_8.png'
+            logo: '../../assets/images/mongodb_logo_8.png'
         },
         {
             id: 'adobe',
@@ -219,7 +219,7 @@
             officialUrl: 'https://www.adobe.com/br/creativecloud/buy/students/desperte-sua-criatividade-com-melhores-apps.html',
             lastVerified: verifiedOn,
             status: 'verified',
-            logo: '../assets/images/adobe_logo.png',
+            logo: '../../assets/images/adobe_logo.png',
             volatileFields: ['benefitLabel']
         },
         {
@@ -238,7 +238,7 @@
             officialUrl: 'https://www.spotify.com/br-pt/student/',
             lastVerified: verifiedOn,
             status: 'verified',
-            logo: '../assets/images/spotify-logo.png',
+            logo: '../../assets/images/spotify-logo.png',
             volatileFields: ['benefitLabel']
         },
         {
@@ -515,13 +515,13 @@
     };
 
     const logoOverrides = {
-        github: '../assets/logos/benefits/github.svg', 'github-copilot': '../assets/logos/benefits/github-copilot.svg', jetbrains: '../assets/logos/benefits/jetbrains.svg', notion: '../assets/logos/benefits/notion.svg',
-        figma: '../assets/logos/benefits/figma.svg', miro: '../assets/logos/benefits/miro.svg', autodesk: '../assets/logos/benefits/autodesk.svg', mongodb: '../assets/logos/benefits/mongodb.svg',
-        spotify: '../assets/logos/benefits/spotify.svg', 'apple-music': '../assets/logos/benefits/apple-music.svg', 'youtube-premium': '../assets/logos/benefits/youtube.svg',
-        'samsung-students': '../assets/logos/benefits/samsung.svg', 'apple-education': '../assets/logos/benefits/apple.svg', '1password-student': '../assets/logos/benefits/1password.svg',
-        'lenovo-students': '../assets/logos/benefits/lenovo.svg', 'dell-students': '../assets/logos/benefits/dell.svg', 'unity-student': '../assets/logos/benefits/unity.svg',
-        'gitkraken-student': '../assets/logos/benefits/gitkraken.svg', 'datacamp-student': '../assets/logos/benefits/datacamp.svg',
-        microsoft365: '../assets/images/MicrosoftT.png', 'microsoft-store-education': '../assets/images/MicrosoftT.png'
+        github: '../../assets/logos/beneficios-estudantis/github.svg', 'github-copilot': '../../assets/logos/beneficios-estudantis/github-copilot.svg', jetbrains: '../../assets/logos/beneficios-estudantis/jetbrains.svg', notion: '../../assets/logos/beneficios-estudantis/notion.svg',
+        figma: '../../assets/logos/beneficios-estudantis/figma.svg', miro: '../../assets/logos/beneficios-estudantis/miro.svg', autodesk: '../../assets/logos/beneficios-estudantis/autodesk.svg', mongodb: '../../assets/logos/beneficios-estudantis/mongodb.svg',
+        spotify: '../../assets/logos/beneficios-estudantis/spotify.svg', 'apple-music': '../../assets/logos/beneficios-estudantis/apple-music.svg', 'youtube-premium': '../../assets/logos/beneficios-estudantis/youtube.svg',
+        'samsung-students': '../../assets/logos/beneficios-estudantis/samsung.svg', 'apple-education': '../../assets/logos/beneficios-estudantis/apple.svg', '1password-student': '../../assets/logos/beneficios-estudantis/1password.svg',
+        'lenovo-students': '../../assets/logos/beneficios-estudantis/lenovo.svg', 'dell-students': '../../assets/logos/beneficios-estudantis/dell.svg', 'unity-student': '../../assets/logos/beneficios-estudantis/unity.svg',
+        'gitkraken-student': '../../assets/logos/beneficios-estudantis/gitkraken.svg', 'datacamp-student': '../../assets/logos/beneficios-estudantis/datacamp.svg',
+        microsoft365: '../../assets/images/MicrosoftT.png', 'microsoft-store-education': '../../assets/images/MicrosoftT.png'
     };
 
     const fallbackLabels = {

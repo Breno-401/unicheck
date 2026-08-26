@@ -16,7 +16,11 @@ Aplicação web estática do UniCheck, com landing page pública, autenticação
 ├── Unicheck/                   # diretório publicado pelo Netlify
 │   ├── index.html              # entrada e redirecionamento
 │   ├── landing/                # páginas públicas
-│   ├── platform/               # dashboard e páginas autenticadas
+│   ├── platform/               # área interna
+│   │   ├── assets/             # imagens, logos e metadados compartilhados
+│   │   ├── pages/              # checklist, perfil, benefícios, manual e ajuda
+│   │   ├── shared/             # CSS e JavaScript compartilhados da plataforma
+│   │   └── index-interno.html  # dashboard autenticado
 │   ├── js/                     # módulos compartilhados da aplicação
 │   └── supabase/               # migrations, seeds e diagnósticos versionados
 └── netlify.toml

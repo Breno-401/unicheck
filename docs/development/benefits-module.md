@@ -6,9 +6,9 @@ Central local de benefícios estudantis verificados em fontes oficiais. A curado
 
 ## Estrutura
 
-- `benefits-data.js`: dataset, categorias, canais de acesso e última verificação.
-- `plataformas-gratuitas.js`: busca, filtros, modal e persistência local-first dos favoritos.
-- `plataformas-gratuitas.css`: cards, logos, temas e responsividade.
+- `beneficios-data.js`: dataset, categorias, canais de acesso e última verificação.
+- `beneficios-estudantis.js`: busca, filtros, modal e persistência local-first dos favoritos.
+- `beneficios-estudantis.css`: cards, logos, temas e responsividade.
 - `logos/`: SVGs locais leves de marcas, provenientes da biblioteca Simple Icons.
 
 ## Dados e busca

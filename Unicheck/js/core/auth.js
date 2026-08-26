@@ -92,7 +92,7 @@
     }
 
     function getLoginPage() {
-        return `${window.location.origin}${window.location.pathname.replace(/\/platform\/.*$/i, "/landing/login_cadastro.html").replace(/\/landing\/.*$/i, "/landing/login_cadastro.html")}`;
+        return `${window.location.origin}${window.location.pathname.replace(/\/platform\/.*$/i, "/landing/login-cadastro.html").replace(/\/landing\/.*$/i, "/landing/login-cadastro.html")}`;
     }
 
     function normalizeErrorMessage(error) {

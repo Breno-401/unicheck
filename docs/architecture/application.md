@@ -36,18 +36,18 @@ Na pratica, a landing explica o produto e leva o usuario para autenticacao. A ar
 ### Fluxo externo
 
 - [`landing/index.html`](../../Unicheck/landing/index.html) e a landing page principal.
-- [`landing/login_cadastro.html`](../../Unicheck/landing/login_cadastro.html) concentra login e cadastro.
+- [`landing/login-cadastro.html`](../../Unicheck/landing/login-cadastro.html) concentra login e cadastro.
 - O login redireciona para a area interna quando a autenticacao da certo.
 
 ### Fluxo interno
 
 - [`platform/index-interno.html`](../../Unicheck/platform/index-interno.html) e o dashboard principal.
 - Dela partem as paginas:
-  - [`platform/CHECKLIST ACADEMICO/checklist-academico.html`](../../Unicheck/platform/CHECKLIST%20ACADEMICO/checklist-academico.html)
-  - [`platform/manual/manual-aluno.html`](../../Unicheck/platform/manual/manual-aluno.html)
-  - [`platform/PLATAFORMAS/plataformas-gratuitas.html`](../../Unicheck/platform/PLATAFORMAS/plataformas-gratuitas.html)
-  - [`platform/CONFIGURACOES PERFIL/configuracoes.html`](../../Unicheck/platform/CONFIGURACOES%20PERFIL/configuracoes.html)
-  - [`platform/ajuda/ajuda-suporte.html`](../../Unicheck/platform/ajuda/ajuda-suporte.html)
+  - [`platform/pages/checklist-academico/checklist-academico.html`](../../Unicheck/platform/pages/checklist-academico/checklist-academico.html)
+  - [`platform/pages/manual-aluno/manual-aluno.html`](../../Unicheck/platform/pages/manual-aluno/manual-aluno.html)
+  - [`platform/pages/beneficios-estudantis/beneficios-estudantis.html`](../../Unicheck/platform/pages/beneficios-estudantis/beneficios-estudantis.html)
+  - [`platform/pages/configuracoes-perfil/configuracoes-perfil.html`](../../Unicheck/platform/pages/configuracoes-perfil/configuracoes-perfil.html)
+  - [`platform/pages/ajuda-suporte/ajuda-suporte.html`](../../Unicheck/platform/pages/ajuda-suporte/ajuda-suporte.html)
 
 ## 4. Stack e dependencias
 
@@ -76,22 +76,22 @@ Na pratica, a landing explica o produto e leva o usuario para autenticacao. A ar
 ### Camada publica
 
 - [`landing/index.html`](../../Unicheck/landing/index.html) e a vitrine do produto.
-- [`landing/login_cadastro.html`](../../Unicheck/landing/login_cadastro.html) e a tela de autenticacao.
+- [`landing/login-cadastro.html`](../../Unicheck/landing/login-cadastro.html) e a tela de autenticacao.
 - [`landing/css/`](../../Unicheck/landing/css) concentra o visual da landing.
 - [`landing/js/`](../../Unicheck/landing/js) concentra interacoes de login, cadastro e comportamento geral.
 
 ### Camada interna
 
 - [`platform/index-interno.html`](../../Unicheck/platform/index-interno.html) e o dashboard inicial.
-- [`platform/js/`](../../Unicheck/platform/js) guarda configuracoes compartilhadas da area interna.
-- [`platform/css/`](../../Unicheck/platform/css) guarda estilos base e componentes reutilizados.
-- [`platform/css/shared/ui-polish.css`](../../Unicheck/platform/css/shared/ui-polish.css) e a camada final compartilhada de temas, estados interativos e breakpoints das paginas internas principais.
-- [`platform/css/components/notifications.css`](../../Unicheck/platform/css/components/notifications.css) estiliza o painel compartilhado de notificacoes, incluindo estados lido/nao lido e adaptacao mobile.
-- [`platform/CHECKLIST ACADEMICO/`](../../Unicheck/platform/CHECKLIST%20ACADEMICO) guarda o modulo de checklist academico.
-- [`platform/manual/`](../../Unicheck/platform/manual) guarda a central navegavel do Manual do Aluno e sua experiencia de leitura.
-- [`platform/PLATAFORMAS/`](../../Unicheck/platform/PLATAFORMAS) guarda o modulo Beneficios para Estudantes.
-- [`platform/CONFIGURACOES PERFIL/`](../../Unicheck/platform/CONFIGURACOES%20PERFIL) guarda o modulo de configuracao de perfil.
-- [`platform/ajuda/`](../../Unicheck/platform/ajuda) guarda a central interna de Ajuda e Suporte, seu FAQ e a configuracao vazia dos futuros canais institucionais.
+- [`platform/shared/js/`](../../Unicheck/platform/shared/js) guarda configuracoes e comportamentos compartilhados da area interna.
+- [`platform/shared/css/`](../../Unicheck/platform/shared/css) guarda estilos base e componentes reutilizados.
+- [`platform/shared/css/layout/ui-polish.css`](../../Unicheck/platform/shared/css/layout/ui-polish.css) e a camada final compartilhada de temas, estados interativos e breakpoints das paginas internas principais.
+- [`platform/shared/css/components/notifications.css`](../../Unicheck/platform/shared/css/components/notifications.css) estiliza o painel compartilhado de notificacoes, incluindo estados lido/nao lido e adaptacao mobile.
+- [`platform/pages/checklist-academico/`](../../Unicheck/platform/pages/checklist-academico) guarda o modulo de checklist academico.
+- [`platform/pages/manual-aluno/`](../../Unicheck/platform/pages/manual-aluno) guarda a central navegavel do Manual do Aluno e sua experiencia de leitura.
+- [`platform/pages/beneficios-estudantis/`](../../Unicheck/platform/pages/beneficios-estudantis) guarda o modulo Beneficios para Estudantes.
+- [`platform/pages/configuracoes-perfil/`](../../Unicheck/platform/pages/configuracoes-perfil) guarda o modulo de configuracao de perfil.
+- [`platform/pages/ajuda-suporte/`](../../Unicheck/platform/pages/ajuda-suporte) guarda a central interna de Ajuda e Suporte, seu FAQ e a configuracao vazia dos futuros canais institucionais.
 
 ### Backend e banco
 
@@ -124,7 +124,7 @@ O comportamento dinamico principal da landing esta em [`landing/js/script.js`](.
 
 ### 6.2 Login e cadastro
 
-O fluxo de autenticacao esta em [`landing/login_cadastro.html`](../../Unicheck/landing/login_cadastro.html) e [`landing/js/login.js`](../../Unicheck/landing/js/login.js).
+O fluxo de autenticacao esta em [`landing/login-cadastro.html`](../../Unicheck/landing/login-cadastro.html) e [`landing/js/login.js`](../../Unicheck/landing/js/login.js).
 
 Comportamento:
 
@@ -143,7 +143,7 @@ Observacao importante:
 
 O dashboard principal esta em [`platform/index-interno.html`](../../Unicheck/platform/index-interno.html).
 
-O script principal e [`platform/js/shared/script-interno.js`](../../Unicheck/platform/js/shared/script-interno.js), que controla:
+O script principal e [`platform/shared/js/platform-shell.js`](../../Unicheck/platform/shared/js/platform-shell.js), que controla:
 
 - inicializacao da dashboard;
 - tema claro/escuro;
@@ -177,10 +177,10 @@ A faixa de parceiro educacional apresenta somente Fundacao Bradesco / Escola Vir
 
 O dashboard tambem usa:
 
-- [`platform/js/shared/core-config.js`](../../Unicheck/platform/js/shared/core-config.js) para rotas e chaves de storage;
-- [`platform/js/shared/profile-manager.js`](../../Unicheck/platform/js/shared/profile-manager.js) para sincronizacao de avatar e nome;
-- [`platform/js/shared/loading-navigation.js`](../../Unicheck/platform/js/shared/loading-navigation.js) para navegacao com loading;
-- [`platform/js/shared/script-profile-sync.js`](../../Unicheck/platform/js/shared/script-profile-sync.js) para refletir o perfil na interface.
+- [`platform/shared/js/platform-config.js`](../../Unicheck/platform/shared/js/platform-config.js) para rotas e chaves de storage;
+- [`platform/shared/js/profile-ui.js`](../../Unicheck/platform/shared/js/profile-ui.js) para sincronizacao de avatar e nome;
+- [`platform/shared/js/navigation.js`](../../Unicheck/platform/shared/js/navigation.js) para navegacao com loading;
+- [`platform/shared/js/profile-sync.js`](../../Unicheck/platform/shared/js/profile-sync.js) para refletir o perfil na interface.
 
 As paginas de dashboard, checklist e plataformas carregam `ui-polish.css` por ultimo e usam classes no `body` (`page-dashboard`, `page-checklist` e `page-platforms`). Isso permite compartilhar tokens de superficie, borda, texto, foco e estado sem deixar seletores genericos de um modulo alterarem os cards de outro.
 
@@ -190,12 +190,12 @@ O modulo de checklist academico e uma das partes mais importantes do sistema.
 
 Arquivos principais:
 
-- [`platform/CHECKLIST ACADEMICO/checklist-academico.html`](../../Unicheck/platform/CHECKLIST%20ACADEMICO/checklist-academico.html)
+- [`platform/pages/checklist-academico/checklist-academico.html`](../../Unicheck/platform/pages/checklist-academico/checklist-academico.html)
 - [`js/services/checklist.js`](../../Unicheck/js/services/checklist.js)
 - [`js/data/checklist-data.js`](../../Unicheck/js/data/checklist-data.js)
-- [`platform/CHECKLIST ACADEMICO/checklist-view.js`](../../Unicheck/platform/CHECKLIST%20ACADEMICO/checklist-view.js)
-- [`platform/CHECKLIST ACADEMICO/checklist-detail.js`](../../Unicheck/platform/CHECKLIST%20ACADEMICO/checklist-detail.js)
-- [`platform/CHECKLIST ACADEMICO/checklist-academico.js`](../../Unicheck/platform/CHECKLIST%20ACADEMICO/checklist-academico.js)
+- [`platform/pages/checklist-academico/checklist-view.js`](../../Unicheck/platform/pages/checklist-academico/checklist-view.js)
+- [`platform/pages/checklist-academico/checklist-detail.js`](../../Unicheck/platform/pages/checklist-academico/checklist-detail.js)
+- [`platform/pages/checklist-academico/checklist-academico.js`](../../Unicheck/platform/pages/checklist-academico/checklist-academico.js)
 
 Fluxo canônico com cache local:
 
@@ -230,16 +230,16 @@ Regra central do modulo:
 
 Arquivos principais:
 
-- [`platform/PLATAFORMAS/plataformas-gratuitas.html`](../../Unicheck/platform/PLATAFORMAS/plataformas-gratuitas.html)
-- [`platform/PLATAFORMAS/benefits-data.js`](../../Unicheck/platform/PLATAFORMAS/benefits-data.js)
-- [`platform/PLATAFORMAS/plataformas-gratuitas.js`](../../Unicheck/platform/PLATAFORMAS/plataformas-gratuitas.js)
-- [`platform/PLATAFORMAS/plataformas-gratuitas.css`](../../Unicheck/platform/PLATAFORMAS/plataformas-gratuitas.css)
+- [`platform/pages/beneficios-estudantis/beneficios-estudantis.html`](../../Unicheck/platform/pages/beneficios-estudantis/beneficios-estudantis.html)
+- [`platform/pages/beneficios-estudantis/beneficios-data.js`](../../Unicheck/platform/pages/beneficios-estudantis/beneficios-data.js)
+- [`platform/pages/beneficios-estudantis/beneficios-estudantis.js`](../../Unicheck/platform/pages/beneficios-estudantis/beneficios-estudantis.js)
+- [`platform/pages/beneficios-estudantis/beneficios-estudantis.css`](../../Unicheck/platform/pages/beneficios-estudantis/beneficios-estudantis.css)
 
 Fluxo:
 
 - trata a pagina como central de beneficios estudantis verificaveis, reunindo software, educacao, tecnologia, compras, entretenimento, direitos publicos e mobilidade relevante para estudantes brasileiros;
 - a curadoria local possui 34 beneficios em nove categorias: Desenvolvimento, Produtividade & Estudos, Design & Criatividade, Cloud & Dados, Educacao, Tecnologia, Entretenimento, Compras & Beneficios e Direitos & Mobilidade;
-- `benefits-data.js` e a fonte central dos cards e registra `id`, nome, categoria e subcategoria, tipo e rotulo do beneficio, disponibilidade, publico, verificacao, elegibilidade, descricao, tags, URL oficial, data da ultima verificacao e status;
+- `beneficios-data.js` e a fonte central dos cards e registra `id`, nome, categoria e subcategoria, tipo e rotulo do beneficio, disponibilidade, publico, verificacao, elegibilidade, descricao, tags, URL oficial, data da ultima verificacao e status;
 - `sourceChannel` diferencia acesso direto, GitHub Student Developer Pack, UNiDAYS, ISIC, instituicao e governo; `accessMethod` descreve verificacao estudantil, email institucional, GitHub Education, SheerID, elegibilidade governamental, loja educacional ou dependencia institucional;
 - `lastVerified` informa quando a referencia oficial foi conferida; campos volateis como preco, percentual e credito sao identificados por `volatileFields` e recebem contexto no detalhe;
 - `status: institution_dependent` e `benefitType: institution_dependent` distinguem ofertas cujo acesso depende da participacao ou elegibilidade da instituicao;
@@ -267,8 +267,8 @@ Esta pagina tambem depende da infraestrutura de dashboard e autenticacao, porque
 
 Arquivos principais:
 
-- [`platform/CONFIGURACOES PERFIL/configuracoes.html`](../../Unicheck/platform/CONFIGURACOES%20PERFIL/configuracoes.html)
-- [`platform/CONFIGURACOES PERFIL/configuracoes.js`](../../Unicheck/platform/CONFIGURACOES%20PERFIL/configuracoes.js)
+- [`platform/pages/configuracoes-perfil/configuracoes-perfil.html`](../../Unicheck/platform/pages/configuracoes-perfil/configuracoes-perfil.html)
+- [`platform/pages/configuracoes-perfil/configuracoes-perfil.js`](../../Unicheck/platform/pages/configuracoes-perfil/configuracoes-perfil.js)
 
 Fluxo:
 
@@ -284,10 +284,10 @@ Fluxo:
 
 Arquivos principais:
 
-- [`platform/ajuda/ajuda-suporte.html`](../../Unicheck/platform/ajuda/ajuda-suporte.html)
-- [`platform/ajuda/ajuda-suporte.css`](../../Unicheck/platform/ajuda/ajuda-suporte.css)
-- [`platform/ajuda/ajuda-suporte.js`](../../Unicheck/platform/ajuda/ajuda-suporte.js)
-- [`platform/ajuda/support-config.js`](../../Unicheck/platform/ajuda/support-config.js)
+- [`platform/pages/ajuda-suporte/ajuda-suporte.html`](../../Unicheck/platform/pages/ajuda-suporte/ajuda-suporte.html)
+- [`platform/pages/ajuda-suporte/ajuda-suporte.css`](../../Unicheck/platform/pages/ajuda-suporte/ajuda-suporte.css)
+- [`platform/pages/ajuda-suporte/ajuda-suporte.js`](../../Unicheck/platform/pages/ajuda-suporte/ajuda-suporte.js)
+- [`platform/pages/ajuda-suporte/support-config.js`](../../Unicheck/platform/pages/ajuda-suporte/support-config.js)
 
 Fluxo:
 
@@ -296,18 +296,18 @@ Fluxo:
 - permite selecionar uma das oito categorias e rola para o FAQ ja filtrado;
 - renderiza um accordion acessivel com estado por `aria-expanded`, relacao por `aria-controls` e controles nativos de teclado;
 - explica conta, checklist, plataformas, perfil e sincronizacao somente conforme os comportamentos existentes no projeto;
-- mantem email (`atendimento@salesiano.br`), WhatsApp (`(27) 9 8123 4566`) e portal UniSales centralizados em [`platform/ajuda/support-config.js`](../../Unicheck/platform/ajuda/support-config.js); email abre o cliente de email e os dois canais web abrem em nova aba com isolamento da pagina de origem;
-- usa a rota interna `platform/ajuda/ajuda-suporte.html`, sem espacos, para reduzir ambiguidades em links relativos.
+- mantem email (`atendimento@salesiano.br`), WhatsApp (`(27) 9 8123 4566`) e portal UniSales centralizados em [`platform/pages/ajuda-suporte/support-config.js`](../../Unicheck/platform/pages/ajuda-suporte/support-config.js); email abre o cliente de email e os dois canais web abrem em nova aba com isolamento da pagina de origem;
+- usa a rota interna `platform/pages/ajuda-suporte/ajuda-suporte.html`, sem espacos, para reduzir ambiguidades em links relativos.
 
-A sidebar do dashboard usa `ajuda/ajuda-suporte.html`; checklists e plataformas usam `../ajuda/ajuda-suporte.html`. A pagina de configuracoes, que possui layout proprio sem a sidebar global, oferece um atalho equivalente no cabecalho. A central de ajuda retorna para dashboard, checklists, plataformas e configuracoes por links relativos proprios e marca Ajuda e Suporte como item ativo.
+A sidebar do dashboard usa `pages/ajuda-suporte/ajuda-suporte.html`; checklist e beneficios usam `../ajuda-suporte/ajuda-suporte.html`. A pagina de configuracoes, que possui layout proprio sem a sidebar global, oferece um atalho equivalente no cabecalho. A central de ajuda retorna para dashboard, checklist, beneficios e configuracoes por links relativos proprios e marca Ajuda e Suporte como item ativo.
 
 ### 6.8 Manual do Aluno
 
 Arquivos principais:
 
-- [`platform/manual/manual-aluno.html`](../../Unicheck/platform/manual/manual-aluno.html)
-- [`platform/manual/manual-aluno.css`](../../Unicheck/platform/manual/manual-aluno.css)
-- [`platform/manual/manual-aluno.js`](../../Unicheck/platform/manual/manual-aluno.js)
+- [`platform/pages/manual-aluno/manual-aluno.html`](../../Unicheck/platform/pages/manual-aluno/manual-aluno.html)
+- [`platform/pages/manual-aluno/manual-aluno.css`](../../Unicheck/platform/pages/manual-aluno/manual-aluno.css)
+- [`platform/pages/manual-aluno/manual-aluno.js`](../../Unicheck/platform/pages/manual-aluno/manual-aluno.js)
 - [`js/data/manual-data.js`](../../Unicheck/js/data/manual-data.js)
 
 O modulo transforma o Manual do Aluno 2024 do UniSales em uma central de conhecimento web, sem reproduzir o PDF pagina a pagina. A fonte institucional foi lida integralmente e o conteudo foi agrupado semanticamente em oito categorias: comeco no UniSales, vida academica, ferramentas digitais, avaliacoes e frequencia, campus e biblioteca, apoio ao estudante, formacao e carreira e utilidades. Embora preserve corretamente o nome `Manual do Aluno 2024 — UniSales`, esse PDF e a ultima referencia institucional disponibilizada ao UniCheck em 2026 e, por isso, seu conteudo e presumido vigente ate a publicacao de fonte institucional mais nova.
@@ -320,7 +320,7 @@ Todo item em `js/data/manual-data.js` possui ID estavel, categoria, titulo, resu
 
 A politica temporal separa regra institucional de dado operacional volatil. Conceitos, procedimentos e dependencias de Calendario, edital, Regimento ou norma continuam vigentes conforme a ultima fonte disponivel e nao recebem alerta generico. `temporalFields` identifica somente partes que podem mudar independentemente de uma nova edicao completa, como nomes de pessoas, telefones, e-mails, links, horarios, datas, valores, multas, quantidades, credenciais, fornecedores e dados de seguro. A interface mostra uma nota pequena e contextual junto ao fim da orientacao. `requiresValidation` fica reservado aos cinco conteudos cujo objeto central e volatil: calendario/horarios, prazos de documentos, tabela de servicos/taxas, contatos/atendimento e seguro escolar.
 
-A sidebar compartilhada posiciona `Manual do Aluno` entre `Checklists Academicos` e `Beneficios Estudantis`, usa o icone inequivoco `book-open` e preserva os comportamentos existentes de estado ativo, recolhimento e menu mobile. A rota da area e `platform/manual/manual-aluno.html` e tambem esta registrada em `platform/js/shared/core-config.js`.
+A sidebar compartilhada posiciona `Manual do Aluno` entre `Checklists Academicos` e `Beneficios Estudantis`, usa o icone inequivoco `book-open` e preserva os comportamentos existentes de estado ativo, recolhimento e menu mobile. A rota da area e `platform/pages/manual-aluno/manual-aluno.html` e tambem esta registrada em `platform/shared/js/platform-config.js`.
 
 ## 7. Modulos compartilhados
 
@@ -338,7 +338,7 @@ A sidebar compartilhada posiciona `Manual do Aluno` entre `Checklists Academicos
 - expõe utilitarios como `requireAuth`, `getSession` e `normalizeErrorMessage`.
 - usa a sessao persistida restaurada por `getSession()` como fonte de verdade do guard;
 - uma falha isolada de consulta remota de usuario, perfil ou dados funcionais nao e interpretada como logout;
-- cada pagina interna e protegida pelo guard compartilhado carregado em `platform/js/shared/script-interno.js`.
+- cada pagina interna e protegida pelo guard compartilhado carregado em `platform/shared/js/platform-shell.js`.
 
 ### `js/services/profile.js`
 
@@ -364,19 +364,19 @@ A sidebar compartilhada posiciona `Manual do Aluno` entre `Checklists Academicos
 - aceita campos futuros de secoes concluidas e bonus do Manual do Aluno, mantidos com peso zero ate o recurso ser implementado;
 - fornece as recompensas visuais do clique, mas nao cria atividades nem notificacoes.
 
-### `platform/js/shared/core-config.js`
+### `platform/shared/js/platform-config.js`
 
 - centraliza chaves de `localStorage`;
 - centraliza rotas da area interna;
 - normaliza caminhos para navegacao entre paginas.
 
-### `platform/js/shared/profile-manager.js`
+### `platform/shared/js/profile-ui.js`
 
 - sincroniza o perfil cacheado entre paginas da area interna;
 - atualiza avatar, nome e email em varios pontos da UI;
 - reage a `focus` e ao evento `storage`.
 
-### `platform/js/shared/progression-profile.js`
+### `platform/shared/js/progression-ui.js`
 
 - injeta a representacao compacta de nivel, XP e barra abaixo do perfil nas sidebars das paginas internas que usam esse layout;
 - calcula a apresentacao usando `js/services/progression.js`, o catalogo carregado dos checklists e o cache de progresso da conta, sem armazenar XP ou nivel;
@@ -384,12 +384,12 @@ A sidebar compartilhada posiciona `Manual do Aluno` entre `Checklists Academicos
 - reage ao cache alterado por outra aba e ao evento local `unicheck:progression-updated` emitido imediatamente pelo checklist;
 - mostra um toast transitorio somente quando uma interacao local atravessa um threshold de nivel; nao cria notificacao nem atividade.
 
-### `platform/js/shared/loading-navigation.js`
+### `platform/shared/js/navigation.js`
 
 - mostra a tela de loading antes de navegações especificas;
 - lida com `data-action="navigate-with-loading"` e `data-action="navigate-platforms"`.
 
-### `platform/css/shared/ui-polish.css`
+### `platform/shared/css/layout/ui-polish.css`
 
 - centraliza tokens semanticos dos temas claro e escuro (`surface`, bordas, textos, destaque, sucesso, alerta e foco);
 - normaliza sidebar, header, inputs, dropdowns e estados interativos;
@@ -397,12 +397,12 @@ A sidebar compartilhada posiciona `Manual do Aluno` entre `Checklists Academicos
 - define a progressao responsiva para desktop amplo, notebook, tablet e celulares de 430/390 px;
 - respeita `prefers-reduced-motion`.
 
-### `platform/js/shared/script-page-state.js`
+### `platform/shared/js/page-state.js`
 
 - oculta o loading apos um atraso;
 - marca o menu lateral ativo com base no caminho atual.
 
-### `platform/js/shared/script-profile-sync.js`
+### `platform/shared/js/profile-sync.js`
 
 - replica o perfil salvo no `localStorage` para os elementos da interface interna;
 - funciona como camada adicional de sincronizacao visual.
@@ -429,19 +429,19 @@ A sidebar compartilhada posiciona `Manual do Aluno` entre `Checklists Academicos
 3. `js/core/auth.js`
 4. `js/services/profile.js`
 5. `js/services/notifications.js`
-6. `platform/js/shared/core-config.js`
-7. `platform/js/shared/profile-manager.js`
-8. `platform/js/shared/loading-navigation.js`
-9. `platform/js/shared/script-interno.js`
-10. `platform/js/shared/script-profile-sync.js`
-11. `platform/js/shared/script-page-state.js` quando a pagina usa esse utilitario
+6. `platform/shared/js/platform-config.js`
+7. `platform/shared/js/profile-ui.js`
+8. `platform/shared/js/navigation.js`
+9. `platform/shared/js/platform-shell.js`
+10. `platform/shared/js/profile-sync.js`
+11. `platform/shared/js/page-state.js` quando a pagina usa esse utilitario
 12. `js/services/checklist.js` e modulos do checklist quando a pagina e de checklist
 13. `js/services/progression.js` antes dos consumidores de XP
-14. `platform/js/shared/progression-profile.js` depois de checklist, progressao e autenticacao nas paginas com sidebar compartilhada
-15. `platform/PLATAFORMAS/plataformas-gratuitas.js` quando a pagina e de plataformas
-16. `platform/CONFIGURACOES PERFIL/configuracoes.js` quando a pagina e de configuracoes
-17. `platform/ajuda/support-config.js` e `platform/ajuda/ajuda-suporte.js` quando a pagina e de ajuda; ambos operam apenas com conteudo local
-18. `js/data/manual-data.js` e `platform/manual/manual-aluno.js` quando a pagina e do Manual; ambos operam apenas com conteudo local e o primeiro e a fonte central de textos e metadados
+14. `platform/shared/js/progression-ui.js` depois de checklist, progressao e autenticacao nas paginas com sidebar compartilhada
+15. `platform/pages/beneficios-estudantis/beneficios-estudantis.js` quando a pagina e de plataformas
+16. `platform/pages/configuracoes-perfil/configuracoes-perfil.js` quando a pagina e de configuracoes
+17. `platform/pages/ajuda-suporte/support-config.js` e `platform/pages/ajuda-suporte/ajuda-suporte.js` quando a pagina e de ajuda; ambos operam apenas com conteudo local
+18. `js/data/manual-data.js` e `platform/pages/manual-aluno/manual-aluno.js` quando a pagina e do Manual; ambos operam apenas com conteudo local e o primeiro e a fonte central de textos e metadados
 
 ## 9. Dados e armazenamento
 
@@ -523,7 +523,7 @@ O projeto funciona, mas existem inconsistencias tecnicas que precisam ser conhec
 - [`supabase-2026-08-24.md`](../audits/supabase-2026-08-24.md) registra o inventario remoto, a decisao de descartar dados de teste e os criterios de aceite.
 - [`js/services/profile.js`](../../Unicheck/js/services/profile.js) e o reset estao alinhados em `users_profile.id` como chave primaria e relacionamento com `auth.users.id`.
 - O total atual e 630 XP para 28 tarefas e 7 fases. Novas fontes devem ser adicionadas na configuracao de [`js/services/progression.js`](../../Unicheck/js/services/progression.js), sem espalhar valores pelos consumidores.
-- Alguns documentos auxiliares em `platform/PLATAFORMAS/` e `platform/CHECKLIST ACADEMICO/` descrevem funcionalidades de forma mais antiga do que o comportamento atual do codigo.
+- Alguns documentos auxiliares em `platform/pages/beneficios-estudantis/` e `platform/pages/checklist-academico/` descrevem funcionalidades de forma mais antiga do que o comportamento atual do codigo.
 
 Isto nao invalida a arquitetura geral, mas significa que este `architecture.md` deve ser tratado como a fonte de contexto mais fiel do estado atual do projeto.
 

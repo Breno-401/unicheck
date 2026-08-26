@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Configurações de Perfil - UniCheck</title>
-    <link rel="icon" href="../../landing/assets/images/logomernor.png" type="image/png">
+    <link rel="icon" href="../../../landing/assets/images/logomernor.png" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-    <link rel="stylesheet" href="../css/base/variaveis.css">
-    <link rel="stylesheet" href="configuracoes.css">
+    <link rel="stylesheet" href="../../shared/css/base/variaveis.css">
+    <link rel="stylesheet" href="configuracoes-perfil.css">
 </head>
 <body>
     <div class="profile-settings-container">
@@ -21,7 +21,7 @@
                     <h1 class="profile-title">Configurações de Perfil</h1>
                     <p class="profile-subtitle">Gerencie seus dados, aparência e segurança.</p>
                 </div>
-                <a href="../index-interno.html" class="back-button">
+                <a href="../../index-interno.html" class="back-button">
                     <i data-lucide="arrow-left" aria-hidden="true"></i>
                     <span>Voltar ao Dashboard</span>
                 </a>
@@ -175,12 +175,12 @@
     <div id="profile-status" class="sr-only" aria-live="polite"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../../js/core/config.js"></script>
-    <script src="../../js/core/auth.js"></script>
-    <script src="../../js/services/profile.js"></script>
-    <script src="../../js/services/activity.js"></script>
-    <script src="../js/shared/script-interno.js"></script>
-    <script src="../js/shared/script-profile-sync.js"></script>
-    <script src="configuracoes.js"></script>
+    <script src="../../../js/core/config.js"></script>
+    <script src="../../../js/core/auth.js"></script>
+    <script src="../../../js/services/profile.js"></script>
+    <script src="../../../js/services/activity.js"></script>
+    <script src="../../shared/js/platform-shell.js"></script>
+    <script src="../../shared/js/profile-sync.js"></script>
+    <script src="configuracoes-perfil.js"></script>
 </body>
 </html>

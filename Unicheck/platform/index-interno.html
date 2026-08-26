@@ -11,20 +11,20 @@
     <!-- Importar Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <!-- Arquivos CSS e JS separados -->
-    <link rel="stylesheet" href="css/base/base.css">
-    <link rel="stylesheet" href="css/components/componente-logo.css">
-    <link rel="stylesheet" href="css/components/componentes-atividades-recentes.css">
-    <link rel="stylesheet" href="css/components/componentes-cards-status.css">
-    <link rel="stylesheet" href="css/components/componentes-header.css">
-    <link rel="stylesheet" href="css/components/componentes-parceiros.css">
-    <link rel="stylesheet" href="css/components/componentes-sidebar.css">
-    <link rel="stylesheet" href="css/shared/layout.css">
-    <link rel="stylesheet" href="css/shared/responsividade.css">
-    <link rel="stylesheet" href="css/base/variaveis.css">
-    <link rel="stylesheet" href="css/shared/style.css">
-    <link rel="stylesheet" href="css/shared/ui-polish.css">
-    <link rel="stylesheet" href="css/pages/dashboard-restored.css">
-    <link rel="stylesheet" href="css/components/notifications.css">
+    <link rel="stylesheet" href="shared/css/base/base.css">
+    <link rel="stylesheet" href="shared/css/components/componente-logo.css">
+    <link rel="stylesheet" href="shared/css/components/componentes-atividades-recentes.css">
+    <link rel="stylesheet" href="shared/css/components/componentes-cards-status.css">
+    <link rel="stylesheet" href="shared/css/components/componentes-header.css">
+    <link rel="stylesheet" href="shared/css/components/componentes-parceiros.css">
+    <link rel="stylesheet" href="shared/css/components/componentes-sidebar.css">
+    <link rel="stylesheet" href="shared/css/layout/layout.css">
+    <link rel="stylesheet" href="shared/css/layout/responsividade.css">
+    <link rel="stylesheet" href="shared/css/base/variaveis.css">
+    <link rel="stylesheet" href="shared/css/layout/style.css">
+    <link rel="stylesheet" href="shared/css/layout/ui-polish.css">
+    <link rel="stylesheet" href="shared/css/pages/dashboard.css">
+    <link rel="stylesheet" href="shared/css/components/notifications.css">
 </head>
 <body class="page-dashboard">
     <!-- Container Principal do Dashboard -->
@@ -73,25 +73,25 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="CHECKLIST ACADEMICO/checklist-academico.html" class="nav-link" data-tooltip="Checklists Acadêmicos">
+                        <a href="pages/checklist-academico/checklist-academico.html" class="nav-link" data-tooltip="Checklists Acadêmicos">
                             <i data-lucide="graduation-cap"></i>
                             <span>Checklists Acadêmicos</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="manual/manual-aluno.html" class="nav-link" data-tooltip="Manual do Aluno">
+                        <a href="pages/manual-aluno/manual-aluno.html" class="nav-link" data-tooltip="Manual do Aluno">
                             <i data-lucide="book-open"></i>
                             <span>Manual do Aluno</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="PLATAFORMAS/plataformas-gratuitas.html" class="nav-link" data-tooltip="Benefícios Estudantis" data-action="navigate-with-loading">
+                        <a href="pages/beneficios-estudantis/beneficios-estudantis.html" class="nav-link" data-tooltip="Benefícios Estudantis" data-action="navigate-with-loading">
                             <i data-lucide="badge-percent"></i>
                             <span>Benefícios Estudantis</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="ajuda/ajuda-suporte.html" class="nav-link" data-tooltip="Ajuda e Suporte">
+                        <a href="pages/ajuda-suporte/ajuda-suporte.html" class="nav-link" data-tooltip="Ajuda e Suporte">
                             <i data-lucide="help-circle"></i>
                             <span>Ajuda e Suporte</span>
                         </a>
@@ -164,13 +164,13 @@
                                         <span>Meu Perfil</span>
                                     </button>
     
-                                    <a href="CONFIGURACOES PERFIL/configuracoes.html" class="user-dropdown-item">
+                                    <a href="pages/configuracoes-perfil/configuracoes-perfil.html" class="user-dropdown-item">
                                         <i data-lucide="settings"></i>
                                         <span>Configurações</span>
                                     </a>
                                     
                                     <div class="user-dropdown-divider"></div>
-                                    <a href="ajuda/ajuda-suporte.html" class="user-dropdown-item">
+                                    <a href="pages/ajuda-suporte/ajuda-suporte.html" class="user-dropdown-item">
                                         <i data-lucide="help-circle"></i>
                                         <span>Ajuda & Suporte</span>
                                     </a>
@@ -204,7 +204,7 @@
                         <span class="academic-next-label">Próxima etapa</span>
                         <strong id="academicCurrentPhase">Primeiros passos na faculdade</strong>
                         <p id="academicNextTask">Continue de onde parou.</p>
-                        <a class="academic-continue-button" id="academicContinueButton" href="CHECKLIST ACADEMICO/checklist-academico.html">
+                        <a class="academic-continue-button" id="academicContinueButton" href="pages/checklist-academico/checklist-academico.html">
                             <span>Continuar</span>
                             <i data-lucide="arrow-right"></i>
                         </a>
@@ -255,12 +255,12 @@
     <script src="../js/services/progression.js"></script>
     <script src="../js/services/activity.js"></script>
     <script src="../js/services/notifications.js"></script>
-    <script src="js/shared/core-config.js"></script>
-    <script src="js/shared/profile-manager.js"></script>
-    <script src="js/shared/progression-profile.js"></script>
-    <script src="js/shared/loading-navigation.js"></script>
-    <script src="js/shared/script-interno.js"></script>
-    <script src="js/shared/script-profile-sync.js"></script>
+    <script src="shared/js/platform-config.js"></script>
+    <script src="shared/js/profile-ui.js"></script>
+    <script src="shared/js/progression-ui.js"></script>
+    <script src="shared/js/navigation.js"></script>
+    <script src="shared/js/platform-shell.js"></script>
+    <script src="shared/js/profile-sync.js"></script>
     
 
 </body>

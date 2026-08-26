@@ -4,7 +4,7 @@ Este módulo deixou de ser um catálogo amplo de “plataformas gratuitas” e p
 
 ## Fonte dos dados
 
-- `benefits-data.js` concentra ofertas, elegibilidade, verificação, URL oficial, status e data da última conferência.
+- `beneficios-data.js` concentra ofertas, elegibilidade, verificação, URL oficial, status e data da última conferência.
 - A revisão atual foi realizada em 16/08/2026.
 - Preços, percentuais, créditos e condições promocionais são tratados como voláteis.
 - Ofertas dependentes da contratação ou elegibilidade institucional são identificadas explicitamente.

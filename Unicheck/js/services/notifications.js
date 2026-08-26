@@ -147,9 +147,9 @@
         if (destination.startsWith("checklist:")) {
             const id = destination.slice("checklist:".length);
             const checklistLink = document.querySelector('a[href*="checklist-academico.html"]');
-            const fallback = window.location.pathname.includes("CHECKLIST ACADEMICO")
+            const fallback = window.location.pathname.includes("/pages/checklist-academico/")
                 ? "checklist-academico.html"
-                : "CHECKLIST ACADEMICO/checklist-academico.html";
+                : "pages/checklist-academico/checklist-academico.html";
             window.location.href = `${checklistLink?.href || fallback}#checklist=${encodeURIComponent(id)}`;
         }
     }
