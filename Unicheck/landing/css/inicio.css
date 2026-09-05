@@ -4,7 +4,7 @@
         radial-gradient(circle at 20% 25%, rgba(108, 189, 181, 0.22), transparent 24%),
         radial-gradient(circle at 80% 15%, rgba(147, 204, 198, 0.18), transparent 20%),
         linear-gradient(180deg, rgba(4, 17, 20, 0.88), rgba(4, 17, 20, 0.62)),
-        url('../img/main.bg.svg');
+        url('../assets/images/main.bg.svg');
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;

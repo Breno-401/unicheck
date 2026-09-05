@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checklist Academico - UniCheck</title>
+    <link rel="icon" href="../../../landing/assets/images/logomernor.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="../../shared/css/base/base.css">
+    <link rel="stylesheet" href="../../shared/css/components/componente-logo.css">
+    <link rel="stylesheet" href="../../shared/css/components/componentes-header.css">
+    <link rel="stylesheet" href="../../shared/css/components/componentes-sidebar.css">
+    <link rel="stylesheet" href="../../shared/css/layout/layout.css">
+    <link rel="stylesheet" href="../../shared/css/layout/responsividade.css">
+    <link rel="stylesheet" href="../../shared/css/base/variaveis.css">
+    <link rel="stylesheet" href="../../shared/css/layout/style.css">
+    <link rel="stylesheet" href="checklist-academico.css">
+    <link rel="stylesheet" href="../../shared/css/layout/ui-polish.css">
+    <link rel="stylesheet" href="../../shared/css/components/notifications.css">
+</head>
+<body class="page-checklist">
+    <div class="dashboard-container" id="dashboardContainer">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-section">
+                    <div class="sidebar-logo-enhanced">
+                        <img src="../../assets/images/logo.png" alt="UniCheck Logo" class="sidebar-logo-image">
+                    </div>
+                    <span class="logo-text">UniCheck</span>
+                </div>
+                <button class="sidebar-toggle" id="sidebarToggle" type="button" title="Retrair/Expandir Navbar" aria-label="Recolher ou expandir menu lateral">
+                    <div class="hamburger-menu">
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                    </div>
+                </button>
+            </div>
+
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <span>JS</span>
+                </div>
+                <div class="user-info">
+                    <h4>Joao Silva</h4>
+                    <p>Aluno UniSales</p>
+                </div>
+                <div class="user-status">
+                    <span class="status-indicator online"></span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="../../index-interno.html" class="nav-link" data-tooltip="Inicio">
+                            <i data-lucide="home"></i>
+                            <span>Inicio</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="checklist-academico.html" class="nav-link" data-tooltip="Checklists Academicos">
+                            <i data-lucide="graduation-cap"></i>
+                            <span>Checklists Academicos</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="../manual-aluno/manual-aluno.html" class="nav-link" data-tooltip="Manual do Aluno">
+                            <i data-lucide="book-open"></i>
+                            <span>Manual do Aluno</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="../beneficios-estudantis/beneficios-estudantis.html" class="nav-link" data-tooltip="Benefícios Estudantis">
+                            <i data-lucide="badge-percent"></i>
+                            <span>Benefícios Estudantis</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="../ajuda-suporte/ajuda-suporte.html" class="nav-link" data-tooltip="Ajuda e Suporte">
+                            <i data-lucide="help-circle"></i>
+                            <span>Ajuda e Suporte</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="nav-footer">
+                    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Alternar tema claro ou escuro">
+                        <i data-lucide="moon"></i>
+                        <span>Modo Escuro</span>
+                    </button>
+                    <button class="logout-btn logout-action" data-action="logout">
+                        <i data-lucide="log-out"></i>
+                        <span>Sair</span>
+                    </button>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content" id="mainContent">
+            <header class="main-header">
+                <div class="header-top">
+                    <div class="header-mobile-controls">
+                        <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-label="Abrir menu lateral">
+                            <i data-lucide="menu"></i>
+                        </button>
+                    </div>
+
+                    <div class="welcome-section">
+                        <h1 class="welcome-title">Checklists Academicos</h1>
+                        <p class="welcome-subtitle">Gerencie suas fases de onboarding, acompanhe o progresso e desbloqueie a proxima etapa.</p>
+                    </div>
+                </div>
+
+                <div class="header-bottom-enhanced">
+                    <div class="header-search-enhanced">
+                        <div class="search-box">
+                            <i data-lucide="search" class="search-icon"></i>
+                            <input type="text" placeholder="Buscar checklists, tarefas..." class="search-input">
+                            <button class="search-filters" type="button" aria-label="Opções de busca">
+                                <i data-lucide="filter"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="header-actions-enhanced">
+                        <button class="theme-toggle-mobile" id="themeToggleMobile" type="button" aria-label="Alternar tema claro ou escuro">
+                            <i data-lucide="moon"></i>
+                        </button>
+                        <button class="header-notification-button" type="button" aria-label="Notificações">
+                            <i data-lucide="bell"></i>
+                        </button>
+                        <div class="user-menu">
+                            <button class="user-menu-trigger" id="userMenuTrigger" type="button" aria-label="Abrir menu do usuário" aria-expanded="false">
+                                <div class="user-avatar-small">
+                                    <span>JS</span>
+                                </div>
+                                <span class="user-name-indicator">Joao Silva</span>
+                                <i data-lucide="chevron-down" class="dropdown-indicator"></i>
+                            </button>
+                            <div class="user-dropdown" id="userDropdown">
+                                <div class="user-dropdown-header">
+                                    <div class="user-dropdown-avatar">
+                                        <span>JS</span>
+                                    </div>
+                                    <div class="user-dropdown-info">
+                                        <h4>Joao Silva</h4>
+                                        <p>joao.silva@unisales.com.br</p>
+                                    </div>
+                                </div>
+                                <div class="user-dropdown-menu">
+                                    <a href="../configuracoes-perfil/configuracoes-perfil.html" class="user-dropdown-item">
+                                        <i data-lucide="user"></i>
+                                        <span>Meu Perfil</span>
+                                    </a>
+                                    <a href="../configuracoes-perfil/configuracoes-perfil.html" class="user-dropdown-item">
+                                        <i data-lucide="settings"></i>
+                                        <span>Configuracoes</span>
+                                    </a>
+                                    <div class="user-dropdown-divider"></div>
+                                    <a href="../ajuda-suporte/ajuda-suporte.html" class="user-dropdown-item">
+                                        <i data-lucide="help-circle"></i>
+                                        <span>Ajuda e Suporte</span>
+                                    </a>
+                                    <button class="user-dropdown-item logout-action" data-action="logout">
+                                        <i data-lucide="log-out"></i>
+                                        <span>Sair</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <section class="checklist-view" id="checklistListView">
+                    <div class="checklists-grid" id="checklistsGrid"></div>
+                </section>
+                <section class="checklist-detail-view is-hidden" id="checklistDetailView">
+                    <div class="checklist-detail-content" id="checklistDetailContent"></div>
+                </section>
+            </div>
+
+            <footer class="dashboard-footer">
+                <div class="footer-content">
+                    <div class="footer-links">
+                        <a href="#" class="footer-link">Termos</a>
+                        <a href="#" class="footer-link">Privacidade</a>
+                        <a href="#" class="footer-link">Contato</a>
+                    </div>
+                    <div class="footer-text">
+                        <p>&copy; 2025 UniCheck. Todos os direitos reservados.</p>
+                    </div>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../../js/core/config.js"></script>
+    <script src="../../../js/core/auth.js"></script>
+    <script src="../../../js/services/profile.js"></script>
+    <script src="../../../js/services/activity.js"></script>
+    <script src="../../../js/services/notifications.js"></script>
+    <script src="../../../js/data/checklist-data.js"></script>
+    <script src="../../../js/services/checklist.js"></script>
+    <script src="../../../js/services/progression.js"></script>
+    <script src="../../shared/js/progression-ui.js"></script>
+    <script src="../../shared/js/platform-shell.js"></script>
+    <script src="../../shared/js/profile-sync.js"></script>
+    <script src="../../shared/js/page-state.js"></script>
+    <script src="checklist-detail.js"></script>
+    <script src="checklist-view.js"></script>
+    <script src="checklist-academico.js"></script>
+</body>
+</html>

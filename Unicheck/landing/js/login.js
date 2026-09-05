@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let toastTimeout = null;
 
     if (!auth) {
-        console.error("UniCheckAuth nao encontrado. Verifique a inclusao de js/config.js e js/auth.js.");
+        console.error("UniCheckAuth nao encontrado. Verifique a inclusao de js/core/config.js e js/core/auth.js.");
     }
 
     function showToast(message, type) {
@@ -89,7 +89,6 @@ document.addEventListener("DOMContentLoaded", () => {
         else if (!emailRegex.test(emailInput.value.trim())) valid = setFieldError(emailInput, "Informe um e-mail valido.");
 
         if (!passwordInput.value) valid = setFieldError(passwordInput, "Informe sua senha.");
-        else if (!passwordRegex.test(passwordInput.value)) valid = setFieldError(passwordInput, "Senha deve ter 8+ caracteres, letra maiuscula e numero.");
 
         return valid;
     }

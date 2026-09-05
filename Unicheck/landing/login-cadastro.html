@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#071a1e">
+    <title>Entrar ou criar conta | UniCheck</title>
+    <link rel="icon" href="assets/images/logomernor.png" type="image/png">
+    <meta name="description" content="Entre no UniCheck ou crie sua conta para organizar sua jornada acadêmica.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/login-cadastro.css">
+</head>
+<body>
+    <a href="index.html" class="back-link" aria-label="Voltar para a página inicial"><span aria-hidden="true">←</span> Voltar para o início</a>
+
+    <main class="auth-layout">
+        <section class="auth-showcase" aria-labelledby="showcaseTitle">
+            <a href="index.html" class="brand" aria-label="UniCheck — página inicial">
+                <img src="assets/images/logo.foto.png" alt="UniCheck" width="486" height="172">
+            </a>
+            <div class="showcase-copy">
+                <span class="eyebrow">Sua jornada em um só lugar</span>
+                <h1 id="showcaseTitle">Menos confusão.<br>Mais direção.</h1>
+                <p>Acompanhe seus próximos passos, encontre informações importantes e organize sua vida acadêmica desde o primeiro dia.</p>
+            </div>
+
+            <div class="journey-preview" aria-label="Resumo dos recursos da plataforma">
+                <div class="preview-heading"><div><small>Progresso geral</small><strong>Sua jornada acadêmica</strong></div><b>42%</b></div>
+                <div class="progress-track"><span></span></div>
+                <ul>
+                    <li><i aria-hidden="true">✓</i><span><strong>Primeiros passos</strong><small>Fase concluída</small></span></li>
+                    <li class="is-current"><i aria-hidden="true">2</i><span><strong>Sistemas acadêmicos</strong><small>Em andamento</small></span></li>
+                    <li><i aria-hidden="true">3</i><span><strong>Rotina universitária</strong><small>Próxima fase</small></span></li>
+                </ul>
+            </div>
+
+            <div class="trust-line"><span aria-hidden="true">✓</span> Seu progresso disponível onde você estiver</div>
+        </section>
+
+        <section class="auth-area" aria-labelledby="authTitle">
+            <div class="mobile-brand"><a href="index.html"><img src="assets/images/logomernor.png" alt="UniCheck" width="498" height="211"></a></div>
+            <div class="auth-card">
+                <header class="auth-header">
+                    <span class="eyebrow">Bem-vindo ao UniCheck</span>
+                    <h2 id="authTitle">Acesse sua conta</h2>
+                    <p class="subtitle" id="authSubtitle">Continue de onde parou e acompanhe sua jornada.</p>
+                </header>
+
+                <nav class="auth-tabs" aria-label="Alternar entre login e cadastro" role="tablist">
+                    <button class="tab-btn is-active" type="button" role="tab" data-tab-target="loginPanel" aria-controls="loginPanel" aria-selected="true">Entrar</button>
+                    <button class="tab-btn" type="button" role="tab" data-tab-target="registerPanel" aria-controls="registerPanel" aria-selected="false">Criar conta</button>
+                </nav>
+
+                <section id="loginPanel" class="form-panel is-active" role="tabpanel" aria-labelledby="authTitle">
+                    <form id="loginForm" novalidate>
+                        <div class="field-group">
+                            <label class="field-label" for="loginEmail">E-mail</label>
+                            <input type="email" placeholder="seu.email@exemplo.com" id="loginEmail" autocomplete="email" required>
+                            <p class="field-error" id="loginEmailError" aria-live="polite"></p>
+                        </div>
+                        <div class="field-group">
+                            <div class="label-row"><label class="field-label" for="loginSenha">Senha</label><a href="#" class="action-link" id="forgotPasswordLink">Esqueceu a senha?</a></div>
+                            <div class="password-field">
+                                <input type="password" placeholder="Digite sua senha" id="loginSenha" autocomplete="current-password" required minlength="8">
+                                <button type="button" class="toggle-password" data-toggle-password="loginSenha" aria-label="Mostrar senha" aria-pressed="false">Mostrar</button>
+                            </div>
+                            <p class="field-error" id="loginSenhaError" aria-live="polite"></p>
+                        </div>
+                        <button id="loginSubmit" class="submit-button" type="submit">Entrar na plataforma <span aria-hidden="true">→</span></button>
+                    </form>
+                    <p class="mobile-switch">Ainda não tem uma conta? <button type="button" data-switch-panel="registerPanel">Criar conta grátis</button></p>
+                </section>
+
+                <section id="registerPanel" class="form-panel" role="tabpanel" aria-labelledby="authTitle" hidden>
+                    <form id="registerForm" novalidate>
+                        <div class="field-group">
+                            <label class="field-label" for="nomeCadastro">Nome completo</label>
+                            <input type="text" placeholder="Como você gostaria de ser chamado" id="nomeCadastro" autocomplete="name" required>
+                            <p class="field-error" id="nomeCadastroError" aria-live="polite"></p>
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label" for="emailCadastro">E-mail</label>
+                            <input type="email" placeholder="seu.email@exemplo.com" id="emailCadastro" autocomplete="email" required>
+                            <p class="field-error" id="emailCadastroError" aria-live="polite"></p>
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label" for="nascimentoCadastro">Data de nascimento</label>
+                            <input type="date" id="nascimentoCadastro" autocomplete="bday" required>
+                            <p class="field-error" id="nascimentoCadastroError" aria-live="polite"></p>
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label" for="senhaCadastro">Crie uma senha</label>
+                            <div class="password-field">
+                                <input type="password" placeholder="8+ caracteres, maiúscula e número" id="senhaCadastro" autocomplete="new-password" required minlength="8">
+                                <button type="button" class="toggle-password" data-toggle-password="senhaCadastro" aria-label="Mostrar senha" aria-pressed="false">Mostrar</button>
+                            </div>
+                            <div class="strength-wrap"><div class="strength-track"><div id="strength" class="strength" aria-hidden="true"></div></div><p id="strengthText" class="strength-text">Força da senha: fraca</p></div>
+                            <p class="field-error" id="senhaCadastroError" aria-live="polite"></p>
+                        </div>
+                        <button id="registerSubmit" class="submit-button" type="submit">Criar minha conta <span aria-hidden="true">→</span></button>
+                    </form>
+                    <p class="terms-note">Ao criar sua conta, você concorda em usar o UniCheck de forma responsável.</p>
+                    <p class="mobile-switch">Já possui uma conta? <button type="button" data-switch-panel="loginPanel">Entrar</button></p>
+                </section>
+            </div>
+            <p class="auth-footer">© <span id="currentYear"></span> UniCheck. Sua jornada, mais clara.</p>
+        </section>
+    </main>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/core/config.js"></script>
+    <script src="../js/core/auth.js"></script>
+    <script src="js/login.js"></script>
+</body>
+</html>
