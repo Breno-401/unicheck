@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checklist player browser test</title>
+    <base href="/Unicheck/platform/pages/checklist-academico/">
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="/Unicheck/platform/shared/css/base/base.css">
+    <link rel="stylesheet" href="/Unicheck/platform/shared/css/layout/layout.css">
+    <link rel="stylesheet" href="/Unicheck/platform/shared/css/base/variaveis.css">
+    <link rel="stylesheet" href="/Unicheck/platform/shared/css/layout/style.css">
+    <link rel="stylesheet" href="/Unicheck/platform/pages/checklist-academico/checklist-academico.css?v=guided-player-3">
+    <link rel="stylesheet" href="/Unicheck/platform/shared/css/layout/ui-polish.css">
+    <style>
+        body { min-height: 100vh; margin: 0; background: var(--bg-primary); }
+        .browser-test-shell { width: min(100% - 2rem, 1440px); margin: 0 auto; padding: 1rem 0 2rem; }
+        .browser-test-shell.is-narrow { width: 390px; margin: 0; padding: 1rem; overflow: hidden; }
+        #browserTestResult { position: fixed; z-index: 9999; right: .5rem; bottom: .5rem; padding: .4rem .6rem; background: #08111f; color: white; font: 12px monospace; }
+    </style>
+</head>
+<body class="page-checklist">
+    <main class="browser-test-shell" id="browserTestShell">
+        <div class="page-content"></div>
+    </main>
+    <output id="browserTestResult">PENDING</output>
+
+    <script>
+        const params = new URLSearchParams(location.search);
+        const theme = params.get("theme") === "dark" ? "dark" : "light";
+        const browserErrors = [];
+        addEventListener("error", event => browserErrors.push(event.message || "window-error"));
+        addEventListener("unhandledrejection", event => browserErrors.push(event.reason?.message || "unhandled-rejection"));
+        document.documentElement.dataset.theme = theme;
+        document.body.dataset.theme = theme;
+        if (params.get("narrow") === "1") document.getElementById("browserTestShell").classList.add("is-narrow");
+
+        const firstChecklistId = "10000000-0000-4000-8000-000000000001";
+        const taskId = number => `20000000-0000-4000-8000-${String(number).padStart(12, "0")}`;
+        const stateName = params.get("state") || "partial";
+        const progressMap = { [firstChecklistId]: { tasks: {} } };
+        if (stateName === "partial") {
+            progressMap[firstChecklistId].tasks[taskId(1)] = true;
+            progressMap[firstChecklistId].tasks[taskId(2)] = true;
+        }
+        if (stateName === "full") {
+            [1, 2, 3, 4].forEach(number => { progressMap[firstChecklistId].tasks[taskId(number)] = true; });
+        }
+
+        window.UniCheckAuth = { getSession: async () => ({ user: { id: "browser-test-user" } }) };
+        window.UniCheckProgression = {
+            calculateFromChecklists: () => ({}),
+            getChecklistCompletionRewards: () => []
+        };
+        window.UniCheckProgressionProfile = { renderFromChecklists: () => {} };
+        window.UniCheckActivity = { record: () => {} };
+        window.UniCheckNotifications = { record: () => {} };
+        window.UniCheckChecklist = {
+            readCachedProgress: () => structuredClone(progressMap),
+            writeCachedProgress: (_userId, value) => {
+                Object.keys(progressMap).forEach(key => delete progressMap[key]);
+                Object.assign(progressMap, structuredClone(value));
+            },
+            readPendingProgress: () => ({}),
+            writePendingProgress: () => {},
+            flushPendingProgress: async () => {},
+            fetchUserProgressMap: async () => structuredClone(progressMap),
+            applyProgress: (checklists, progress) => {
+                let previousCompleted = true;
+                return checklists.map((checklist, index) => {
+                    const tasks = checklist.tasks.map(task => ({
+                        ...task,
+                        completed: progress[checklist.id]?.tasks?.[task.id] === true
+                    }));
+                    const completedCount = tasks.filter(task => task.completed).length;
+                    const completed = tasks.length > 0 && completedCount === tasks.length;
+                    const hydrated = {
+                        ...checklist,
+                        tasks,
+                        items: tasks,
+                        progress: tasks.length ? Math.round((completedCount / tasks.length) * 100) : 0,
+                        completed,
+                        locked: index > 0 && !previousCompleted
+                    };
+                    previousCompleted = completed;
+                    return hydrated;
+                });
+            }
+        };
+        location.hash = `checklist=${firstChecklistId}`;
+    </script>
+    <script src="/Unicheck/js/data/checklist-data.js"></script>
+    <script>
+        window.UniCheckChecklistData.load = async () => window.UniCheckChecklistData.getChecklists();
+    </script>
+    <script src="/Unicheck/js/data/checklist-content.js"></script>
+    <script src="/Unicheck/platform/pages/checklist-academico/checklist-detail.js"></script>
+    <script src="/Unicheck/platform/pages/checklist-academico/checklist-view.js"></script>
+    <script>
+        (async () => {
+            const result = document.getElementById("browserTestResult");
+            const failures = [];
+            const assert = (condition, message) => { if (!condition) failures.push(message); };
+
+            await window.UniCheckChecklistView.init();
+            await new Promise(resolve => setTimeout(resolve, 50));
+
+            const expectedInitial = stateName === "partial" ? taskId(3) : taskId(1);
+            const initialStage = document.querySelector("[data-selected-task-id]");
+            assert(initialStage?.dataset.selectedTaskId === expectedInitial, "initial-selection");
+            assert(document.querySelectorAll("#checklist-selected-step").length === 1, "single-stage");
+            assert(document.querySelectorAll('[aria-current="step"]').length === 1, "single-current-step");
+            assert(document.querySelector('[data-action="select-task"]')?.tagName === "BUTTON", "keyboard-button");
+            const renderedDetail = document.querySelector(".checklist-detail-content");
+            assert(!renderedDetail.textContent.includes("Ver instruções"), "no-old-toggle");
+            assert(!renderedDetail.querySelector("[aria-expanded]"), "no-accordion-state");
+
+            const selectedBeforeToggle = initialStage?.dataset.selectedTaskId;
+            const firstCheckbox = document.querySelector('[data-action="toggle-task"]');
+            const completedBeforeToggle = firstCheckbox.checked;
+            firstCheckbox.click();
+            await new Promise(resolve => setTimeout(resolve, 50));
+            assert(document.querySelector("[data-selected-task-id]")?.dataset.selectedTaskId === selectedBeforeToggle, "selection-independent-from-completion");
+            assert(progressMap[firstChecklistId].tasks[taskId(1)] === !completedBeforeToggle, "local-persistence-updated");
+
+            const shouldOpenStage = params.get("view") !== "list";
+            let selectionClickDetail = null;
+            if (shouldOpenStage) {
+                const secondSelector = document.querySelector(`[data-action="select-task"][data-task-id="${taskId(2)}"]`);
+                secondSelector.addEventListener("click", event => { selectionClickDetail = event.detail; }, { once: true });
+                if (params.get("keyboard") === "1") secondSelector.click();
+                else secondSelector.dispatchEvent(new MouseEvent("click", { bubbles: true, detail: 1 }));
+                await new Promise(resolve => setTimeout(resolve, 50));
+                assert(document.querySelector("[data-selected-task-id]")?.dataset.selectedTaskId === taskId(2), "select-step");
+                if (params.get("keyboard") === "1") assert(document.activeElement?.id === "checklist-selected-step", "keyboard-focus-stage");
+            }
+            const workspace = document.querySelector(".detail-workspace");
+            const stage = document.querySelector(".detail-stage-panel");
+            const progressBar = document.querySelector(".detail-progress-bar");
+            assert(document.documentElement.scrollWidth <= document.documentElement.clientWidth, "no-page-horizontal-overflow");
+            assert(workspace.scrollWidth <= workspace.clientWidth, "no-workspace-horizontal-overflow");
+            if (stage.offsetParent) assert(stage.scrollWidth <= stage.clientWidth, "no-stage-horizontal-overflow");
+
+            if (matchMedia("(max-width: 900px)").matches) {
+                const trailDisplay = getComputedStyle(document.querySelector(".detail-trail-panel")).display;
+                const stageDisplay = getComputedStyle(document.querySelector(".detail-stage-panel")).display;
+                if (shouldOpenStage) {
+                    assert(trailDisplay === "none", "mobile-trail-hidden");
+                    assert(stageDisplay !== "none", "mobile-stage-visible");
+                    assert(getComputedStyle(document.querySelector(".detail-mobile-back")).display !== "none", "mobile-back-visible");
+                } else {
+                    assert(trailDisplay !== "none", "mobile-trail-visible");
+                    assert(stageDisplay === "none", "mobile-stage-hidden");
+                }
+            }
+
+            assert(browserErrors.length === 0, `console:${browserErrors.join("|")}`);
+
+            const metrics = `vw${innerWidth}-doc${document.documentElement.clientWidth}/${document.documentElement.scrollWidth}-work${Math.round(workspace?.getBoundingClientRect().width || 0)}-stage${Math.round(stage?.getBoundingClientRect().width || 0)}-bar${Math.round(progressBar?.getBoundingClientRect().height || 0)}/${getComputedStyle(progressBar).flex}-active${document.activeElement?.id || document.activeElement?.tagName}-click${selectionClickDetail}`;
+            result.textContent = failures.length ? `FAIL:${failures.join(",")}:${metrics}` : `PASS:${stateName}:${theme}:${shouldOpenStage ? "detail" : "list"}:${metrics}`;
+            result.dataset.failures = failures.join(",");
+        })().catch(error => {
+            const result = document.getElementById("browserTestResult");
+            result.textContent = `ERROR:${error.message}`;
+        });
+    </script>
+</body>
+</html>
