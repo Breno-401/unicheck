@@ -177,7 +177,7 @@ p { color: var(--muted); }
 .site-footer { padding-top: 58px; color: #bed0d1; background: #051316; }
 .footer-grid { display: grid; grid-template-columns: 2fr repeat(3, 1fr); gap: 36px; padding-bottom: 48px; }
 .footer-brand p { max-width: 32ch; margin: 18px 0 0; color: #91a7a9; font-size: .9rem; }
-.site-footer .brand img { width: 135px; filter: brightness(0) invert(1); }
+.site-footer .brand img { width: 135px; }
 .site-footer h2 { margin-bottom: 18px; color: #fff; font-size: .85rem; letter-spacing: .04em; }
 .site-footer ul { display: grid; gap: 10px; }
 .site-footer li, .site-footer a, .footer-bottom p { color: #91a7a9; font-size: .84rem; }
