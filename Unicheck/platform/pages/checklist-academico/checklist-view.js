@@ -775,30 +775,6 @@
         }
     }
 
-    function showXpFeedback(rewards, anchor) {
-        if (!Array.isArray(rewards) || !rewards.length) return;
-        let stack = anchor?.querySelector(":scope > .xp-feedback-stack--inline") || document.querySelector("body > .xp-feedback-stack");
-        if (!stack) {
-            stack = document.createElement("div");
-            stack.className = `xp-feedback-stack${anchor ? " xp-feedback-stack--inline" : ""}`;
-            stack.setAttribute("role", "status");
-            stack.setAttribute("aria-live", "polite");
-            (anchor || document.body).appendChild(stack);
-        }
-
-        rewards.forEach(reward => {
-            const feedback = document.createElement("div");
-            feedback.className = `xp-feedback xp-feedback--${reward.type}`;
-            feedback.innerHTML = `<i data-lucide="sparkles" aria-hidden="true"></i><span><strong>+${reward.xp} XP</strong>${reward.label}</span>`;
-            stack.appendChild(feedback);
-            window.setTimeout(() => {
-                feedback.remove();
-                if (!stack.children.length) stack.remove();
-            }, 1200);
-        });
-        window.lucide?.createIcons?.();
-    }
-
     function updateTaskState(checklistId, taskId) {
         const current = state.progress[checklistId] || { tasks: {} };
 
@@ -945,10 +921,6 @@
             taskCompleted: true,
             phaseCompleted
         }) || [];
-        const completionAnchor = refs.detailContent?.querySelector(
-            `[data-selected-task-id="${taskId}"] .detail-completion-action`
-        );
-        showXpFeedback(rewards, completionAnchor);
         window.dispatchEvent(new CustomEvent("unicheck:progression-updated", {
             detail: {
                 checklists: state.checklists,
@@ -1076,6 +1048,9 @@
 
         const notification = document.createElement("div");
         notification.className = `profile-notification notification-${type}`;
+        if (document.querySelector(".xp-reward")) {
+            notification.classList.add("profile-notification--below-xp-reward");
+        }
         notification.setAttribute("role", "status");
         notification.setAttribute("aria-live", "polite");
         notification.innerHTML = `

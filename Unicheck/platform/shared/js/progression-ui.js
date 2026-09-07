@@ -1,8 +1,13 @@
 (function () {
     "use strict";
 
+    const XP_REWARD_DURATION_MS = 3400;
+    const XP_REWARD_QUEUE_GAP_MS = 120;
     let currentProgression = null;
     let transitionToken = 0;
+    let activeXpReward = null;
+    let xpRewardTimer = null;
+    const xpRewardQueue = [];
 
     function prefersReducedMotion() {
         return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
@@ -56,6 +61,89 @@
         return progression.nextLevel.minXp - progression.currentLevel.minXp;
     }
 
+    function ensureXpRewardRegion() {
+        let region = document.querySelector("body > .xp-reward-region");
+        if (region) return region;
+
+        region = document.createElement("div");
+        region.className = "xp-reward-region";
+        document.body.appendChild(region);
+        return region;
+    }
+
+    function showNextXpReward() {
+        if (activeXpReward || !xpRewardQueue.length) return;
+
+        const reward = xpRewardQueue.shift();
+        const progression = reward.progression;
+        const levelXp = Math.round(getLevelXp(progression));
+        const levelXpMax = getLevelXpMax(progression);
+        const progress = Math.max(0, Math.min(100, progression.levelProgress || 0));
+        const progressTitle = progression.nextLevel
+            ? `Progresso para ${progression.nextLevel.name}`
+            : "Nível máximo alcançado";
+        const progressValue = levelXpMax
+            ? `${levelXp} / ${levelXpMax} XP`
+            : `${progression.xp} XP total`;
+        const region = ensureXpRewardRegion();
+        const element = document.createElement("div");
+        element.className = "xp-reward";
+        element.setAttribute("role", "status");
+        element.setAttribute("aria-live", "polite");
+        element.setAttribute("aria-atomic", "true");
+        element.setAttribute("aria-label", `${reward.label}. Você ganhou ${reward.gainedXp} XP.`);
+        element.innerHTML = `
+            <div class="xp-reward-heading">
+                <span class="xp-reward-symbol" aria-hidden="true">✦</span>
+                <span class="xp-reward-copy">
+                    <strong class="xp-reward-amount">+${reward.gainedXp} <span>XP</span></strong>
+                    <span class="xp-reward-label">${escapeHtml(reward.label)}</span>
+                </span>
+            </div>
+            <div class="xp-reward-progress" aria-hidden="true">
+                <span class="xp-reward-progress-meta">
+                    <span>${escapeHtml(progressTitle)}</span>
+                    <strong>${escapeHtml(progressValue)}</strong>
+                </span>
+                <span class="xp-reward-track"><span style="width: ${progress}%"></span></span>
+            </div>
+        `;
+        region.appendChild(element);
+        activeXpReward = element;
+
+        xpRewardTimer = window.setTimeout(() => {
+            element.remove();
+            activeXpReward = null;
+            xpRewardTimer = null;
+            if (xpRewardQueue.length) {
+                window.setTimeout(showNextXpReward, XP_REWARD_QUEUE_GAP_MS);
+            } else {
+                region.remove();
+            }
+        }, XP_REWARD_DURATION_MS);
+    }
+
+    function enqueueXpReward(progression, detail = {}) {
+        const gainedXp = Number(detail.gainedXp) || 0;
+        if (!progression?.currentLevel || gainedXp <= 0) return;
+
+        xpRewardQueue.push({
+            progression,
+            gainedXp,
+            label: detail.phaseCompleted ? "Fase concluída" : "Etapa concluída"
+        });
+        showNextXpReward();
+    }
+
+    function clearXpRewards() {
+        xpRewardQueue.length = 0;
+        if (xpRewardTimer) window.clearTimeout(xpRewardTimer);
+        xpRewardTimer = null;
+        activeXpReward?.remove();
+        activeXpReward = null;
+        document.querySelector("body > .xp-reward-region")?.remove();
+    }
+
     function updateSurface(progression, options = {}) {
         if (!progression?.currentLevel) return null;
         const surface = ensureSurface();
@@ -98,7 +186,7 @@
         const startedAt = performance.now();
         const tick = now => {
             if (token !== transitionToken) return;
-            const ratio = Math.min((now - startedAt) / duration, 1);
+            const ratio = Math.max(0, Math.min((now - startedAt) / duration, 1));
             const eased = 1 - Math.pow(1 - ratio, 3);
             const value = Math.round(from + (to - from) * eased);
             const label = surface.querySelector("[data-progression-xp]");
@@ -220,6 +308,14 @@
         const progression = event.detail?.progression
             || window.UniCheckProgression?.calculateFromChecklists?.(event.detail?.checklists || []);
         const previous = event.detail?.previousProgression || currentProgression;
+        const levelChanged = Boolean(
+            previous?.currentLevel?.level < progression?.currentLevel?.level
+        );
+        if (levelChanged) {
+            clearXpRewards();
+        } else {
+            enqueueXpReward(progression, event.detail || {});
+        }
         animateTransition(previous, progression, event.detail || {});
     });
 
