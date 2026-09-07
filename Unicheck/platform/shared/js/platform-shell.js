@@ -330,6 +330,17 @@ function getStoredChecklistProgress(userId) {
     }
 }
 
+function hasStoredChecklistProgress(userId) {
+    if (!userId) return false;
+
+    try {
+        return localStorage.getItem(getChecklistProgressKey(userId)) !== null;
+    } catch (error) {
+        console.warn('Erro ao verificar cache de progresso dos checklists:', error);
+        return false;
+    }
+}
+
 function getDashboardChecklistSummary(progressMap = {}) {
     const checklists = window.UniCheckChecklistData?.getChecklists?.() || [];
     const phases = checklists.map(checklist => {
@@ -364,27 +375,38 @@ function getDashboardChecklistSummary(progressMap = {}) {
 async function updateDashboardMetrics(syncRemote = false) {
     const dashboardSurface = document.getElementById('academicProgressBar')
         || document.getElementById('journeyTimeline');
+    const sidebarProfile = document.querySelector('.sidebar .user-profile');
+    const checklistSurface = document.getElementById('checklistListView');
 
-    if (!dashboardSurface) return;
+    if (!dashboardSurface && !sidebarProfile) return;
 
     try {
-        await window.UniCheckChecklistData?.load?.();
-        const session = await window.UniCheckAuth?.getSession?.();
+        if (dashboardSurface) {
+            await window.UniCheckChecklistData?.load?.();
+        }
+        const auth = window.UniCheckAuth;
+        const session = syncRemote === true && auth?.requireAuth
+            ? await auth.requireAuth()
+            : await auth?.getSession?.();
         const sessionUserId = session?.user?.id || null;
         if (sessionUserId) {
-            renderDashboardForUser(sessionUserId);
-            if (syncRemote === true) {
-                void reconcileDashboardRemote(sessionUserId);
+            if (dashboardSurface || checklistSurface || hasStoredChecklistProgress(sessionUserId)) {
+                renderDashboardForUser(sessionUserId);
+            }
+            if (syncRemote === true && !checklistSurface) {
+                void reconcileDashboardRemote(sessionUserId, Boolean(dashboardSurface));
             }
         }
     } catch (error) {
-        console.warn('Erro ao atualizar métricas do dashboard:', error);
+        console.warn('Erro ao atualizar progresso da plataforma:', error);
     }
 }
 
-async function reconcileDashboardRemote(userId) {
+async function reconcileDashboardRemote(userId, restoreActivity = true) {
     const progressRequest = syncAndFetchDashboardProgress(userId);
-    const activityRequest = window.UniCheckActivity?.restore?.(userId);
+    const activityRequest = restoreActivity
+        ? window.UniCheckActivity?.restore?.(userId)
+        : null;
     const [progressResult, activityResult] = await Promise.allSettled([
         progressRequest || Promise.resolve(null),
         activityRequest || Promise.resolve(null)
@@ -412,7 +434,9 @@ async function reconcileDashboardRemote(userId) {
         });
     }
 
-    renderDashboardForUser(userId);
+    if (hasStoredChecklistProgress(userId)) {
+        renderDashboardForUser(userId);
+    }
 }
 
 async function syncAndFetchDashboardProgress(userId) {
