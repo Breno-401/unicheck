@@ -97,6 +97,25 @@ test("trilha renderiza lista compacta e somente um painel de etapa", () => {
     assert.equal((container.innerHTML.match(/aria-current="step"/g) || []).length, 1);
 });
 
+test("cabecalho das tres primeiras fases omite metadados internos de planejamento", () => {
+    const window = loadModules();
+    const checklists = window.UniCheckChecklistData.getChecklists().slice(0, 3);
+
+    checklists.forEach(checklist => {
+        const container = { innerHTML: "" };
+        window.UniCheckChecklistDetail.render(container, {
+            ...checklist,
+            progress: 0,
+            completed: false,
+            tasks: checklist.tasks.map(task => ({ ...task, completed: false }))
+        });
+        const hero = container.innerHTML.match(/<header class="detail-hero">[\s\S]*?<\/header>/)?.[0] || "";
+
+        assert.match(hero, new RegExp(checklist.title));
+        assert.doesNotMatch(hero, /Objetivo|Foco|Saída|detail-overview-list/i);
+    });
+});
+
 test("estado inicial seleciona a primeira etapa pendente sem alterar conclusao", () => {
     const window = loadModules();
     const checklist = window.UniCheckChecklistData.getChecklists()[0];
