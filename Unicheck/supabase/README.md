@@ -41,7 +41,7 @@ O reset e a validação abaixo já foram executados em 2026-08-24. A ordem perma
 2. criação automática de `users_profile`;
 3. login;
 4. checklist inicialmente limpo;
-5. marcar e desmarcar tarefas;
+5. concluir uma etapa e confirmar que ela não pode ser reaberta pela interface;
 6. atualizar a página e confirmar persistência;
 7. confirmar atividade recente;
 8. confirmar notificações;

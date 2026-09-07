@@ -6,6 +6,7 @@ const vm = require("node:vm");
 const contentSource = fs.readFileSync(require.resolve("../Unicheck/js/data/checklist-content.js"), "utf8");
 const catalogSource = fs.readFileSync(require.resolve("../Unicheck/js/data/checklist-data.js"), "utf8");
 const detailSource = fs.readFileSync(require.resolve("../Unicheck/platform/pages/checklist-academico/checklist-detail.js"), "utf8");
+const supportSource = fs.readFileSync(require.resolve("../Unicheck/platform/shared/js/support-channels.js"), "utf8");
 
 function loadModules() {
     const window = {};
@@ -15,6 +16,7 @@ function loadModules() {
     };
     vm.runInNewContext(catalogSource, { window, localStorage, console, CustomEvent: class {} });
     vm.runInNewContext(contentSource, { window, console });
+    vm.runInNewContext(supportSource, { window, console });
     vm.runInNewContext(detailSource, { window, console });
     return window;
 }
@@ -84,10 +86,13 @@ test("trilha renderiza lista compacta e somente um painel de etapa", () => {
     assert.match(container.innerHTML, /O que fazer agora/);
     assert.match(container.innerHTML, /data-action="select-task"/);
     assert.match(container.innerHTML, /aria-current="step"/);
+    assert.match(container.innerHTML, /data-action="complete-task"/);
+    assert.match(container.innerHTML, /Confira as orientações acima para concluir/);
     assert.match(container.innerHTML, /id="checklist-selected-step"/);
     assert.match(container.innerHTML, /data-task-id="20000000-0000-4000-8000-000000000001"/);
     assert.doesNotMatch(trailMarkup, /O que fazer agora|Como fazer|Você terminou quando/);
     assert.doesNotMatch(container.innerHTML, /Ver instruções|Ocultar instruções|aria-expanded|data-guide-panel/);
+    assert.doesNotMatch(container.innerHTML, /type="checkbox"|toggle-task/);
     assert.equal((container.innerHTML.match(/id="checklist-selected-step"/g) || []).length, 1);
     assert.equal((container.innerHTML.match(/aria-current="step"/g) || []).length, 1);
 });
@@ -109,7 +114,7 @@ test("estado inicial seleciona a primeira etapa pendente sem alterar conclusao",
 
     assert.equal(selectedTaskId, secondTaskId);
     assert.match(container.innerHTML, new RegExp(`data-resolved-task-id="${secondTaskId}"`));
-    assert.match(container.innerHTML, new RegExp(`data-task-id="${firstTaskId}"[\\s\\S]*?checked`));
+    assert.match(container.innerHTML, new RegExp(`class="detail-trail-item is-completed[^"]*"[\\s\\S]*?data-task-id="${firstTaskId}"`));
     assert.match(container.innerHTML, new RegExp(`data-selected-task-id="${secondTaskId}"`));
     assert.equal(tasks[0].completed, true);
     assert.equal(tasks[1].completed, false);
@@ -131,7 +136,60 @@ test("selecao explicita permite revisar etapa concluida", () => {
     assert.equal(resolvedTaskId, selectedTaskId);
     assert.match(container.innerHTML, new RegExp(`data-selected-task-id="${selectedTaskId}"`));
     assert.match(container.innerHTML, /Concluída/);
-    assert.match(container.innerHTML, /target="_blank" rel="noopener noreferrer"/);
+    assert.match(container.innerHTML, /Etapa concluída/);
+    assert.doesNotMatch(container.innerHTML, /data-action="complete-task"/);
+    assert.match(container.innerHTML, /target="_blank"[\s\S]*?rel="noopener noreferrer"/);
+});
+
+test("acoes externas usam CTA compartilhado e o mesmo Multiatendimento da ajuda", () => {
+    const window = loadModules();
+    const checklists = window.UniCheckChecklistData.getChecklists();
+    const firstPhase = {
+        ...checklists[0],
+        progress: 0,
+        completed: false,
+        tasks: checklists[0].tasks.map(task => ({ ...task, completed: false }))
+    };
+    const portalPhase = {
+        ...checklists[1],
+        progress: 25,
+        completed: false,
+        tasks: checklists[1].tasks.map((task, index) => ({ ...task, completed: index === 0 }))
+    };
+    const calendarContainer = { innerHTML: "" };
+    const supportContainer = { innerHTML: "" };
+
+    window.UniCheckChecklistDetail.render(calendarContainer, firstPhase, { selectedTaskId: firstPhase.tasks[3].id });
+    window.UniCheckChecklistDetail.render(supportContainer, portalPhase, { selectedTaskId: portalPhase.tasks[1].id });
+
+    assert.match(calendarContainer.innerHTML, /class="guide-action-link"/);
+    assert.match(calendarContainer.innerHTML, /Abrir calendário acadêmico/);
+    assert.match(supportContainer.innerHTML, /Falar com o Multiatendimento/);
+    assert.ok(supportContainer.innerHTML.includes(window.UniCheckContacts.multiatendimento.href));
+    assert.equal(window.UniCheckSupportChannels.whatsapp, window.UniCheckContacts.multiatendimento);
+});
+
+test("fase concluida oferece revisao protegida e acesso a proxima fase", () => {
+    const window = loadModules();
+    const checklists = window.UniCheckChecklistData.getChecklists();
+    const checklist = {
+        ...checklists[0],
+        progress: 100,
+        completed: true,
+        tasks: checklists[0].tasks.map(task => ({ ...task, completed: true }))
+    };
+    const container = { innerHTML: "" };
+
+    window.UniCheckChecklistDetail.render(container, checklist, {
+        selectedTaskId: checklist.tasks[3].id,
+        nextChecklistId: checklists[1].id,
+        nextChecklistTitle: checklists[1].title
+    });
+
+    assert.match(container.innerHTML, /Fase concluída/);
+    assert.match(container.innerHTML, /Próxima fase liberada/);
+    assert.match(container.innerHTML, /Ir para a próxima fase/);
+    assert.doesNotMatch(container.innerHTML, /Desmarcar|Refazer|Remover conclusão|Resetar etapa/i);
 });
 
 test("conteudo visivel nao expoe linguagem de bastidor editorial", () => {

@@ -10,16 +10,18 @@
     <link rel="stylesheet" href="/Unicheck/platform/shared/css/layout/layout.css">
     <link rel="stylesheet" href="/Unicheck/platform/shared/css/base/variaveis.css">
     <link rel="stylesheet" href="/Unicheck/platform/shared/css/layout/style.css">
-    <link rel="stylesheet" href="/Unicheck/platform/pages/checklist-academico/checklist-academico.css?v=guided-player-3">
+    <link rel="stylesheet" href="/Unicheck/platform/pages/checklist-academico/checklist-academico.css?v=ux-polish-1">
     <link rel="stylesheet" href="/Unicheck/platform/shared/css/layout/ui-polish.css">
     <style>
         body { min-height: 100vh; margin: 0; background: var(--bg-primary); }
         .browser-test-shell { width: min(100% - 2rem, 1440px); margin: 0 auto; padding: 1rem 0 2rem; }
         .browser-test-shell.is-narrow { width: 390px; margin: 0; padding: 1rem; overflow: hidden; }
+        .test-sidebar { position: fixed; z-index: 10; top: .5rem; left: .5rem; width: 250px; visibility: hidden; }
         #browserTestResult { position: fixed; z-index: 9999; right: .5rem; bottom: .5rem; padding: .4rem .6rem; background: #08111f; color: white; font: 12px monospace; }
     </style>
 </head>
 <body class="page-checklist">
+    <aside class="sidebar test-sidebar"><div class="user-profile"></div></aside>
     <main class="browser-test-shell" id="browserTestShell">
         <div class="page-content"></div>
     </main>
@@ -35,36 +37,69 @@
         document.body.dataset.theme = theme;
         if (params.get("narrow") === "1") document.getElementById("browserTestShell").classList.add("is-narrow");
 
-        const firstChecklistId = "10000000-0000-4000-8000-000000000001";
+        const checklistId = number => `10000000-0000-4000-8000-${String(number).padStart(12, "0")}`;
+        const firstChecklistId = checklistId(1);
         const taskId = number => `20000000-0000-4000-8000-${String(number).padStart(12, "0")}`;
         const stateName = params.get("state") || "partial";
-        const progressMap = { [firstChecklistId]: { tasks: {} } };
+        const progressMap = {};
+        const pendingMap = {};
+        const activities = [];
+        const notifications = [];
+        let openChecklistId = firstChecklistId;
+        window.__allowProgressWrites = true;
+
+        const completeTasks = (phaseNumber, taskNumbers) => {
+            const phaseId = checklistId(phaseNumber);
+            progressMap[phaseId] ||= { tasks: {} };
+            taskNumbers.forEach(number => { progressMap[phaseId].tasks[taskId(number)] = true; });
+        };
         if (stateName === "partial") {
-            progressMap[firstChecklistId].tasks[taskId(1)] = true;
-            progressMap[firstChecklistId].tasks[taskId(2)] = true;
+            completeTasks(1, [1, 2]);
         }
         if (stateName === "full") {
-            [1, 2, 3, 4].forEach(number => { progressMap[firstChecklistId].tasks[taskId(number)] = true; });
+            completeTasks(1, [1, 2, 3, 4]);
+        }
+        if (stateName === "phase") {
+            completeTasks(1, [1, 2, 3]);
+        }
+        if (stateName === "portal") {
+            completeTasks(1, [1, 2, 3, 4]);
+            completeTasks(2, [5]);
+            openChecklistId = checklistId(2);
+        }
+        if (stateName === "levelup") {
+            completeTasks(1, [1, 2, 3, 4]);
+            completeTasks(2, [5, 6, 7, 8]);
+            completeTasks(3, [9, 10, 11]);
+            openChecklistId = checklistId(3);
         }
 
         window.UniCheckAuth = { getSession: async () => ({ user: { id: "browser-test-user" } }) };
-        window.UniCheckProgression = {
-            calculateFromChecklists: () => ({}),
-            getChecklistCompletionRewards: () => []
-        };
-        window.UniCheckProgressionProfile = { renderFromChecklists: () => {} };
-        window.UniCheckActivity = { record: () => {} };
-        window.UniCheckNotifications = { record: () => {} };
+        window.UniCheckActivity = { record: (_userId, activity) => { activities.push(activity); } };
+        window.UniCheckNotifications = { record: (_userId, notification) => { notifications.push(notification); } };
         window.UniCheckChecklist = {
             readCachedProgress: () => structuredClone(progressMap),
             writeCachedProgress: (_userId, value) => {
+                if (!window.__allowProgressWrites) return false;
                 Object.keys(progressMap).forEach(key => delete progressMap[key]);
                 Object.assign(progressMap, structuredClone(value));
+                return true;
             },
-            readPendingProgress: () => ({}),
-            writePendingProgress: () => {},
-            flushPendingProgress: async () => {},
-            fetchUserProgressMap: async () => structuredClone(progressMap),
+            readPendingProgress: () => structuredClone(pendingMap),
+            writePendingProgress: (_userId, value) => {
+                if (!window.__allowProgressWrites) return false;
+                Object.keys(pendingMap).forEach(key => delete pendingMap[key]);
+                Object.assign(pendingMap, structuredClone(value));
+                return true;
+            },
+            flushPendingProgress: async () => {
+                Object.keys(pendingMap).forEach(key => delete pendingMap[key]);
+            },
+            fetchUserProgressMap: async () => {
+                const snapshot = structuredClone(progressMap);
+                if (params.get("race") === "1") await new Promise(resolve => setTimeout(resolve, 7000));
+                return snapshot;
+            },
             applyProgress: (checklists, progress) => {
                 let previousCompleted = true;
                 return checklists.map((checklist, index) => {
@@ -87,13 +122,16 @@
                 });
             }
         };
-        location.hash = `checklist=${firstChecklistId}`;
+        location.hash = `checklist=${openChecklistId}`;
     </script>
     <script src="/Unicheck/js/data/checklist-data.js"></script>
     <script>
         window.UniCheckChecklistData.load = async () => window.UniCheckChecklistData.getChecklists();
     </script>
+    <script src="/Unicheck/platform/shared/js/support-channels.js"></script>
     <script src="/Unicheck/js/data/checklist-content.js"></script>
+    <script src="/Unicheck/js/services/progression.js"></script>
+    <script src="/Unicheck/platform/shared/js/progression-ui.js"></script>
     <script src="/Unicheck/platform/pages/checklist-academico/checklist-detail.js"></script>
     <script src="/Unicheck/platform/pages/checklist-academico/checklist-view.js"></script>
     <script>
@@ -101,11 +139,18 @@
             const result = document.getElementById("browserTestResult");
             const failures = [];
             const assert = (condition, message) => { if (!condition) failures.push(message); };
+            const wait = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
 
             await window.UniCheckChecklistView.init();
-            await new Promise(resolve => setTimeout(resolve, 50));
+            await wait(80);
 
-            const expectedInitial = stateName === "partial" ? taskId(3) : taskId(1);
+            const expectedInitial = {
+                partial: taskId(3),
+                full: taskId(1),
+                phase: taskId(4),
+                portal: taskId(6),
+                levelup: taskId(12)
+            }[stateName] || taskId(1);
             const initialStage = document.querySelector("[data-selected-task-id]");
             assert(initialStage?.dataset.selectedTaskId === expectedInitial, "initial-selection");
             assert(document.querySelectorAll("#checklist-selected-step").length === 1, "single-stage");
@@ -114,26 +159,105 @@
             const renderedDetail = document.querySelector(".checklist-detail-content");
             assert(!renderedDetail.textContent.includes("Ver instruções"), "no-old-toggle");
             assert(!renderedDetail.querySelector("[aria-expanded]"), "no-accordion-state");
-
-            const selectedBeforeToggle = initialStage?.dataset.selectedTaskId;
-            const firstCheckbox = document.querySelector('[data-action="toggle-task"]');
-            const completedBeforeToggle = firstCheckbox.checked;
-            firstCheckbox.click();
-            await new Promise(resolve => setTimeout(resolve, 50));
-            assert(document.querySelector("[data-selected-task-id]")?.dataset.selectedTaskId === selectedBeforeToggle, "selection-independent-from-completion");
-            assert(progressMap[firstChecklistId].tasks[taskId(1)] === !completedBeforeToggle, "local-persistence-updated");
+            assert(!renderedDetail.querySelector('input[type="checkbox"]'), "no-checkbox-indicator");
+            assert(!renderedDetail.querySelector('[role="checkbox"]'), "no-checkbox-role");
+            assert(!renderedDetail.querySelector('[data-action="toggle-task"]'), "no-toggle-action");
 
             const shouldOpenStage = params.get("view") !== "list";
             let selectionClickDetail = null;
             if (shouldOpenStage) {
-                const secondSelector = document.querySelector(`[data-action="select-task"][data-task-id="${taskId(2)}"]`);
-                secondSelector.addEventListener("click", event => { selectionClickDetail = event.detail; }, { once: true });
-                if (params.get("keyboard") === "1") secondSelector.click();
-                else secondSelector.dispatchEvent(new MouseEvent("click", { bubbles: true, detail: 1 }));
-                await new Promise(resolve => setTimeout(resolve, 50));
-                assert(document.querySelector("[data-selected-task-id]")?.dataset.selectedTaskId === taskId(2), "select-step");
+                const selectors = [...document.querySelectorAll('[data-action="select-task"]')];
+                const targetSelector = params.get("interaction") === "1"
+                    ? selectors.find(element => element.dataset.taskId === expectedInitial)
+                    : selectors[1] || selectors[0];
+                targetSelector.addEventListener("click", event => { selectionClickDetail = event.detail; }, { once: true });
+                if (params.get("keyboard") === "1") targetSelector.click();
+                else targetSelector.dispatchEvent(new MouseEvent("click", { bubbles: true, detail: 1 }));
+                await wait(80);
+                assert(document.querySelector("[data-selected-task-id]")?.dataset.selectedTaskId === targetSelector.dataset.taskId, "select-step");
                 if (params.get("keyboard") === "1") assert(document.activeElement?.id === "checklist-selected-step", "keyboard-focus-stage");
             }
+
+            if (stateName === "portal") {
+                const multi = [...document.querySelectorAll(".guide-action-link")]
+                    .find(link => link.textContent.includes("Multiatendimento"));
+                assert(multi?.href === window.UniCheckContacts.multiatendimento.href, "shared-multiatendimento-url");
+                assert(multi?.target === "_blank", "multiatendimento-external");
+            }
+            if (stateName === "full" && shouldOpenStage) {
+                document.querySelector(`[data-action="select-task"][data-task-id="${taskId(4)}"]`)?.click();
+                await wait(50);
+                const calendar = [...document.querySelectorAll(".guide-action-link")]
+                    .find(link => link.textContent.includes("calendário acadêmico"));
+                calendar?.focus();
+                const calendarStyle = calendar ? getComputedStyle(calendar) : null;
+                assert(calendar?.href === "https://unisales.br/calendario-academico/", "calendar-url");
+                assert(parseFloat(calendarStyle?.borderTopWidth || "0") >= 1, "calendar-button-border");
+                assert(calendarStyle?.outlineStyle !== "none", "calendar-focus-visible");
+            }
+
+            if (params.get("interaction") === "1") {
+                const completionButton = document.querySelector("[data-completion-button]");
+                const completedBefore = progressMap[openChecklistId]?.tasks?.[expectedInitial] === true;
+                assert(completionButton?.disabled === true, "completion-initially-disabled");
+                completionButton?.click();
+                await wait(80);
+                assert((progressMap[openChecklistId]?.tasks?.[expectedInitial] === true) === completedBefore, "fast-click-blocked");
+
+                const completionObserver = document.querySelector("[data-completion-observer]");
+                completionObserver?.scrollIntoView({ behavior: "auto", block: "center" });
+                document.querySelector(".detail-stage-panel")?.dispatchEvent(new Event("scroll"));
+                window.dispatchEvent(new Event("scroll"));
+                await wait(180);
+                assert(completionButton?.disabled === true, "minimum-time-still-blocked");
+                await wait(5940);
+                assert(completionButton?.disabled === false, "completion-enabled-after-guidance");
+
+                if (params.get("fail") === "1") window.__allowProgressWrites = false;
+                completionButton?.click();
+                completionButton?.click();
+                completionButton?.dispatchEvent(new MouseEvent("click", { bubbles: true, detail: 1 }));
+                await wait(180);
+
+                if (params.get("fail") === "1") {
+                    assert(progressMap[openChecklistId]?.tasks?.[expectedInitial] !== true, "failure-does-not-complete");
+                    assert(!document.querySelector("[data-completion-error]")?.hidden, "failure-is-visible");
+                    assert(activities.length === 0, "failure-no-activity");
+                    assert(!document.querySelector(".xp-feedback"), "failure-no-xp");
+                } else {
+                    assert(progressMap[openChecklistId]?.tasks?.[expectedInitial] === true, "completion-persisted-locally");
+                    assert(activities.filter(activity => activity.type === "checklist_task_completed").length === 1, "single-activity-on-spam");
+                    assert(document.querySelector(".complete-task-button.is-completed")?.disabled === true, "completion-becomes-final");
+                    assert(document.querySelectorAll(".xp-feedback").length >= 1, "xp-feedback-visible");
+
+                    if (stateName === "phase") {
+                        assert(document.querySelector("[data-phase-completion]")?.textContent.includes("Fase concluída"), "phase-completed-feedback");
+                        assert(document.querySelector(".phase-next-button"), "next-phase-action");
+                    } else if (stateName === "levelup") {
+                        await wait(620);
+                        const celebration = document.querySelector(".level-up-celebration");
+                        assert(celebration?.textContent.includes("Nível 3"), "level-up-number");
+                        assert(celebration?.textContent.includes("Fase concluída"), "combined-phase-level-up");
+                        assert(celebration?.textContent.includes("Próxima fase liberada"), "combined-next-phase");
+                        const sidebarLabel = document.querySelector("[data-progression-level]");
+                        assert(sidebarLabel?.textContent.includes("Nível 3"), "sidebar-level-updated");
+                    } else {
+                        await wait(800);
+                        const nextPending = document.querySelector("[data-selected-task-id]")?.dataset.selectedTaskId;
+                        assert(nextPending !== expectedInitial, "automatic-next-task");
+                    }
+
+                    document.querySelector(`[data-action="select-task"][data-task-id="${expectedInitial}"]`)?.click();
+                    await wait(80);
+                    const activityCount = activities.length;
+                    assert(document.querySelector(".complete-task-button.is-completed")?.disabled === true, "review-remains-completed");
+                    document.querySelector(".complete-task-button.is-completed")?.click();
+                    await wait(50);
+                    assert(activities.length === activityCount, "review-no-duplicate-effects");
+                    assert(progressMap[openChecklistId]?.tasks?.[expectedInitial] === true, "review-no-regression");
+                }
+            }
+
             const workspace = document.querySelector(".detail-workspace");
             const stage = document.querySelector(".detail-stage-panel");
             const progressBar = document.querySelector(".detail-progress-bar");
@@ -153,6 +277,8 @@
                     assert(stageDisplay === "none", "mobile-stage-hidden");
                 }
             }
+
+            assert(Math.round(parseFloat(getComputedStyle(progressBar).height || "0")) === 5, "fixed-progress-thickness");
 
             assert(browserErrors.length === 0, `console:${browserErrors.join("|")}`);
 
