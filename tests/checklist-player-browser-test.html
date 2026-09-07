@@ -162,6 +162,12 @@
             assert(!renderedDetail.querySelector('input[type="checkbox"]'), "no-checkbox-indicator");
             assert(!renderedDetail.querySelector('[role="checkbox"]'), "no-checkbox-role");
             assert(!renderedDetail.querySelector('[data-action="toggle-task"]'), "no-toggle-action");
+            const detailHero = renderedDetail.querySelector(".detail-hero");
+            assert(!detailHero?.textContent.match(/Objetivo|Foco|Saída/i), "no-planning-labels");
+            assert(!detailHero?.querySelector(".detail-overview-list"), "no-planning-overview-space");
+            assert(parseFloat(getComputedStyle(detailHero).paddingBottom || "0") <= 16, "compact-detail-hero");
+            assert(!document.querySelector(".xp-reward"), "reload-no-xp-reward");
+            assert(!document.querySelector(".xp-feedback"), "old-local-xp-absent-on-load");
 
             const shouldOpenStage = params.get("view") !== "list";
             let selectionClickDetail = null;
@@ -223,17 +229,26 @@
                     assert(progressMap[openChecklistId]?.tasks?.[expectedInitial] !== true, "failure-does-not-complete");
                     assert(!document.querySelector("[data-completion-error]")?.hidden, "failure-is-visible");
                     assert(activities.length === 0, "failure-no-activity");
-                    assert(!document.querySelector(".xp-feedback"), "failure-no-xp");
+                    assert(!document.querySelector(".xp-reward"), "failure-no-xp");
                 } else {
                     assert(progressMap[openChecklistId]?.tasks?.[expectedInitial] === true, "completion-persisted-locally");
                     assert(activities.filter(activity => activity.type === "checklist_task_completed").length === 1, "single-activity-on-spam");
-                    assert(document.querySelector(".complete-task-button.is-completed")?.disabled === true, "completion-becomes-final");
-                    assert(document.querySelectorAll(".xp-feedback").length >= 1, "xp-feedback-visible");
+                    assert(document.querySelector(`[data-task-card][data-task-id="${expectedInitial}"]`)?.classList.contains("is-completed"), "completion-becomes-final");
+                    assert(!document.querySelector(".xp-feedback"), "old-local-xp-removed");
 
                     if (stateName === "phase") {
+                        const reward = document.querySelector(".xp-reward");
+                        assert(reward?.textContent.includes("+50 XP"), "phase-xp-reward-total");
+                        assert(reward?.textContent.includes("Fase concluída"), "phase-xp-reward-label");
+                        assert(document.querySelectorAll(".xp-reward").length === 1, "phase-single-xp-reward");
                         assert(document.querySelector("[data-phase-completion]")?.textContent.includes("Fase concluída"), "phase-completed-feedback");
                         assert(document.querySelector(".phase-next-button"), "next-phase-action");
+                        const notification = document.querySelector(".profile-notification");
+                        if (innerWidth > 768 && reward && notification) {
+                            assert(reward.getBoundingClientRect().bottom <= notification.getBoundingClientRect().top, "phase-feedbacks-do-not-overlap");
+                        }
                     } else if (stateName === "levelup") {
+                        assert(!document.querySelector(".xp-reward"), "level-up-suppresses-xp-reward");
                         await wait(620);
                         const celebration = document.querySelector(".level-up-celebration");
                         assert(celebration?.textContent.includes("Nível 3"), "level-up-number");
@@ -242,7 +257,54 @@
                         const sidebarLabel = document.querySelector("[data-progression-level]");
                         assert(sidebarLabel?.textContent.includes("Nível 3"), "sidebar-level-updated");
                     } else {
-                        await wait(800);
+                        const reward = document.querySelector(".xp-reward");
+                        const rewardRegion = document.querySelector(".xp-reward-region");
+                        assert(reward?.textContent.includes("+10 XP"), "xp-reward-amount");
+                        assert(reward?.textContent.includes("Etapa concluída"), "xp-reward-label");
+                        assert(reward?.textContent.includes("30 / 100 XP"), "xp-reward-real-progress");
+                        assert(reward?.getAttribute("aria-live") === "polite", "xp-reward-polite-live-region");
+                        assert(document.activeElement !== reward, "xp-reward-does-not-steal-focus");
+                        assert(rewardRegion && getComputedStyle(rewardRegion).position === "fixed", "xp-reward-global-position");
+                        assert(rewardRegion && getComputedStyle(rewardRegion).pointerEvents === "none", "xp-reward-non-blocking");
+                        if (reward && matchMedia("(prefers-reduced-motion: reduce)").matches) {
+                            assert(getComputedStyle(reward).transform === "none", "xp-reward-reduced-motion-no-transform");
+                        }
+                        if (rewardRegion && innerWidth <= 600) {
+                            assert(
+                                rewardRegion.offsetLeft >= 15
+                                && rewardRegion.offsetWidth <= document.documentElement.clientWidth - 30,
+                                "xp-reward-mobile-inset"
+                            );
+                        }
+                        const sidebarXp = document.querySelector("[data-progression-xp]");
+                        await wait(620);
+                        if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+                            assert(sidebarXp?.textContent.includes("30 / 100 XP"), "sidebar-xp-updated-with-reward");
+                        } else {
+                            assert(document.querySelector(".sidebar-profile-progression")?.classList.contains("is-xp-updating"), "sidebar-xp-animation-started-with-reward");
+                        }
+                        if (params.get("queue") === "1") {
+                            window.dispatchEvent(new CustomEvent("unicheck:progression-updated", {
+                                detail: {
+                                    previousProgression: window.UniCheckProgression.calculateFromCounts({ completedTasks: 3 }),
+                                    progression: window.UniCheckProgression.calculateFromCounts({ completedTasks: 4 }),
+                                    gainedXp: 10,
+                                    phaseCompleted: false
+                                }
+                            }));
+                            await wait(50);
+                            assert(document.querySelectorAll(".xp-reward").length === 1, "xp-reward-queue-no-overlap");
+                            await wait(2850);
+                            assert(document.querySelectorAll(".xp-reward").length === 1, "xp-reward-queue-continues-sequentially");
+                            assert(document.querySelector(".xp-reward")?.textContent.includes("40 / 100 XP"), "xp-reward-queue-shows-next-progress");
+                        }
+                        if (params.get("timing") === "1") {
+                            await wait(2050);
+                            assert(document.querySelector(".xp-reward"), "xp-reward-readable-duration");
+                            await wait(850);
+                            assert(!document.querySelector(".xp-reward"), "xp-reward-dismisses-after-animation");
+                        }
+                        await wait(180);
                         const nextPending = document.querySelector("[data-selected-task-id]")?.dataset.selectedTaskId;
                         assert(nextPending !== expectedInitial, "automatic-next-task");
                     }
@@ -282,7 +344,9 @@
 
             assert(browserErrors.length === 0, `console:${browserErrors.join("|")}`);
 
-            const metrics = `vw${innerWidth}-doc${document.documentElement.clientWidth}/${document.documentElement.scrollWidth}-work${Math.round(workspace?.getBoundingClientRect().width || 0)}-stage${Math.round(stage?.getBoundingClientRect().width || 0)}-bar${Math.round(progressBar?.getBoundingClientRect().height || 0)}/${getComputedStyle(progressBar).flex}-active${document.activeElement?.id || document.activeElement?.tagName}-click${selectionClickDetail}`;
+            const sidebarXpMetric = document.querySelector("[data-progression-xp]")?.textContent || "missing";
+            const rewardRegionMetric = document.querySelector(".xp-reward-region");
+            const metrics = `vw${innerWidth}-doc${document.documentElement.clientWidth}/${document.documentElement.scrollWidth}-work${Math.round(workspace?.getBoundingClientRect().width || 0)}-stage${Math.round(stage?.getBoundingClientRect().width || 0)}-bar${Math.round(progressBar?.getBoundingClientRect().height || 0)}/${getComputedStyle(progressBar).flex}-xp${sidebarXpMetric}-reward${rewardRegionMetric?.offsetLeft ?? "gone"}/${rewardRegionMetric?.offsetWidth ?? "gone"}-active${document.activeElement?.id || document.activeElement?.tagName}-click${selectionClickDetail}`;
             result.textContent = failures.length ? `FAIL:${failures.join(",")}:${metrics}` : `PASS:${stateName}:${theme}:${shouldOpenStage ? "detail" : "list"}:${metrics}`;
             result.dataset.failures = failures.join(",");
         })().catch(error => {

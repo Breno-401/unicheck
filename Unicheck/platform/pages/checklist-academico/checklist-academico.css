@@ -436,6 +436,10 @@
     transform: translateY(0);
 }
 
+.profile-notification--below-xp-reward {
+    top: calc(var(--xp-reward-top, 1.5rem) + var(--xp-reward-clearance, 9.5rem));
+}
+
 .notification-content {
     display: flex;
     align-items: center;
