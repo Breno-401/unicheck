@@ -12,41 +12,41 @@
     const CHECKLIST_COPY = {
         "Primeiros passos na faculdade": {
             eyebrow: "Onboarding da turma",
-            helper: "Estruture o primeiro contato da turma, defina responsabilidades e deixe os canais oficiais prontos antes de avancar.",
-            sectionTitle: "Organizacao inicial",
-            sectionDescription: "Cada card cobre uma entrega concreta da fase 1 para dar base ao restante da jornada academica.",
+            helper: "Descubra com quem falar, entre no grupo certo e encontre as datas que orientam sua primeira semana.",
+            sectionTitle: "Primeiros passos guiados",
+            sectionDescription: "Selecione uma etapa para consultar a orientação sem perder de vista o restante da trilha.",
             summaryLabel: "Base da fase",
-            summaryStatus: "Turma pronta para seguir",
-            summaryLead: "Fase de entrada e organizacao",
-            nextStep: "Quando tudo estiver concluido, a fase 2 entra com os canais e a rotina ja alinhados.",
-            unlockNote: "Esta etapa cria a estrutura que evita ruido nas fases seguintes.",
+            summaryStatus: "Primeira semana em andamento",
+            summaryLead: "Contatos e datas essenciais",
+            nextStep: "Quando tudo estiver concluído, você seguirá para o Portal Acadêmico com a base da turma organizada.",
+            unlockNote: "Esta etapa separa os combinados dos alunos dos canais e processos institucionais.",
             overview: [
-                { label: "Objetivo", value: "Organizar a turma" },
-                { label: "Foco", value: "Canais e combinados" },
-                { label: "Saida", value: "Base consolidada" }
+                { label: "Objetivo", value: "Situar-se na turma" },
+                { label: "Foco", value: "Pessoas e datas" },
+                { label: "Saída", value: "Primeira semana orientada" }
             ],
             beforeStart: [
-                "Confirme o nome oficial da turma e os contatos da coordenacao.",
-                "Tenha em maos os canais de comunicacao que a turma vai usar.",
-                "Verifique se ha um calendario ou informativo institucional para compartilhar."
+                "Consulte a etapa selecionada antes de marcá-la como concluída.",
+                "Não compartilhe contatos ou conversas pessoais no checklist.",
+                "Marque o card somente depois de conferir o critério de conclusão."
             ],
             highlights: [
-                "Define um responsavel para centralizar informacoes.",
-                "Evita ruido de comunicacao logo no inicio.",
-                "Cria a base para os acessos institucionais seguintes."
+                "Identifica o representante de turma sem atribuir funções indevidas.",
+                "Diferencia o grupo dos alunos de um canal oficial da instituição.",
+                "Leva ao calendário acadêmico e ao setor adequado."
             ],
             taskContext: [
-                "Escolher um lider ajuda a concentrar avisos, duvidas e repasses da turma.",
-                "Criar o grupo oficial evita que a comunicacao fique dispersa em varios canais.",
-                "Entrar no grupo correto garante que ninguem perca comunicados importantes.",
-                "Confirmar calendario e canais evita retrabalho e mensagens contraditorias."
+                "Identificar o representante ajuda a encaminhar demandas coletivas da turma.",
+                "Encontrar o grupo principal aproxima o aluno dos combinados feitos pelos colegas.",
+                "Entrar no grupo correto reduz o risco de seguir informações de outra turma.",
+                "Confirmar calendário e setores evita retrabalho e encaminhamentos incorretos."
             ]
         },
         "Portal Academico TOTVS": {
             eyebrow: "Portal do aluno",
-            helper: "Use os cards para entrar no Portal Academico TOTVS, localizar a central do aluno e acessar os documentos mais usados.",
-            sectionTitle: "Fluxo do portal",
-            sectionDescription: "Cada card espelha uma etapa real do primeiro acesso, da navegacao e da consulta de documentos no portal.",
+            helper: "Siga os caminhos confirmados do Portal TOTVS para entrar, reconhecer a conta e localizar as consultas essenciais.",
+            sectionTitle: "Portal TOTVS, clique a clique",
+            sectionDescription: "Cada card mantém uma única conclusão, mesmo quando o guia apresenta vários passos de navegação.",
             summaryLabel: "Resumo do acesso",
             summaryStatus: "Acesso operacional",
             summaryLead: "Entrada e navegacao no portal",
@@ -58,9 +58,9 @@
                 { label: "Saida", value: "Portal dominado" }
             ],
             beforeStart: [
-                "Tenha o RA e a senha inicial ou definitiva em maos.",
-                "Confirme se o portal institucional esta disponivel no navegador.",
-                "Use uma aba limpa para evitar conflito de sessao ou cache."
+                "Use o endereço do Portal disponível no botão de acesso direto.",
+                "Não misture a senha do Portal TOTVS com a conta do Microsoft 365.",
+                "Você não precisa gerar boleto, requerimento ou documento para explorar os menus."
             ],
             highlights: [
                 "Autenticacao com credenciais academicas.",
@@ -76,9 +76,9 @@
         },
         "Configuracao de Email": {
             eyebrow: "Conta institucional",
-            helper: "Valide o email institucional, teste o acesso e deixe a conta pronta para comunicacoes e recuperacao de senha.",
-            sectionTitle: "Conta de entrada",
-            sectionDescription: "Os cards desta fase cuidam do acesso, validacao e uso correto do email academico.",
+            helper: "Descubra o endereço criado para você, entre na conta Microsoft correta e confirme que o e-mail envia e recebe.",
+            sectionTitle: "E-mail institucional na prática",
+            sectionDescription: "As instruções separam as credenciais do Microsoft 365 das credenciais usadas no Portal TOTVS.",
             summaryLabel: "Resumo da conta",
             summaryStatus: "Conta pronta",
             summaryLead: "Email institucional configurado",
@@ -90,9 +90,9 @@
                 { label: "Saida", value: "Conta preparada" }
             ],
             beforeStart: [
-                "Confirme o endereco institucional fornecido pela faculdade.",
-                "Teste o acesso em um navegador confiavel antes de salvar a conta no celular.",
-                "Tenha a senha original e a nova senha guardadas com seguranca."
+                "Confirme o endereço real em Minha conta no AVA; não dependa apenas do padrão de nomes.",
+                "Use o endereço @souunisales.com.br completo no Microsoft 365.",
+                "Nunca envie senha, RA ou documentos na mensagem de teste."
             ],
             highlights: [
                 "Evita perda de comunicados e boletos internos.",
@@ -291,39 +291,277 @@
         return copy.taskContext[index] || copy.taskContext[copy.taskContext.length - 1] || "Conclua este card para atualizar o progresso da fase.";
     }
 
+    function getTaskGuide(taskId) {
+        return window.UniCheckChecklistContent?.getGuide?.(taskId) || null;
+    }
+
+    function getTaskNumber(index) {
+        return String(index + 1).padStart(2, "0");
+    }
+
+    function isSafeAccessUrl(value) {
+        return typeof value === "string" && /^https:\/\/[^\s<>"']+$/i.test(value);
+    }
+
+    function isSafeImageSource(value) {
+        return typeof value === "string" && /^(?:\.{1,2}\/|\/)[^<>"']+$/i.test(value);
+    }
+
+    function buildGuideActionLink(action) {
+        if (!action || !isSafeAccessUrl(action.url)) return "";
+
+        return `
+            <a
+                class="guide-action-link"
+                href="${escapeHtml(action.url)}"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                <i data-lucide="external-link" aria-hidden="true"></i>
+                <span>${escapeHtml(action.label || "Abrir acesso")}</span>
+                <i class="guide-action-link-arrow" data-lucide="arrow-up-right" aria-hidden="true"></i>
+            </a>
+        `;
+    }
+
+    function buildGuideStep(step) {
+        const screenshot = isSafeImageSource(step.image) ? `
+            <figure class="detail-guide-figure">
+                <img src="${escapeHtml(step.image)}" alt="${escapeHtml(step.imageAlt || step.text)}" loading="lazy">
+                ${step.imageCaption ? `<figcaption>${escapeHtml(step.imageCaption)}</figcaption>` : ""}
+            </figure>
+        ` : "";
+
+        return `
+            <li class="detail-guide-step">
+                <span class="detail-guide-step-marker" aria-hidden="true"></span>
+                <div class="detail-guide-step-copy">
+                    <p>${escapeHtml(step.text)}</p>
+                    ${step.path ? `<code>${escapeHtml(step.path)}</code>` : ""}
+                    ${screenshot}
+                </div>
+            </li>
+        `;
+    }
+
+    function createFallbackGuide(task, copy, index) {
+        return {
+            title: task.text,
+            description: getTaskContext(copy, index),
+            nextAction: task.text,
+            steps: [],
+            completionCriteria: "A atividade foi realizada e o resultado foi conferido.",
+            whyItMatters: "Concluir esta etapa mantém sua jornada acadêmica organizada.",
+            quickHelp: []
+        };
+    }
+
+    function buildGuideMetadata(guide) {
+        const metadata = [
+            guide.where ? { icon: "map-pin", label: "Local", value: guide.where } : null,
+            guide.credential ? { icon: "key-round", label: "Acesso", value: guide.credential } : null
+        ].filter(Boolean);
+        const access = buildGuideActionLink(guide.access);
+
+        if (!metadata.length && !access) return "";
+
+        return `
+            <div class="detail-guide-meta-row">
+                ${metadata.map(item => `
+                    <span class="detail-guide-meta">
+                        <i data-lucide="${item.icon}" aria-hidden="true"></i>
+                        <span><small>${escapeHtml(item.label)}:</small>${escapeHtml(item.value)}</span>
+                    </span>
+                `).join("")}
+                ${access}
+            </div>
+        `;
+    }
+
+    function buildGuideHelpItem(item) {
+        const contactKey = item.action?.contact;
+        const contact = contactKey ? window.UniCheckContacts?.[contactKey] : null;
+        const action = contact ? buildGuideActionLink({
+            label: item.action.label,
+            url: contact.href
+        }) : "";
+
+        return `
+            <div class="detail-guide-help-item">
+                <strong>${escapeHtml(item.title)}</strong>
+                <p>${escapeHtml(item.text)}</p>
+                ${action}
+            </div>
+        `;
+    }
+
+    function buildCompletionControl(checklist, task) {
+        const helperId = `completion-helper-${task.id}`;
+        const errorId = `completion-error-${task.id}`;
+
+        if (task.completed) {
+            return `
+                <section class="detail-completion-action is-completed" aria-label="Conclusão da etapa">
+                    <button class="complete-task-button is-completed" type="button" disabled>
+                        <i data-lucide="check-circle-2" aria-hidden="true"></i>
+                        <span>Etapa concluída</span>
+                    </button>
+                    <p class="completion-helper">Seu progresso está protegido. Você pode revisar esta orientação quando quiser.</p>
+                </section>
+            `;
+        }
+
+        return `
+            <section class="detail-completion-action" aria-label="Conclusão da etapa">
+                <button
+                    class="complete-task-button"
+                    type="button"
+                    data-action="complete-task"
+                    data-completion-button
+                    data-checklist-id="${escapeHtml(checklist.id)}"
+                    data-task-id="${escapeHtml(task.id)}"
+                    aria-describedby="${escapeHtml(helperId)} ${escapeHtml(errorId)}"
+                    disabled
+                >
+                    <i data-lucide="check-circle" aria-hidden="true"></i>
+                    <span data-completion-button-label>Concluir etapa</span>
+                </button>
+                <p class="completion-helper" id="${escapeHtml(helperId)}" data-completion-helper>
+                    Confira as orientações acima para concluir.
+                </p>
+                <p class="completion-error" id="${escapeHtml(errorId)}" data-completion-error role="alert" hidden></p>
+            </section>
+        `;
+    }
+
+    function buildPhaseCompletion(checklist, options = {}) {
+        if (!checklist.completed) return "";
+
+        const nextTitle = options.nextChecklistTitle;
+        const nextChecklistId = options.nextChecklistId;
+        const nextCopy = nextTitle
+            ? `<p>Próxima fase liberada: <strong>${escapeHtml(nextTitle)}</strong></p>`
+            : "<p>Você concluiu todas as fases desta jornada.</p>";
+        const nextAction = nextTitle && nextChecklistId ? `
+            <button
+                class="phase-next-button"
+                type="button"
+                data-action="open-checklist"
+                data-checklist-id="${escapeHtml(nextChecklistId)}"
+            >
+                Ir para a próxima fase
+                <i data-lucide="arrow-right" aria-hidden="true"></i>
+            </button>
+        ` : "";
+
+        return `
+            <section class="phase-completion-card" data-phase-completion aria-labelledby="phase-completion-title">
+                <span class="phase-completion-icon" aria-hidden="true"><i data-lucide="badge-check"></i></span>
+                <div>
+                    <span class="phase-completion-kicker">Fase concluída</span>
+                    <h4 id="phase-completion-title">${escapeHtml(checklist.title)}</h4>
+                    ${nextCopy}
+                    ${nextAction}
+                </div>
+            </section>
+        `;
+    }
+
+    function buildSelectedTask(checklist, copy, selectedTaskId, options = {}) {
+        const selectedIndex = Math.max(checklist.tasks.findIndex(task => task.id === selectedTaskId), 0);
+        const task = checklist.tasks[selectedIndex];
+        if (!task) {
+            return `
+                <section class="detail-stage-panel detail-stage-panel--empty" id="checklist-selected-step" tabindex="-1">
+                    <i data-lucide="clipboard-x" aria-hidden="true"></i>
+                    <p>Esta fase ainda não possui etapas cadastradas.</p>
+                </section>
+            `;
+        }
+
+        const guide = getTaskGuide(task.id) || createFallbackGuide(task, copy, selectedIndex);
+        const titleId = `checklist-selected-title-${task.id}`;
+        const steps = guide.steps || [];
+        const help = guide.quickHelp || [];
+
+        return `
+            <article
+                class="detail-stage-panel"
+                id="checklist-selected-step"
+                data-selected-task-id="${escapeHtml(task.id)}"
+                tabindex="-1"
+                aria-labelledby="${escapeHtml(titleId)}"
+            >
+                <button class="detail-mobile-back" type="button" data-action="back-to-trail">
+                    <i data-lucide="arrow-left" aria-hidden="true"></i>
+                    Voltar para a trilha
+                </button>
+
+                <header class="detail-stage-header">
+                    <div class="detail-stage-kicker">
+                        <span>Etapa ${getTaskNumber(selectedIndex)} de ${String(checklist.tasks.length).padStart(2, "0")}</span>
+                        <span class="detail-task-state ${task.completed ? "is-completed" : ""}">
+                            <i data-lucide="${task.completed ? "check-circle-2" : "circle-dashed"}" aria-hidden="true"></i>
+                            ${task.completed ? "Concluída" : "Pendente"}
+                        </span>
+                    </div>
+                    <h3 id="${escapeHtml(titleId)}">${escapeHtml(guide.title)}</h3>
+                    ${guide.description ? `<p>${escapeHtml(guide.description)}</p>` : ""}
+                </header>
+
+                <div class="detail-guide-body">
+                    <section class="detail-guide-action" aria-labelledby="detail-action-title-${escapeHtml(task.id)}">
+                        <h4 id="detail-action-title-${escapeHtml(task.id)}">
+                            <i data-lucide="mouse-pointer-click" aria-hidden="true"></i>
+                            O que fazer agora
+                        </h4>
+                        <p>${escapeHtml(guide.nextAction)}</p>
+                        ${buildGuideMetadata(guide)}
+                    </section>
+
+                    ${steps.length ? `
+                        <section class="detail-guide-section">
+                            <h4><i data-lucide="list-ordered" aria-hidden="true"></i>Como fazer</h4>
+                            <ol class="detail-guide-steps">
+                                ${steps.map(buildGuideStep).join("")}
+                            </ol>
+                        </section>
+                    ` : ""}
+
+                    <section class="detail-guide-section detail-guide-completion" data-completion-observer>
+                        <h4><i data-lucide="badge-check" aria-hidden="true"></i>Você terminou quando</h4>
+                        <p>${escapeHtml(guide.completionCriteria)}</p>
+                    </section>
+
+                    ${guide.whyItMatters ? `
+                        <section class="detail-guide-section detail-guide-why">
+                            <h4>Por que isso importa</h4>
+                            <p>${escapeHtml(guide.whyItMatters)}</p>
+                        </section>
+                    ` : ""}
+
+                    ${help.length ? `
+                        <section class="detail-guide-section detail-guide-help">
+                            <h4><i data-lucide="lightbulb" aria-hidden="true"></i>Importante</h4>
+                            <div class="detail-guide-help-list">
+                                ${help.map(buildGuideHelpItem).join("")}
+                            </div>
+                        </section>
+                    ` : ""}
+
+                    ${buildCompletionControl(checklist, task)}
+                    ${buildPhaseCompletion(checklist, options)}
+                </div>
+            </article>
+        `;
+    }
+
     function getPhaseAccent(checklist) {
         const phaseIndex = Math.max((checklist.phase || 1) - 1, 0);
         return PHASE_ACCENTS[phaseIndex % PHASE_ACCENTS.length];
     }
 
-    function buildOverviewCards(copy) {
-        return `
-            <div class="detail-overview-grid">
-                ${copy.overview.map(item => `
-                    <article class="detail-overview-card">
-                        <span class="detail-overview-label">${escapeHtml(item.label)}</span>
-                        <strong class="detail-overview-value">${escapeHtml(item.value)}</strong>
-                    </article>
-                `).join("")}
-            </div>
-        `;
-    }
-
-    function buildProgressOrb(checklist) {
-        const angle = Math.max(0, Math.min(checklist.progress || 0, 100)) * 3.6;
-        const accent = getPhaseAccent(checklist);
-
-        return `
-            <div class="detail-progress-orb" data-progress-orb style="--progress-angle: ${angle}deg; --phase-accent: ${accent.gradient}; --phase-accent-color: ${accent.color};">
-                <div class="detail-progress-orb-inner">
-                    <strong data-progress-number>${checklist.progress}%</strong>
-                    <span>concluido</span>
-                </div>
-            </div>
-        `;
-    }
-
-    function buildTrailList(checklist, copy) {
+    function buildTrailList(checklist, selectedTaskId) {
         if (!checklist.tasks.length) {
             return `
                 <div class="detail-empty-state">
@@ -334,156 +572,149 @@
         }
 
         return `
-            <div class="detail-trail-list">
-                ${checklist.tasks.map((task, index) => `
-                    <label class="detail-trail-card ${task.completed ? "is-completed" : ""}" data-task-card data-task-id="${escapeHtml(task.id)}">
-                        <input
-                            type="checkbox"
-                            data-action="toggle-task"
-                            data-checklist-id="${escapeHtml(checklist.id)}"
+            <ol class="detail-trail-list">
+                ${checklist.tasks.map((task, index) => {
+                    const guide = getTaskGuide(task.id);
+                    const title = guide?.title || task.text;
+                    const isSelected = task.id === selectedTaskId;
+                    const isLocked = task.locked === true;
+                    const stateLabel = isLocked ? "Bloqueada" : task.completed ? "Concluída" : "Pendente";
+                    const stateIcon = isLocked ? "lock" : task.completed ? "check" : "circle";
+
+                    return `
+                        <li
+                            class="detail-trail-item ${task.completed ? "is-completed" : ""} ${isSelected ? "is-selected" : ""} ${isLocked ? "is-locked" : ""}"
+                            data-task-card
                             data-task-id="${escapeHtml(task.id)}"
-                            ${task.completed ? "checked" : ""}
                         >
-                        <span class="detail-trail-step" aria-hidden="true">
-                            <i data-lucide="${task.completed ? "check-circle-2" : "circle"}"></i>
-                        </span>
-                        <span class="detail-trail-copy">
-                            <span class="detail-trail-header">
-                                <span class="detail-task-order">Etapa ${index + 1}</span>
-                                <span class="detail-task-state ${task.completed ? "is-completed" : ""}">
-                                    ${task.completed ? "Feita" : "Em aberto"}
+                            <button
+                                class="detail-trail-select"
+                                type="button"
+                                data-action="select-task"
+                                data-checklist-id="${escapeHtml(checklist.id)}"
+                                data-task-id="${escapeHtml(task.id)}"
+                                aria-label="Etapa ${index + 1}, ${escapeHtml(title)}, ${stateLabel.toLowerCase()}${isSelected ? ", selecionada" : ""}"
+                                aria-current="${isSelected ? "step" : "false"}"
+                                aria-controls="checklist-selected-step"
+                                ${isLocked ? "disabled" : ""}
+                            >
+                                <span class="detail-trail-check" aria-hidden="true">
+                                    <i data-lucide="${stateIcon}"></i>
                                 </span>
-                            </span>
-                            <span class="detail-task-title">${escapeHtml(task.text)}</span>
-                            <span class="detail-task-context">${escapeHtml(getTaskContext(copy, index))}</span>
-                        </span>
-                    </label>
-                `).join("")}
-            </div>
+                                <span class="detail-trail-copy">
+                                    <span class="detail-trail-meta">
+                                        <span>Etapa ${getTaskNumber(index)}${isSelected ? " · selecionada" : ""}</span>
+                                        <span>${stateLabel}</span>
+                                    </span>
+                                    <strong>${escapeHtml(title)}</strong>
+                                </span>
+                                <i data-lucide="chevron-right" aria-hidden="true"></i>
+                            </button>
+                        </li>
+                    `;
+                }).join("")}
+            </ol>
         `;
     }
 
-    function buildSidePanel(checklist, copy) {
+    function buildTrailPanel(checklist, copy, selectedTaskId) {
         const completedTasks = checklist.tasks.filter(task => task.completed).length;
         const totalTasks = checklist.tasks.length;
-        const remainingTasks = Math.max(totalTasks - completedTasks, 0);
 
         return `
-            <aside class="detail-side-panel">
-                <div class="detail-summary-card">
-                    <span class="detail-summary-label">${escapeHtml(copy.summaryLabel)}</span>
-                    <div class="detail-summary-head">
-                        ${buildProgressOrb(checklist)}
-                        <div class="detail-summary-copy">
-                            <strong class="detail-summary-value" data-progress-number>${checklist.progress}%</strong>
-                            <p class="detail-summary-lead">${escapeHtml(copy.summaryLead)}</p>
-                        </div>
+            <aside class="detail-trail-panel" aria-labelledby="detail-trail-title">
+                <div class="detail-trail-heading">
+                    <div>
+                        <span class="detail-trail-kicker">Fase ${escapeHtml(checklist.phase || 1)}</span>
+                        <h3 id="detail-trail-title">Sua trilha</h3>
                     </div>
-                    <div class="detail-progress">
-                        <div class="detail-progress-bar">
-                            <div class="detail-progress-fill" data-progress-fill style="width: ${checklist.progress}%"></div>
-                        </div>
-                        <span class="detail-progress-text" data-progress-count>${completedTasks}/${totalTasks} itens concluidos</span>
-                    </div>
-                    <div class="detail-summary-status ${checklist.completed ? "is-completed" : ""}">
-                        ${checklist.completed ? "Checklist concluido" : copy.summaryStatus}
-                    </div>
+                    <p data-progress-count>${completedTasks} de ${totalTasks} concluídas</p>
                 </div>
-
-                <div class="detail-support-card">
-                    <div class="detail-section-heading">
-                        <h3>Como ler a trilha</h3>
-                        <p>Avance etapa por etapa. Cada card mostra a acao, o contexto e o estado atual.</p>
-                    </div>
-                    <ul class="detail-support-list">
-                        ${copy.beforeStart.map(item => `<li>${escapeHtml(item)}</li>`).join("")}
-                    </ul>
+                <div
+                    class="detail-progress-bar"
+                    role="progressbar"
+                    aria-label="Progresso da fase"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    aria-valuenow="${escapeHtml(checklist.progress || 0)}"
+                >
+                    <div class="detail-progress-fill" data-progress-fill style="width: ${checklist.progress}%"></div>
                 </div>
-
-                <div class="detail-support-card detail-support-card--accent">
-                    <div class="detail-section-heading">
-                        <h3>O que esta fase libera</h3>
-                        <p>${escapeHtml(copy.nextStep)}</p>
-                    </div>
-                    <ul class="detail-support-list">
-                        ${copy.highlights.slice(0, 2).map(item => `<li>${escapeHtml(item)}</li>`).join("")}
-                    </ul>
-                    <div class="detail-next-step">
-                        <span class="detail-next-step-label">Restam ${remainingTasks} etapas</span>
-                        <span class="detail-next-step-text">${escapeHtml(remainingTasks === 0 ? "Tudo pronto para a proxima fase." : "Continue para destravar o fluxo completo.")}</span>
-                    </div>
-                </div>
-
-                <div class="detail-support-card detail-support-card--subtle">
-                    <div class="detail-section-heading">
-                        <h3>Impacto</h3>
-                        <p>${escapeHtml(copy.unlockNote)}</p>
-                    </div>
+                <nav aria-label="Etapas da fase">
+                    ${buildTrailList(checklist, selectedTaskId)}
+                </nav>
+                <div class="detail-trail-footer">
+                    <i data-lucide="flag" aria-hidden="true"></i>
+                    <p>${escapeHtml(copy.nextStep)}</p>
                 </div>
             </aside>
         `;
     }
 
-    function buildChecklistLayout(checklist) {
+    function resolveSelectedTaskId(checklist, requestedTaskId) {
+        if (checklist.tasks.some(task => task.id === requestedTaskId && task.locked !== true)) {
+            return requestedTaskId;
+        }
+
+        return checklist.tasks.find(task => !task.completed && task.locked !== true)?.id
+            || checklist.tasks.find(task => task.locked !== true)?.id
+            || null;
+    }
+
+    function buildChecklistLayout(checklist, options = {}) {
         const copy = getChecklistCopy(checklist);
         const accent = getPhaseAccent(checklist);
+        const selectedTaskId = resolveSelectedTaskId(checklist, options.selectedTaskId);
+        const mobileStageClass = options.mobileStageOpen ? "is-mobile-stage-open" : "";
 
         return `
-            <section class="checklist-detail-shell" style="--phase-accent: ${accent.gradient}; --phase-accent-color: ${accent.color};">
+            <section
+                class="checklist-detail-shell ${mobileStageClass}"
+                style="--phase-accent: ${accent.gradient}; --phase-accent-color: ${accent.color};"
+                data-resolved-task-id="${escapeHtml(selectedTaskId || "")}"
+            >
                 <div class="detail-topbar">
                     <button class="btn btn-secondary detail-back-button" type="button" data-action="back-to-list">
-                        <i data-lucide="arrow-left"></i>
-                        Voltar
+                        <i data-lucide="arrow-left" aria-hidden="true"></i>
+                        Todas as fases
                     </button>
-                    <div class="detail-topbar-actions">
-                        <span class="detail-phase-badge">Fase ${escapeHtml(checklist.phase || 1)}</span>
-                        <span class="detail-phase-badge detail-phase-badge--muted">
-                            ${checklist.completed ? "Concluida" : "Em andamento"}
-                        </span>
-                    </div>
                 </div>
 
-                <div class="detail-hero">
+                <header class="detail-hero">
                     <div class="detail-hero-copy">
-                        <span class="detail-eyebrow">${escapeHtml(copy.eyebrow)}</span>
+                        <div class="detail-hero-kicker">
+                            <span class="detail-eyebrow">${escapeHtml(copy.eyebrow)}</span>
+                            <span class="detail-phase-label">Fase ${escapeHtml(checklist.phase || 1)}</span>
+                        </div>
                         <h2>${escapeHtml(checklist.title)}</h2>
                         <p>${escapeHtml(copy.helper)}</p>
                     </div>
-                    <div class="detail-hero-panel">
-                        ${buildOverviewCards(copy)}
-                        <div class="detail-hero-note">
-                            <strong>Leitura guiada</strong>
-                            <p>${escapeHtml(copy.unlockNote)}</p>
-                        </div>
-                    </div>
-                </div>
+                </header>
 
-                <div class="detail-layout">
-                    <section class="detail-main-panel">
-                        <div class="detail-main-card">
-                            <div class="detail-section-heading">
-                                <h3>${escapeHtml(copy.sectionTitle)}</h3>
-                                <p>${escapeHtml(copy.sectionDescription)}</p>
-                            </div>
-                            ${buildTrailList(checklist, copy)}
-                        </div>
-                    </section>
-                    ${buildSidePanel(checklist, copy)}
+                <div class="detail-workspace">
+                    ${buildTrailPanel(checklist, copy, selectedTaskId)}
+                    ${buildSelectedTask(checklist, copy, selectedTaskId, options)}
                 </div>
             </section>
         `;
     }
 
-    function render(container, checklist) {
+    function render(container, checklist, options = {}) {
         if (!container || !checklist) {
-            return;
+            return null;
         }
 
-        container.innerHTML = buildChecklistLayout(checklist);
+        const selectedTaskId = resolveSelectedTaskId(checklist, options.selectedTaskId);
+        container.innerHTML = buildChecklistLayout(checklist, {
+            ...options,
+            selectedTaskId
+        });
 
         if (typeof lucide !== "undefined") {
             lucide.createIcons();
         }
+
+        return selectedTaskId;
     }
 
     window.UniCheckChecklistDetail = {

@@ -392,6 +392,24 @@ button, a, input { -webkit-tap-highlight-color: transparent; }
 .sidebar-progress-meta small { overflow: hidden; color: var(--text-muted); font-size: .66rem; line-height: 1.3; text-align: right; text-overflow: ellipsis; white-space: nowrap; }
 .sidebar-profile-progression.is-xp-updating .sidebar-progress-meta > span { animation: sidebarXpValue 320ms ease-out; }
 @keyframes sidebarXpValue { 50% { color: var(--accent); transform: translateY(-1px); } }
+.sidebar-profile-progression.is-xp-receiving .sidebar-progress-track {
+  animation: sidebarXpReceivedTrack 320ms cubic-bezier(.22, 1, .36, 1);
+}
+.sidebar-profile-progression.is-xp-receiving .sidebar-progress-track > span {
+  animation: sidebarXpReceivedFill 320ms cubic-bezier(.22, 1, .36, 1);
+}
+.sidebar-profile-progression.is-xp-receiving .sidebar-progress-heading strong {
+  animation: sidebarXpReceivedLevel 320ms ease-out;
+}
+@keyframes sidebarXpReceivedTrack {
+  45% { box-shadow: inset 0 0 0 1px var(--accent), 0 0 11px color-mix(in srgb, var(--accent) 42%, transparent); }
+}
+@keyframes sidebarXpReceivedFill {
+  45% { filter: brightness(1.22); box-shadow: 0 0 9px color-mix(in srgb, var(--accent) 55%, transparent); }
+}
+@keyframes sidebarXpReceivedLevel {
+  45% { color: var(--accent); text-shadow: 0 0 10px color-mix(in srgb, var(--accent) 24%, transparent); }
+}
 .sidebar-level-indicator { display: none; }
 .sidebar.collapsed .sidebar-profile-progression { width: 28px; height: 24px; flex: 0 0 24px; padding: 0; border: 0; }
 .sidebar.collapsed .sidebar-progress-details { display: none; }
@@ -415,35 +433,258 @@ button, a, input { -webkit-tap-highlight-color: transparent; }
 @keyframes levelUpIn { from { opacity: 0; transform: translateY(-7px); } }
 @keyframes levelUpOut { to { opacity: 0; transform: translateY(-5px); } }
 
-.xp-feedback-stack {
+.level-up-celebration {
   position: fixed;
-  right: 1.25rem;
-  bottom: 1.25rem;
-  z-index: 1200;
+  z-index: 2200;
+  inset: 0;
   display: grid;
-  gap: .55rem;
+  place-items: center;
+  padding: 1rem;
+  pointer-events: none;
+  isolation: isolate;
+  animation: levelCelebrationFade 2.8s ease both;
+}
+.level-up-backdrop {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: radial-gradient(circle at center, color-mix(in srgb, var(--accent) 20%, transparent), transparent 48%);
+  animation: levelBackdropPulse 1.2s ease-out both;
+}
+.level-up-card {
+  position: relative;
+  width: min(100%, 390px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem 1.4rem 1.25rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 48%, var(--border));
+  border-radius: 24px;
+  background: linear-gradient(155deg, color-mix(in srgb, var(--accent) 12%, var(--surface-elevated)), var(--surface));
+  box-shadow: 0 24px 70px rgb(2 8 23 / 38%), 0 0 42px color-mix(in srgb, var(--accent) 20%, transparent);
+  color: var(--text-primary);
+  text-align: center;
+  animation: levelCardRise 540ms cubic-bezier(.22, 1, .36, 1) both;
+}
+.level-up-symbol {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  margin-bottom: .75rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 42%, var(--border));
+  border-radius: 18px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  box-shadow: 0 0 28px color-mix(in srgb, var(--accent) 24%, transparent);
+  animation: levelSymbolPulse 900ms cubic-bezier(.22, 1, .36, 1) both;
+}
+.level-up-symbol svg { width: 27px; height: 27px; }
+.level-up-kicker { color: var(--accent); font-size: .72rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.level-up-number { margin-top: .25rem; font: 800 clamp(1.8rem, 6vw, 2.65rem)/1 var(--font-heading); letter-spacing: -.035em; }
+.level-up-name { margin-top: .35rem; color: var(--text-secondary); font-size: 1rem; font-weight: 700; }
+.level-up-xp { margin-top: .8rem; padding: .35rem .65rem; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-size: .78rem; font-weight: 800; }
+.level-up-phase-note { width: 100%; display: flex; align-items: center; justify-content: center; gap: .55rem; margin-top: 1rem; padding-top: .9rem; border-top: 1px solid var(--border); color: var(--success); }
+.level-up-phase-note svg { width: 20px; height: 20px; flex: 0 0 auto; }
+.level-up-phase-note span { display: grid; gap: .08rem; color: var(--text-secondary); font-size: .78rem; text-align: left; }
+.level-up-phase-note strong { color: var(--success); }
+.level-up-card > p { margin: .45rem 0 0; color: var(--text-secondary); font-size: .76rem; }
+.level-up-particle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 72%, white);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 65%, transparent);
+  opacity: 0;
+  animation: levelParticle 900ms var(--particle-delay) ease-out both;
+}
+@keyframes levelCelebrationFade { 0%, 100% { opacity: 0; } 8%, 82% { opacity: 1; } }
+@keyframes levelBackdropPulse { from { opacity: 0; transform: scale(.72); } 55% { opacity: 1; } to { opacity: .72; transform: scale(1.08); } }
+@keyframes levelCardRise { from { opacity: 0; transform: translateY(18px) scale(.92); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes levelSymbolPulse { 0% { transform: scale(.72) rotate(-8deg); } 55% { transform: scale(1.12) rotate(3deg); } 100% { transform: scale(1) rotate(0); } }
+@keyframes levelParticle { 0% { opacity: 0; transform: rotate(var(--particle-angle)) translateY(0) scale(.4); } 30% { opacity: 1; } 100% { opacity: 0; transform: rotate(var(--particle-angle)) translateY(-145px) scale(1); } }
+
+.page-checklist {
+  --xp-reward-top: max(1.5rem, env(safe-area-inset-top));
+  --xp-reward-clearance: 9.5rem;
+}
+.xp-reward-region {
+  position: fixed;
+  z-index: 1900;
+  top: var(--xp-reward-top, 1.5rem);
+  right: max(1.5rem, env(safe-area-inset-right));
+  width: min(344px, calc(100vw - 3rem));
   pointer-events: none;
 }
-.page-checklist [data-task-card] { position: relative; }
-.xp-feedback-stack--inline { position: absolute; top: .55rem; right: .55rem; bottom: auto; }
-.xp-feedback {
-  display: flex;
-  align-items: center;
-  gap: .55rem;
-  min-width: 132px;
-  padding: .72rem .9rem;
-  border: 1px solid var(--accent);
-  border-radius: 13px;
-  background: var(--surface-elevated);
+.xp-reward {
+  --reward-accent: var(--accent);
+  --reward-brand: var(--unicheck-primary, #6cbdb5);
+  --reward-bg: linear-gradient(142deg, color-mix(in srgb, var(--reward-brand) 9%, var(--surface-elevated)), var(--surface) 64%);
+  --reward-border: color-mix(in srgb, var(--reward-brand) 30%, var(--border));
+  --reward-glow: color-mix(in srgb, var(--reward-accent) 22%, transparent);
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  padding: 1.05rem 1.05rem .95rem 1.2rem;
+  border: 1px solid var(--reward-border);
+  border-radius: 16px;
+  background: var(--reward-bg);
+  box-shadow: 0 16px 38px rgb(8 24 48 / 17%), 0 0 22px var(--reward-glow);
   color: var(--text-primary);
-  box-shadow: var(--shadow-lg);
-  animation: xpFeedbackIn 220ms ease-out both, xpFeedbackOut 180ms ease-in 1500ms forwards;
+  isolation: isolate;
+  animation: xpRewardIn 320ms cubic-bezier(.22, 1, .36, 1) both, xpRewardOut 300ms ease-in 3.05s forwards;
 }
-.xp-feedback svg { width: 18px; color: var(--accent); }
-.xp-feedback strong { color: var(--accent); }
-.xp-feedback span { display: grid; font-size: .75rem; line-height: 1.25; }
-@keyframes xpFeedbackIn { from { opacity: 0; transform: translateY(8px) scale(.97); } }
-@keyframes xpFeedbackOut { to { opacity: 0; transform: translateY(-5px); } }
+.xp-reward::before {
+  position: absolute;
+  z-index: -1;
+  top: -42px;
+  right: -34px;
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--reward-glow), transparent 68%);
+  filter: blur(5px);
+  content: "";
+}
+.xp-reward::after {
+  position: absolute;
+  top: 24%;
+  bottom: 24%;
+  left: 0;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--reward-accent);
+  box-shadow: 0 0 12px var(--reward-glow);
+  content: "";
+}
+.xp-reward-heading {
+  position: relative;
+  min-height: 52px;
+  padding-right: 3rem;
+}
+.xp-reward-symbol {
+  position: absolute;
+  top: .1rem;
+  right: .25rem;
+  color: var(--reward-accent);
+  font-size: 1.4rem;
+  line-height: 1;
+  text-shadow: 0 0 12px var(--reward-glow);
+  animation: xpRewardSpark 580ms 100ms cubic-bezier(.22, 1, .36, 1) both;
+}
+.xp-reward-symbol::after {
+  position: absolute;
+  right: -.22rem;
+  bottom: -.3rem;
+  color: var(--reward-brand);
+  content: "·";
+  font-size: .95rem;
+  text-shadow: 0 0 8px color-mix(in srgb, var(--reward-brand) 38%, transparent);
+}
+.xp-reward-copy { display: grid; gap: .28rem; min-width: 0; }
+.xp-reward-amount {
+  width: fit-content;
+  background: linear-gradient(105deg, var(--reward-accent), var(--reward-brand));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  font: 800 1.9rem/.96 var(--font-heading);
+  letter-spacing: -.045em;
+  text-shadow: 0 0 17px var(--reward-glow);
+  animation: xpRewardAmount 480ms 70ms cubic-bezier(.22, 1, .36, 1) both;
+}
+.xp-reward-amount span { font-size: .6em; letter-spacing: .025em; }
+.xp-reward-label {
+  color: var(--text-secondary);
+  font-size: .76rem;
+  font-weight: 750;
+  letter-spacing: .035em;
+}
+.xp-reward-progress { display: grid; gap: .42rem; margin-top: .72rem; }
+.xp-reward-progress-value {
+  color: var(--text-primary);
+  font-size: .76rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+.xp-reward-track {
+  display: block;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--reward-accent) 10%, var(--surface-subtle));
+}
+.xp-reward-track > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--reward-accent), color-mix(in srgb, var(--reward-accent) 42%, var(--reward-brand)));
+  box-shadow: 0 0 7px var(--reward-glow);
+  transition: width 720ms 160ms cubic-bezier(.22, 1, .36, 1);
+}
+.xp-reward-destination {
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: .7rem;
+  font-weight: 650;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.xp-reward--phase {
+  --reward-glow: color-mix(in srgb, var(--reward-accent) 29%, transparent);
+}
+.xp-reward--phase::after { top: 16%; bottom: 16%; }
+.xp-reward--phase .xp-reward-label { color: var(--reward-accent); }
+.xp-reward--phase .xp-reward-symbol::before {
+  position: absolute;
+  top: -.42rem;
+  left: -.48rem;
+  color: var(--reward-brand);
+  content: "✦";
+  font-size: .46em;
+  text-shadow: 0 0 8px color-mix(in srgb, var(--reward-brand) 42%, transparent);
+}
+.xp-energy-particle {
+  --reward-accent: var(--accent);
+  position: fixed;
+  z-index: 1950;
+  top: 0;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  border: 1px solid color-mix(in srgb, var(--reward-accent) 58%, white);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--reward-accent) 78%, white);
+  box-shadow: 0 0 7px var(--reward-accent), 0 0 15px var(--reward-glow, var(--reward-accent));
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+.xp-energy-particle::before {
+  position: absolute;
+  inset: -4px;
+  border: 1px solid color-mix(in srgb, var(--reward-accent) 36%, transparent);
+  border-radius: 50%;
+  content: "";
+  animation: xpEnergySpark 360ms ease-in-out infinite alternate;
+}
+@keyframes xpRewardIn { from { opacity: 0; transform: translateX(20px) scale(.96); } }
+@keyframes xpRewardOut { to { opacity: 0; transform: translateX(8px) scale(.985); } }
+@keyframes xpRewardAmount {
+  from { opacity: .45; transform: translateY(3px) scale(.94); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes xpRewardSpark {
+  from { opacity: 0; transform: rotate(-18deg) scale(.55); }
+  65% { opacity: 1; transform: rotate(8deg) scale(1.12); }
+  to { opacity: .88; transform: rotate(0) scale(1); }
+}
+@keyframes xpEnergySpark { to { opacity: .28; transform: scale(1.28); } }
 .academic-next-action {
   display: flex;
   flex-direction: column;
@@ -675,9 +916,12 @@ a.journey-phase-content:focus-visible { outline: 3px solid var(--focus-ring); ou
   .academic-progress-heading { align-items: flex-start; }
   .academic-progress-value { font-size: 2rem; }
   .academic-continue-button { width: 100%; }
-  .xp-feedback-stack { right: .75rem; bottom: .75rem; left: .75rem; }
-  .xp-feedback { width: fit-content; max-width: 100%; margin-left: auto; }
-  .xp-feedback-stack--inline { right: .4rem; bottom: auto; left: auto; }
+  .xp-reward-region {
+    top: max(1rem, env(safe-area-inset-top));
+    right: max(1rem, env(safe-area-inset-right));
+    left: max(1rem, env(safe-area-inset-left));
+    width: auto;
+  }
   .page-dashboard .journey-context-section { padding-bottom: 1rem; }
   .journey-timeline { grid-template-columns: 1fr; gap: 0; }
   .journey-phase { padding-bottom: .55rem; }
@@ -711,4 +955,27 @@ a.journey-phase-content:focus-visible { outline: 3px solid var(--focus-ring); ou
     animation-iteration-count: 1 !important;
     transition-duration: .01ms !important;
   }
+  .level-up-celebration,
+  .level-up-backdrop,
+  .level-up-card,
+  .level-up-symbol { animation: none !important; }
+  .level-up-celebration { opacity: 1; }
+  .level-up-particle { display: none; }
+  .xp-energy-particle { display: none; }
+  .xp-reward {
+    transform: none;
+    box-shadow: 0 12px 28px rgb(8 24 48 / 14%);
+    animation: xpRewardReduced 3.4s ease both !important;
+  }
+  .xp-reward::before { filter: none; opacity: .35; }
+  .xp-reward::after { box-shadow: none; }
+  .xp-reward-amount,
+  .xp-reward-symbol { animation: none !important; text-shadow: none; transform: none; }
+  .xp-reward-symbol::before,
+  .xp-reward-symbol::after { text-shadow: none; }
+  .xp-reward-track > span { box-shadow: none; }
+  .sidebar-profile-progression.is-xp-receiving :is(.sidebar-progress-track, .sidebar-progress-track > span, .sidebar-progress-heading strong) {
+    animation: none !important;
+  }
 }
+@keyframes xpRewardReduced { 0%, 100% { opacity: 0; } 6%, 90% { opacity: 1; } }

@@ -17,10 +17,20 @@
         const currentLevel = LEVELS[Math.max(0, currentIndex)];
         const nextLevel = LEVELS[currentIndex + 1] || null;
         const span = nextLevel ? nextLevel.minXp - currentLevel.minXp : 1;
+        const levelXp = Math.max(0, xp - currentLevel.minXp);
         const levelProgress = nextLevel
-            ? Math.min(100, Math.round(((xp - currentLevel.minXp) / span) * 100))
+            ? Math.min(100, Math.round((levelXp / span) * 100))
             : 100;
-        return { xp, currentLevel, nextLevel, levelProgress, completedTasks, completedPhases };
+        return {
+            xp,
+            currentLevel,
+            nextLevel,
+            levelXp,
+            levelXpMax: nextLevel ? span : null,
+            levelProgress,
+            completedTasks,
+            completedPhases
+        };
     }
 
     function calculateFromChecklists(checklists = []) {
@@ -32,8 +42,8 @@
 
     function getChecklistCompletionRewards({ taskCompleted = false, phaseCompleted = false } = {}) {
         const rewards = [];
-        if (taskCompleted) rewards.push({ type: "task", xp: TASK_XP, label: "Tarefa concluida" });
-        if (phaseCompleted) rewards.push({ type: "phase", xp: PHASE_XP, label: "Fase concluida" });
+        if (taskCompleted) rewards.push({ type: "task", xp: TASK_XP, label: "Etapa concluída" });
+        if (phaseCompleted) rewards.push({ type: "phase", xp: PHASE_XP, label: "Fase concluída" });
         return rewards;
     }
 

@@ -44,7 +44,7 @@ test("A: remoto vazio vence cache antigo cheio", () => {
     assert.equal(Object.keys(api.reconcileProgressMaps({}, progress(true), {})).length, 0);
 });
 
-test("B e C: remoto vence cache vazio ou divergente sem pending", () => {
+test("B e C: remoto vence cache vazio ou divergente sem operacao pendente", () => {
     const { api } = loadChecklist();
     assert.equal(api.reconcileProgressMaps(progress(true), {}, {})[phase].tasks[task], true);
     assert.equal(api.reconcileProgressMaps(progress(false), progress(true), {})[phase].tasks[task], false);
@@ -60,7 +60,7 @@ test("D: pending legitimo sobrepoe remoto e e removido apos upsert", async () =>
     assert.equal(Object.keys(api.readPendingProgress("user-1")).length, 0);
 });
 
-test("E e F: falha preserva pending e recuperacao envia uma unica vez", async () => {
+test("E e F: falha preserva conclusao pendente e recuperacao envia uma unica vez", async () => {
     let requests = 0;
     let unavailable = true;
     const { api } = loadChecklist({
@@ -70,7 +70,7 @@ test("E e F: falha preserva pending e recuperacao envia uma unica vez", async ()
         }
     });
     api.writeCachedProgress("user-1", progress(true));
-    api.writePendingProgress("user-1", { [task]: { checklistId: phase, completed: false } });
+    api.writePendingProgress("user-1", { [task]: { checklistId: phase, completed: true } });
     await assert.rejects(api.flushPendingProgress("user-1"), /offline/);
     assert.equal(api.readCachedProgress("user-1")[phase].tasks[task], true);
     assert.equal(Object.keys(api.readPendingProgress("user-1")).length, 1);
@@ -79,6 +79,29 @@ test("E e F: falha preserva pending e recuperacao envia uma unica vez", async ()
     await api.flushPendingProgress("user-1");
     assert.equal(requests, 2);
     assert.equal(Object.keys(api.readPendingProgress("user-1")).length, 0);
+});
+
+test("operacoes false legadas sao descartadas e nunca regridem conclusao remota", async () => {
+    let requests = 0;
+    const { api } = loadChecklist({ upsert: async () => { requests += 1; return { error: null }; } });
+    api.writePendingProgress("user-1", { [task]: { checklistId: phase, completed: false } });
+
+    assert.equal(Object.keys(api.readPendingProgress("user-1")).length, 0);
+    assert.equal(api.reconcileProgressMaps(progress(true), {}, {
+        [task]: { checklistId: phase, completed: false }
+    })[phase].tasks[task], true);
+    await api.flushPendingProgress("user-1");
+    assert.equal(requests, 0);
+});
+
+test("API de conclusao sempre persiste true", async () => {
+    const payloads = [];
+    const { api } = loadChecklist({ upsert: async payload => { payloads.push(payload); return { error: null }; } });
+
+    await api.completeTaskProgress({ userId: "user-1", checklistId: phase, taskId: task });
+
+    assert.equal(payloads.length, 1);
+    assert.equal(payloads[0].completed, true);
 });
 
 test("cache legado v2 nao e lido pela versao v3", () => {
