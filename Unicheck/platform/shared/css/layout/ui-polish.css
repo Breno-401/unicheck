@@ -415,6 +415,81 @@ button, a, input { -webkit-tap-highlight-color: transparent; }
 @keyframes levelUpIn { from { opacity: 0; transform: translateY(-7px); } }
 @keyframes levelUpOut { to { opacity: 0; transform: translateY(-5px); } }
 
+.level-up-celebration {
+  position: fixed;
+  z-index: 2200;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  pointer-events: none;
+  isolation: isolate;
+  animation: levelCelebrationFade 2.8s ease both;
+}
+.level-up-backdrop {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: radial-gradient(circle at center, color-mix(in srgb, var(--accent) 20%, transparent), transparent 48%);
+  animation: levelBackdropPulse 1.2s ease-out both;
+}
+.level-up-card {
+  position: relative;
+  width: min(100%, 390px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem 1.4rem 1.25rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 48%, var(--border));
+  border-radius: 24px;
+  background: linear-gradient(155deg, color-mix(in srgb, var(--accent) 12%, var(--surface-elevated)), var(--surface));
+  box-shadow: 0 24px 70px rgb(2 8 23 / 38%), 0 0 42px color-mix(in srgb, var(--accent) 20%, transparent);
+  color: var(--text-primary);
+  text-align: center;
+  animation: levelCardRise 540ms cubic-bezier(.22, 1, .36, 1) both;
+}
+.level-up-symbol {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  margin-bottom: .75rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 42%, var(--border));
+  border-radius: 18px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  box-shadow: 0 0 28px color-mix(in srgb, var(--accent) 24%, transparent);
+  animation: levelSymbolPulse 900ms cubic-bezier(.22, 1, .36, 1) both;
+}
+.level-up-symbol svg { width: 27px; height: 27px; }
+.level-up-kicker { color: var(--accent); font-size: .72rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.level-up-number { margin-top: .25rem; font: 800 clamp(1.8rem, 6vw, 2.65rem)/1 var(--font-heading); letter-spacing: -.035em; }
+.level-up-name { margin-top: .35rem; color: var(--text-secondary); font-size: 1rem; font-weight: 700; }
+.level-up-xp { margin-top: .8rem; padding: .35rem .65rem; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-size: .78rem; font-weight: 800; }
+.level-up-phase-note { width: 100%; display: flex; align-items: center; justify-content: center; gap: .55rem; margin-top: 1rem; padding-top: .9rem; border-top: 1px solid var(--border); color: var(--success); }
+.level-up-phase-note svg { width: 20px; height: 20px; flex: 0 0 auto; }
+.level-up-phase-note span { display: grid; gap: .08rem; color: var(--text-secondary); font-size: .78rem; text-align: left; }
+.level-up-phase-note strong { color: var(--success); }
+.level-up-card > p { margin: .45rem 0 0; color: var(--text-secondary); font-size: .76rem; }
+.level-up-particle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 72%, white);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 65%, transparent);
+  opacity: 0;
+  animation: levelParticle 900ms var(--particle-delay) ease-out both;
+}
+@keyframes levelCelebrationFade { 0%, 100% { opacity: 0; } 8%, 82% { opacity: 1; } }
+@keyframes levelBackdropPulse { from { opacity: 0; transform: scale(.72); } 55% { opacity: 1; } to { opacity: .72; transform: scale(1.08); } }
+@keyframes levelCardRise { from { opacity: 0; transform: translateY(18px) scale(.92); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes levelSymbolPulse { 0% { transform: scale(.72) rotate(-8deg); } 55% { transform: scale(1.12) rotate(3deg); } 100% { transform: scale(1) rotate(0); } }
+@keyframes levelParticle { 0% { opacity: 0; transform: rotate(var(--particle-angle)) translateY(0) scale(.4); } 30% { opacity: 1; } 100% { opacity: 0; transform: rotate(var(--particle-angle)) translateY(-145px) scale(1); } }
+
 .xp-feedback-stack {
   position: fixed;
   right: 1.25rem;
@@ -437,7 +512,7 @@ button, a, input { -webkit-tap-highlight-color: transparent; }
   background: var(--surface-elevated);
   color: var(--text-primary);
   box-shadow: var(--shadow-lg);
-  animation: xpFeedbackIn 220ms ease-out both, xpFeedbackOut 180ms ease-in 1500ms forwards;
+  animation: xpFeedbackIn 220ms ease-out both, xpFeedbackOut 180ms ease-in 850ms forwards;
 }
 .xp-feedback svg { width: 18px; color: var(--accent); }
 .xp-feedback strong { color: var(--accent); }
@@ -711,4 +786,10 @@ a.journey-phase-content:focus-visible { outline: 3px solid var(--focus-ring); ou
     animation-iteration-count: 1 !important;
     transition-duration: .01ms !important;
   }
+  .level-up-celebration,
+  .level-up-backdrop,
+  .level-up-card,
+  .level-up-symbol { animation: none !important; }
+  .level-up-celebration { opacity: 1; }
+  .level-up-particle { display: none; }
 }
