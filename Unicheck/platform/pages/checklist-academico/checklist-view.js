@@ -928,6 +928,7 @@
                 progression: progressionAfter,
                 gainedXp: rewards.reduce((total, reward) => total + reward.xp, 0),
                 phaseCompleted,
+                phaseAccent: after?.accent?.color || before?.accent?.color || null,
                 phaseTitle: phaseCompleted ? after?.title : null,
                 nextPhaseTitle: phaseCompleted ? nextAfter?.title || null : null
             }
