@@ -3,6 +3,8 @@
     const PENDING_SYNC_KEY = "unicheck_checklist_pending_sync_v2";
     const ROUTE_PREFIX = "#checklist=";
     const FALLBACK_IMAGE = "../../assets/images/logo.png";
+    const MIN_TASK_DWELL_MS = 6000;
+    const AUTO_ADVANCE_DELAY_MS = 760;
     const PHASE_ACCENTS = [
         { color: "#0b61ff", gradient: "linear-gradient(135deg, #0b61ff, #31b0ff)" },
         { color: "#06b6d4", gradient: "linear-gradient(135deg, #06b6d4, #22d3ee)" },
@@ -84,6 +86,10 @@
         selectedTaskIds: {},
         mobileStageOpen: false,
         syncInFlight: false,
+        completionInFlight: new Set(),
+        sessionCompletions: new Map(),
+        taskGate: null,
+        autoAdvanceTimer: null,
         recentlyUnlockedChecklistId: null,
         initialized: false
     };
@@ -139,17 +145,18 @@
 
     function saveStoredProgress(userId) {
         if (!userId) {
-            return;
+            return false;
         }
 
         try {
             if (window.UniCheckChecklist?.writeCachedProgress) {
-                window.UniCheckChecklist.writeCachedProgress(userId, state.progress);
-                return;
+                return window.UniCheckChecklist.writeCachedProgress(userId, state.progress) !== false;
             }
             localStorage.setItem(getStoredProgressKey(userId), JSON.stringify(state.progress));
+            return true;
         } catch (error) {
             console.error("Erro ao salvar progresso dos checklists:", error);
+            return false;
         }
     }
 
@@ -172,24 +179,25 @@
     }
 
     function savePendingSync(userId, pending) {
-        if (!userId) return;
+        if (!userId) return false;
         if (window.UniCheckChecklist?.writePendingProgress) {
-            window.UniCheckChecklist.writePendingProgress(userId, pending);
-            return;
+            return window.UniCheckChecklist.writePendingProgress(userId, pending) !== false;
         }
         try {
             localStorage.setItem(getPendingSyncKey(userId), JSON.stringify(pending));
+            return true;
         } catch (error) {
             console.error("[UniCheckChecklistView] Erro ao salvar fila de sincronizacao", error);
+            return false;
         }
     }
 
     function queuePendingSync(checklistId, taskId, completed) {
         const userId = state.user?.id;
-        if (!userId) return;
+        if (!userId || completed !== true) return false;
         const pending = getPendingSync(userId);
-        pending[taskId] = { checklistId, completed: Boolean(completed) };
-        savePendingSync(userId, pending);
+        pending[taskId] = { checklistId, completed: true };
+        return savePendingSync(userId, pending) !== false;
     }
 
     function clearPendingSync(taskId, completed) {
@@ -198,7 +206,7 @@
         const pending = getPendingSync(userId);
         if (pending[taskId]?.completed !== Boolean(completed)) return;
         delete pending[taskId];
-        savePendingSync(userId, pending);
+        return savePendingSync(userId, pending);
     }
 
     async function flushPendingSync() {
@@ -209,8 +217,8 @@
             userId,
             checklistId: value.checklistId,
             taskId,
-            completed: value.completed
-        }));
+            completed: true
+        })).filter(entry => snapshot[entry.taskId]?.completed === true);
         if (!entries.length) return;
 
         state.syncInFlight = true;
@@ -219,7 +227,7 @@
             if (window.UniCheckChecklist.flushPendingProgress) {
                 await window.UniCheckChecklist.flushPendingProgress(userId);
             } else {
-                await window.UniCheckChecklist.saveProgressBatch(entries);
+                await window.UniCheckChecklist.completeProgressBatch(entries);
                 entries.forEach(entry => clearPendingSync(entry.taskId, entry.completed));
             }
             synced = true;
@@ -241,19 +249,26 @@
     }
 
     function mergeProgressMaps(remoteMap = {}, localMap = {}) {
+        let merged;
         if (window.UniCheckChecklist?.reconcileProgressMaps) {
-            return window.UniCheckChecklist.reconcileProgressMaps(
+            merged = window.UniCheckChecklist.reconcileProgressMaps(
                 remoteMap,
                 localMap,
                 getPendingSync(state.user?.id)
             );
+        } else {
+            merged = JSON.parse(JSON.stringify(remoteMap || {}));
+            Object.entries(getPendingSync(state.user?.id)).forEach(([taskId, pending]) => {
+                if (!pending?.checklistId || pending.completed !== true) return;
+                merged[pending.checklistId] ||= { tasks: {} };
+                merged[pending.checklistId].tasks ||= {};
+                merged[pending.checklistId].tasks[taskId] = true;
+            });
         }
-        const merged = JSON.parse(JSON.stringify(remoteMap || {}));
-        Object.entries(getPendingSync(state.user?.id)).forEach(([taskId, pending]) => {
-            if (!pending?.checklistId) return;
-            merged[pending.checklistId] ||= { tasks: {} };
-            merged[pending.checklistId].tasks ||= {};
-            merged[pending.checklistId].tasks[taskId] = Boolean(pending.completed);
+        state.sessionCompletions.forEach((checklistId, taskId) => {
+            merged[checklistId] ||= { tasks: {} };
+            merged[checklistId].tasks ||= {};
+            merged[checklistId].tasks[taskId] = true;
         });
         return merged;
     }
@@ -529,6 +544,126 @@
         }
     }
 
+    function clearTaskGateBindings() {
+        if (!state.taskGate) return;
+        state.taskGate.observer?.disconnect?.();
+        state.taskGate.removeViewportListener?.();
+        state.taskGate.observer = null;
+        state.taskGate.removeViewportListener = null;
+    }
+
+    function resetTaskGate() {
+        if (!state.taskGate) return;
+        clearTaskGateBindings();
+        if (state.taskGate.timerId) {
+            window.clearTimeout(state.taskGate.timerId);
+        }
+        state.taskGate = null;
+    }
+
+    function updateCompletionControl() {
+        const gate = state.taskGate;
+        if (!gate) return;
+        const button = refs.detailContent?.querySelector(
+            `[data-completion-button][data-task-id="${gate.taskId}"]`
+        );
+        const helper = refs.detailContent?.querySelector(
+            `[data-selected-task-id="${gate.taskId}"] [data-completion-helper]`
+        );
+        if (!button || state.completionInFlight.has(gate.taskId)) return;
+
+        const elapsed = performance.now() - gate.startedAt;
+        gate.eligible = gate.contentLoaded && gate.completionViewed && elapsed >= MIN_TASK_DWELL_MS;
+        button.disabled = !gate.eligible;
+        button.classList.toggle("is-eligible", gate.eligible);
+        if (helper) {
+            helper.textContent = gate.eligible
+                ? "Tudo certo — você já pode concluir esta etapa."
+                : "Confira as orientações acima para concluir.";
+        }
+    }
+
+    function markCompletionRegionViewed(taskId) {
+        const gate = state.taskGate;
+        if (!gate || gate.taskId !== taskId || gate.completionViewed) return;
+        gate.completionViewed = true;
+        updateCompletionControl();
+    }
+
+    function isCompletionRegionVisible(target, scrollRoot) {
+        if (!target) return false;
+        const targetRect = target.getBoundingClientRect();
+        const rootRect = scrollRoot === window
+            ? { top: 0, bottom: window.innerHeight }
+            : scrollRoot.getBoundingClientRect();
+        const visibleHeight = Math.max(0, Math.min(targetRect.bottom, rootRect.bottom) - Math.max(targetRect.top, rootRect.top));
+        return visibleHeight >= Math.min(48, targetRect.height * 0.35);
+    }
+
+    function setupTaskEligibility(checklist, taskId) {
+        const task = checklist?.tasks?.find(item => item.id === taskId);
+        if (!task || task.completed) {
+            resetTaskGate();
+            return;
+        }
+
+        const gateKey = `${checklist.id}:${task.id}`;
+        if (state.taskGate?.key !== gateKey) {
+            resetTaskGate();
+            state.taskGate = {
+                key: gateKey,
+                checklistId: checklist.id,
+                taskId: task.id,
+                startedAt: performance.now(),
+                contentLoaded: true,
+                completionViewed: false,
+                eligible: false,
+                timerId: null,
+                observer: null,
+                removeViewportListener: null
+            };
+        } else {
+            clearTaskGateBindings();
+            state.taskGate.contentLoaded = true;
+        }
+
+        const gate = state.taskGate;
+        const stage = refs.detailContent?.querySelector(`[data-selected-task-id="${task.id}"]`);
+        const completionRegion = stage?.querySelector("[data-completion-observer]");
+        if (!stage || !completionRegion) return;
+
+        const usesPageScroll = window.matchMedia?.("(max-width: 900px)").matches === true;
+        const scrollRoot = usesPageScroll ? window : stage;
+        const assessVisibility = () => {
+            if (state.taskGate !== gate) return;
+            if (isCompletionRegionVisible(completionRegion, scrollRoot)) {
+                markCompletionRegionViewed(task.id);
+            }
+        };
+
+        if (window.IntersectionObserver) {
+            gate.observer = new window.IntersectionObserver(entries => {
+                if (entries.some(entry => entry.isIntersecting && entry.intersectionRatio >= 0.25)) {
+                    markCompletionRegionViewed(task.id);
+                }
+            }, { root: usesPageScroll ? null : stage, threshold: [0.25, 0.5] });
+            gate.observer.observe(completionRegion);
+        }
+
+        scrollRoot.addEventListener("scroll", assessVisibility, { passive: true });
+        window.addEventListener("resize", assessVisibility, { passive: true });
+        gate.removeViewportListener = () => {
+            scrollRoot.removeEventListener("scroll", assessVisibility);
+            window.removeEventListener("resize", assessVisibility);
+        };
+
+        if (gate.timerId) window.clearTimeout(gate.timerId);
+        const remaining = Math.max(0, MIN_TASK_DWELL_MS - (performance.now() - gate.startedAt));
+        gate.timerId = window.setTimeout(updateCompletionControl, remaining + 20);
+        updateCompletionControl();
+        window.requestAnimationFrame(assessVisibility);
+    }
+
     function renderDetailView() {
         if (!refs.detailContent) {
             return;
@@ -548,13 +683,23 @@
             return;
         }
 
+        const checklistIndex = state.checklists.findIndex(item => item.id === checklist.id);
+        const nextChecklist = state.checklists[checklistIndex + 1] || null;
         const selectedTaskId = window.UniCheckChecklistDetail.render(refs.detailContent, checklist, {
             selectedTaskId: state.selectedTaskIds[checklist.id],
-            mobileStageOpen: state.mobileStageOpen
+            mobileStageOpen: state.mobileStageOpen,
+            nextChecklistId: nextChecklist?.id || null,
+            nextChecklistTitle: nextChecklist?.title || null
         });
 
         if (selectedTaskId) {
             state.selectedTaskIds[checklist.id] = selectedTaskId;
+            const mobileTrailOnly = window.matchMedia?.("(max-width: 900px)").matches === true && !state.mobileStageOpen;
+            if (mobileTrailOnly) {
+                resetTaskGate();
+            } else {
+                setupTaskEligibility(checklist, selectedTaskId);
+            }
         }
     }
 
@@ -567,6 +712,7 @@
         if (isDetail) {
             renderDetailView();
         } else {
+            resetTaskGate();
             renderListView();
         }
     }
@@ -591,7 +737,7 @@
         requestAnimationFrame(tick);
     }
 
-    function animateChecklistTransition(before, after, taskId, completed) {
+    function animateChecklistTransition(before, after, taskId, levelChanged = false) {
         if (!before || !after) return;
         const scope = refs.detailContent;
         if (!scope) return;
@@ -619,19 +765,14 @@
 
         const taskCard = scope.querySelector(`[data-task-card][data-task-id="${taskId}"]`);
         if (taskCard && !prefersReducedMotion()) {
-            taskCard.classList.add(completed ? "just-completed" : "just-reopened");
+            taskCard.classList.add("just-completed");
         }
 
-        if (!before.completed && after.completed && !prefersReducedMotion()) {
+        if (!before.completed && after.completed && !levelChanged && !prefersReducedMotion()) {
             scope.querySelector(".checklist-detail-shell")?.classList.add("phase-completed-feedback");
             scope.querySelector(".detail-trail-panel")?.classList.add("phase-complete-pulse");
+            scope.querySelector("[data-phase-completion]")?.classList.add("is-celebrating");
         }
-    }
-
-    function primeTaskInteraction(input) {
-        if (prefersReducedMotion()) return;
-        const card = input.closest("[data-task-card]");
-        card?.classList.add(input.checked ? "task-press-complete" : "task-press-reopen");
     }
 
     function showXpFeedback(rewards, anchor) {
@@ -653,104 +794,187 @@
             window.setTimeout(() => {
                 feedback.remove();
                 if (!stack.children.length) stack.remove();
-            }, 1750);
+            }, 1200);
         });
         window.lucide?.createIcons?.();
     }
 
-    function updateTaskState(checklistId, taskId, completed) {
+    function updateTaskState(checklistId, taskId) {
         const current = state.progress[checklistId] || { tasks: {} };
 
         state.progress[checklistId] = {
             ...current,
             tasks: {
                 ...current.tasks,
-                [taskId]: completed
+                [taskId]: true
             }
         };
     }
 
-    function toggleTask(checklistId, taskId, completed) {
-        const progressionBefore = window.UniCheckProgression?.calculateFromChecklists?.(state.checklists);
+    function setCompletionLoading(button, loading) {
+        if (!button) return;
+        button.disabled = loading || !state.taskGate?.eligible;
+        button.classList.toggle("is-loading", loading);
+        button.setAttribute("aria-busy", String(loading));
+        const label = button.querySelector("[data-completion-button-label]");
+        if (label) label.textContent = loading ? "Concluindo..." : "Concluir etapa";
+        const icon = button.querySelector("[data-lucide]");
+        if (icon) icon.setAttribute("data-lucide", loading ? "loader-circle" : "check-circle");
+        window.lucide?.createIcons?.();
+    }
+
+    function showCompletionError(taskId, message) {
+        const error = refs.detailContent?.querySelector(
+            `[data-selected-task-id="${taskId}"] [data-completion-error]`
+        );
+        if (!error) return;
+        error.textContent = message;
+        error.hidden = false;
+    }
+
+    function recordCompletionActivity(before, after, taskId, nextBefore, nextAfter) {
+        if (!state.user?.id || !before || !after) return;
+        const completedTask = after.tasks.find(task => task.id === taskId);
+        const completedGuide = window.UniCheckChecklistContent?.getGuide?.(taskId);
+        window.UniCheckActivity?.record?.(state.user.id, {
+            type: "checklist_task_completed",
+            title: `Concluiu "${completedGuide?.title || completedTask?.text || "Tarefa do checklist"}"`,
+            context: after.title,
+            metadata: { checklistId: after.id, taskId }
+        });
+
+        if (before.completed || !after.completed) return;
+        window.UniCheckActivity?.record?.(state.user.id, {
+            type: "checklist_phase_completed",
+            title: `Concluiu a fase "${after.title}"`,
+            context: `${after.tasks.length}/${after.tasks.length} tarefas concluídas`,
+            metadata: { checklistId: after.id }
+        });
+        if (nextBefore?.locked && nextAfter && !nextAfter.locked) {
+            window.UniCheckActivity?.record?.(state.user.id, {
+                type: "checklist_phase_unlocked",
+                title: `Desbloqueou "${nextAfter.title}"`,
+                context: "Próxima fase disponível",
+                metadata: { checklistId: nextAfter.id }
+            });
+            window.UniCheckNotifications?.record?.(state.user.id, {
+                eventKey: `phase_unlocked:${nextAfter.id}`,
+                type: "phase_unlocked",
+                title: "Nova fase desbloqueada",
+                message: `${nextAfter.title} está disponível.`,
+                destination: `checklist:${nextAfter.id}`
+            });
+        } else if (!nextAfter) {
+            window.UniCheckNotifications?.record?.(state.user.id, {
+                eventKey: "journey_completed:v1",
+                type: "journey_completed",
+                title: "Jornada acadêmica concluída",
+                message: "Você concluiu todas as fases do Checklist Acadêmico.",
+                destination: `checklist:${after.id}`
+            });
+        }
+    }
+
+    function scheduleNextPendingTask(checklist, completedTaskId) {
+        if (!checklist || checklist.completed) return;
+        const nextTask = checklist.tasks.find(task => !task.completed && task.locked !== true);
+        if (!nextTask) return;
+        if (state.autoAdvanceTimer) window.clearTimeout(state.autoAdvanceTimer);
+        state.autoAdvanceTimer = window.setTimeout(() => {
+            state.autoAdvanceTimer = null;
+            if (state.currentChecklistId !== checklist.id) return;
+            if (state.selectedTaskIds[checklist.id] !== completedTaskId) return;
+            selectTask(checklist.id, nextTask.id, false, true);
+        }, prefersReducedMotion() ? 0 : AUTO_ADVANCE_DELAY_MS);
+    }
+
+    async function completeTask(checklistId, taskId, button) {
+        const gate = state.taskGate;
         const before = getChecklistById(checklistId);
+        const taskWasCompleted = before?.tasks?.find(task => task.id === taskId)?.completed === true;
+        if (!before || taskWasCompleted) {
+            return { status: "already-completed" };
+        }
+        if (state.completionInFlight.has(taskId)) {
+            return { status: "in-flight" };
+        }
+        if (!gate?.eligible || gate.checklistId !== checklistId || gate.taskId !== taskId) {
+            updateCompletionControl();
+            return { status: "not-eligible" };
+        }
+
+        state.completionInFlight.add(taskId);
+        setCompletionLoading(button, true);
+        await new Promise(resolve => window.setTimeout(resolve, 80));
+
+        const progressionBefore = window.UniCheckProgression?.calculateFromChecklists?.(state.checklists);
         const checklistIndex = state.checklists.findIndex(item => item.id === checklistId);
         const nextBefore = state.checklists[checklistIndex + 1] || null;
-        updateTaskState(checklistId, taskId, completed);
+        const progressBefore = JSON.parse(JSON.stringify(state.progress));
+
+        updateTaskState(checklistId, taskId);
+        const acceptedLocally = saveStoredProgress(state.user?.id) && queuePendingSync(checklistId, taskId, true);
+        if (!acceptedLocally) {
+            state.progress = progressBefore;
+            saveStoredProgress(state.user?.id);
+            state.completionInFlight.delete(taskId);
+            setCompletionLoading(button, false);
+            const message = "Não foi possível salvar esta conclusão. Tente novamente.";
+            showCompletionError(taskId, message);
+            showNotification(message, "error");
+            return { status: "failed" };
+        }
+        state.sessionCompletions.set(taskId, checklistId);
+
         hydrateChecklists();
         const after = getChecklistById(checklistId);
         const nextAfter = state.checklists[checklistIndex + 1] || null;
+        const progressionAfter = window.UniCheckProgression?.calculateFromChecklists?.(state.checklists);
+        const phaseCompleted = Boolean(before && after && !before.completed && after.completed);
+        const levelChanged = Boolean(
+            progressionBefore?.currentLevel?.level !== progressionAfter?.currentLevel?.level
+        );
 
         if (before && after && !before.completed && after.completed && nextBefore?.locked && nextAfter && !nextAfter.locked) {
             state.recentlyUnlockedChecklistId = nextAfter.id;
         }
         syncVisibleView();
-        animateChecklistTransition(before, after, taskId, completed);
+        animateChecklistTransition(before, after, taskId, levelChanged);
 
-        const taskWasCompleted = before?.tasks?.find(task => task.id === taskId)?.completed === true;
         const rewards = window.UniCheckProgression?.getChecklistCompletionRewards?.({
-            taskCompleted: Boolean(completed && !taskWasCompleted),
-            phaseCompleted: Boolean(before && after && !before.completed && after.completed)
+            taskCompleted: true,
+            phaseCompleted
         }) || [];
-        const taskCard = refs.detailContent?.querySelector(`[data-task-card][data-task-id="${taskId}"]`);
-        showXpFeedback(rewards, taskCard);
+        const completionAnchor = refs.detailContent?.querySelector(
+            `[data-selected-task-id="${taskId}"] .detail-completion-action`
+        );
+        showXpFeedback(rewards, completionAnchor);
         window.dispatchEvent(new CustomEvent("unicheck:progression-updated", {
             detail: {
                 checklists: state.checklists,
-                announceLevelChange: Boolean(completed),
-                previousLevel: progressionBefore?.currentLevel?.level
+                previousProgression: progressionBefore,
+                progression: progressionAfter,
+                gainedXp: rewards.reduce((total, reward) => total + reward.xp, 0),
+                phaseCompleted,
+                phaseTitle: phaseCompleted ? after?.title : null,
+                nextPhaseTitle: phaseCompleted ? nextAfter?.title || null : null
             }
         }));
 
-        // A interface ja reflete o novo estado. Em seguida, persiste no cache
-        // por usuario e deixa a escrita remota exclusivamente em background.
-        saveStoredProgress(state.user?.id);
-        queuePendingSync(checklistId, taskId, completed);
-
-        if (state.user?.id && completed && before && after) {
-            const completedTask = after.tasks.find(task => task.id === taskId);
-            const completedGuide = window.UniCheckChecklistContent?.getGuide?.(taskId);
-            window.UniCheckActivity?.record?.(state.user.id, {
-                type: "checklist_task_completed",
-                title: `Concluiu "${completedGuide?.title || completedTask?.text || "Tarefa do checklist"}"`,
-                context: after.title
-            });
-
-            if (!before.completed && after.completed) {
-                window.UniCheckActivity?.record?.(state.user.id, {
-                    type: "checklist_phase_completed",
-                    title: `Concluiu a fase "${after.title}"`,
-                    context: `${after.tasks.length}/${after.tasks.length} tarefas concluídas`
-                });
-                if (nextBefore?.locked && nextAfter && !nextAfter.locked) {
-                    window.UniCheckActivity?.record?.(state.user.id, {
-                        type: "checklist_phase_unlocked",
-                        title: `Desbloqueou "${nextAfter.title}"`,
-                        context: "Próxima fase disponível"
-                    });
-                    window.UniCheckNotifications?.record?.(state.user.id, {
-                        eventKey: `phase_unlocked:${nextAfter.id}`,
-                        type: "phase_unlocked",
-                        title: "Nova fase desbloqueada",
-                        message: `${nextAfter.title} está disponível.`,
-                        destination: `checklist:${nextAfter.id}`
-                    });
-                } else if (!nextAfter) {
-                    window.UniCheckNotifications?.record?.(state.user.id, {
-                        eventKey: "journey_completed:v1",
-                        type: "journey_completed",
-                        title: "Jornada acadêmica concluída",
-                        message: "Você concluiu todas as fases do Checklist Acadêmico.",
-                        destination: `checklist:${after.id}`
-                    });
-                }
-            }
-        }
+        recordCompletionActivity(before, after, taskId, nextBefore, nextAfter);
 
         if (state.user?.id) {
             void flushPendingSync();
         }
 
-        return { before, after };
+        state.completionInFlight.delete(taskId);
+        if (phaseCompleted) {
+            showNotification(`Fase "${after.title}" concluída.`, "success");
+        } else {
+            scheduleNextPendingTask(after, taskId);
+        }
+
+        return { status: "completed", before, after, rewards };
     }
 
     function openChecklist(checklistId, shouldPushState = true) {
@@ -759,6 +983,10 @@
             return;
         }
 
+        if (state.autoAdvanceTimer && state.currentChecklistId !== checklistId) {
+            window.clearTimeout(state.autoAdvanceTimer);
+            state.autoAdvanceTimer = null;
+        }
         state.currentChecklistId = checklistId;
         state.mobileStageOpen = false;
         syncVisibleView();
@@ -769,6 +997,10 @@
     }
 
     function goBackToList(shouldPushState = true) {
+        if (state.autoAdvanceTimer) {
+            window.clearTimeout(state.autoAdvanceTimer);
+            state.autoAdvanceTimer = null;
+        }
         state.currentChecklistId = null;
         state.mobileStageOpen = false;
         syncVisibleView();
@@ -778,10 +1010,16 @@
         }
     }
 
-    function selectTask(checklistId, taskId, shouldFocusStage = false) {
+    function selectTask(checklistId, taskId, shouldFocusStage = false, isAutomatic = false) {
         const checklist = getChecklistById(checklistId);
-        if (!checklist || checklist.id !== state.currentChecklistId || !checklist.tasks.some(task => task.id === taskId)) {
+        const task = checklist?.tasks?.find(item => item.id === taskId);
+        if (!checklist || checklist.id !== state.currentChecklistId || !task || task.locked === true) {
             return;
+        }
+
+        if (!isAutomatic && state.autoAdvanceTimer) {
+            window.clearTimeout(state.autoAdvanceTimer);
+            state.autoAdvanceTimer = null;
         }
 
         state.selectedTaskIds[checklistId] = taskId;
@@ -796,13 +1034,14 @@
             if (window.matchMedia?.("(max-width: 900px)").matches) {
                 stage?.scrollIntoView?.({
                     behavior: prefersReducedMotion() ? "auto" : "smooth",
-                    block: "start"
+                    block: isAutomatic ? "nearest" : "start"
                 });
             }
         });
     }
 
     function returnToTrail() {
+        resetTaskGate();
         state.mobileStageOpen = false;
         renderDetailView();
 
@@ -936,6 +1175,15 @@
             return;
         }
 
+        if (action === "complete-task") {
+            const checklistId = actionElement.getAttribute("data-checklist-id");
+            const taskId = actionElement.getAttribute("data-task-id");
+            if (checklistId && taskId) {
+                void completeTask(checklistId, taskId, actionElement);
+            }
+            return;
+        }
+
         if (action === "open-checklist") {
             const checklistId = actionElement.getAttribute("data-checklist-id");
             if (checklistId) {
@@ -949,34 +1197,8 @@
         }
     }
 
-    function handlePageChange(event) {
-        const target = event.target;
-        if (!(target instanceof HTMLInputElement)) {
-            return;
-        }
-
-        if (target.getAttribute("data-action") !== "toggle-task") {
-            return;
-        }
-
-        const checklistId = target.getAttribute("data-checklist-id");
-        const taskId = target.getAttribute("data-task-id");
-
-        if (!checklistId || !taskId) {
-            return;
-        }
-
-        primeTaskInteraction(target);
-        const { before, after } = toggleTask(checklistId, taskId, target.checked);
-
-        if (before && after && before.completed !== after.completed && after.completed) {
-            showNotification(`"${after.title}" concluido. Proxima fase liberada.`, "success");
-        }
-    }
-
     function setupEventListeners() {
         refs.pageContent?.addEventListener("click", handlePageClick);
-        refs.pageContent?.addEventListener("change", handlePageChange);
         window.addEventListener("popstate", syncFromLocation);
         window.addEventListener("online", flushPendingSync);
 

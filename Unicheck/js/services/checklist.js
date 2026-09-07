@@ -79,19 +79,30 @@
     }
 
     function writeCachedProgress(userId, progressMap) {
-        if (!userId) return;
+        if (!userId) return false;
         try {
             localStorage.setItem(getProgressStorageKey(userId), JSON.stringify(progressMap || {}));
+            return true;
         } catch (error) {
             console.warn("[UniCheckChecklist] Nao foi possivel atualizar o cache de progresso", error);
+            return false;
         }
+    }
+
+    function keepCompletedPendingEntries(pendingMap) {
+        return Object.entries(pendingMap || {}).reduce((result, [taskId, pending]) => {
+            if (pending?.checklistId && pending.completed === true) {
+                result[taskId] = { checklistId: pending.checklistId, completed: true };
+            }
+            return result;
+        }, {});
     }
 
     function readPendingProgress(userId) {
         if (!userId) return {};
         try {
             const raw = localStorage.getItem(`${PENDING_STORAGE_PREFIX}:${userId}`);
-            return raw ? JSON.parse(raw) : {};
+            return keepCompletedPendingEntries(raw ? JSON.parse(raw) : {});
         } catch (error) {
             console.warn("[UniCheckChecklist] Fila local de progresso invalida", error);
             return {};
@@ -99,11 +110,13 @@
     }
 
     function writePendingProgress(userId, pendingMap) {
-        if (!userId) return;
+        if (!userId) return false;
         try {
-            localStorage.setItem(`${PENDING_STORAGE_PREFIX}:${userId}`, JSON.stringify(pendingMap || {}));
+            localStorage.setItem(`${PENDING_STORAGE_PREFIX}:${userId}`, JSON.stringify(keepCompletedPendingEntries(pendingMap)));
+            return true;
         } catch (error) {
             console.warn("[UniCheckChecklist] Nao foi possivel atualizar a fila de progresso", error);
+            return false;
         }
     }
 
@@ -120,10 +133,10 @@
 
         Object.entries(pendingMap).forEach(([taskId, pending]) => {
             const checklistId = pending?.checklistId;
-            if (!checklistId) return;
+            if (!checklistId || pending.completed !== true) return;
             merged[checklistId] ||= { tasks: {} };
             merged[checklistId].tasks ||= {};
-            merged[checklistId].tasks[taskId] = Boolean(pending.completed);
+            merged[checklistId].tasks[taskId] = true;
         });
 
         return merged;
@@ -164,7 +177,7 @@
         return normalizeProgressRows(data);
     }
 
-    async function saveTaskProgress({ userId, checklistId, taskId, completed }) {
+    async function completeTaskProgress({ userId, checklistId, taskId }) {
         if (!userId || !checklistId || !taskId) {
             throw new Error("Parametros insuficientes para salvar progresso.");
         }
@@ -174,7 +187,7 @@
             user_id: userId,
             checklist_id: checklistId,
             checklist_item_id: taskId,
-            completed: Boolean(completed)
+            completed: true
         };
 
         const { error } = await withTimeout(client
@@ -188,14 +201,15 @@
         return payload;
     }
 
-    async function saveProgressBatch(entries) {
+    async function completeProgressBatch(entries) {
         if (!Array.isArray(entries) || !entries.length) return [];
-        const payload = entries.map(({ userId, checklistId, taskId, completed }) => ({
+        const payload = entries.filter(entry => entry?.completed === true).map(({ userId, checklistId, taskId }) => ({
             user_id: userId,
             checklist_id: checklistId,
             checklist_item_id: taskId,
-            completed: Boolean(completed)
+            completed: true
         }));
+        if (!payload.length) return [];
         const { error } = await withTimeout(getClient()
             .from(CHECKLIST_PROGRESS_TABLE)
             .upsert(payload, { onConflict: "user_id,checklist_item_id" }), "Sincronizacao da fila de progresso");
@@ -212,15 +226,15 @@
             userId,
             checklistId: value.checklistId,
             taskId,
-            completed: Boolean(value.completed)
+            completed: true
         }));
         if (!entries.length) return [];
 
-        await saveProgressBatch(entries);
+        await completeProgressBatch(entries);
         const current = readPendingProgress(userId);
         entries.forEach(entry => {
             const queued = current[entry.taskId];
-            if (queued?.checklistId === entry.checklistId && Boolean(queued.completed) === entry.completed) {
+            if (queued?.checklistId === entry.checklistId && queued.completed === true) {
                 delete current[entry.taskId];
             }
         });
@@ -270,8 +284,8 @@
     window.UniCheckChecklist = {
         CHECKLIST_PROGRESS_TABLE,
         fetchUserProgressMap,
-        saveTaskProgress,
-        saveProgressBatch,
+        completeTaskProgress,
+        completeProgressBatch,
         readCachedProgress,
         writeCachedProgress,
         readPendingProgress,

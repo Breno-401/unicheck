@@ -307,6 +307,23 @@
         return typeof value === "string" && /^(?:\.{1,2}\/|\/)[^<>"']+$/i.test(value);
     }
 
+    function buildGuideActionLink(action) {
+        if (!action || !isSafeAccessUrl(action.url)) return "";
+
+        return `
+            <a
+                class="guide-action-link"
+                href="${escapeHtml(action.url)}"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                <i data-lucide="external-link" aria-hidden="true"></i>
+                <span>${escapeHtml(action.label || "Abrir acesso")}</span>
+                <i class="guide-action-link-arrow" data-lucide="arrow-up-right" aria-hidden="true"></i>
+            </a>
+        `;
+    }
+
     function buildGuideStep(step) {
         const screenshot = isSafeImageSource(step.image) ? `
             <figure class="detail-guide-figure">
@@ -344,12 +361,7 @@
             guide.where ? { icon: "map-pin", label: "Local", value: guide.where } : null,
             guide.credential ? { icon: "key-round", label: "Acesso", value: guide.credential } : null
         ].filter(Boolean);
-        const access = guide.access && isSafeAccessUrl(guide.access.url) ? `
-            <a class="detail-guide-link" href="${escapeHtml(guide.access.url)}" target="_blank" rel="noopener noreferrer">
-                ${escapeHtml(guide.access.label || "Abrir acesso")}
-                <i data-lucide="arrow-up-right" aria-hidden="true"></i>
-            </a>
-        ` : "";
+        const access = buildGuideActionLink(guide.access);
 
         if (!metadata.length && !access) return "";
 
@@ -366,7 +378,96 @@
         `;
     }
 
-    function buildSelectedTask(checklist, copy, selectedTaskId) {
+    function buildGuideHelpItem(item) {
+        const contactKey = item.action?.contact;
+        const contact = contactKey ? window.UniCheckContacts?.[contactKey] : null;
+        const action = contact ? buildGuideActionLink({
+            label: item.action.label,
+            url: contact.href
+        }) : "";
+
+        return `
+            <div class="detail-guide-help-item">
+                <strong>${escapeHtml(item.title)}</strong>
+                <p>${escapeHtml(item.text)}</p>
+                ${action}
+            </div>
+        `;
+    }
+
+    function buildCompletionControl(checklist, task) {
+        const helperId = `completion-helper-${task.id}`;
+        const errorId = `completion-error-${task.id}`;
+
+        if (task.completed) {
+            return `
+                <section class="detail-completion-action is-completed" aria-label="Conclusão da etapa">
+                    <button class="complete-task-button is-completed" type="button" disabled>
+                        <i data-lucide="check-circle-2" aria-hidden="true"></i>
+                        <span>Etapa concluída</span>
+                    </button>
+                    <p class="completion-helper">Seu progresso está protegido. Você pode revisar esta orientação quando quiser.</p>
+                </section>
+            `;
+        }
+
+        return `
+            <section class="detail-completion-action" aria-label="Conclusão da etapa">
+                <button
+                    class="complete-task-button"
+                    type="button"
+                    data-action="complete-task"
+                    data-completion-button
+                    data-checklist-id="${escapeHtml(checklist.id)}"
+                    data-task-id="${escapeHtml(task.id)}"
+                    aria-describedby="${escapeHtml(helperId)} ${escapeHtml(errorId)}"
+                    disabled
+                >
+                    <i data-lucide="check-circle" aria-hidden="true"></i>
+                    <span data-completion-button-label>Concluir etapa</span>
+                </button>
+                <p class="completion-helper" id="${escapeHtml(helperId)}" data-completion-helper>
+                    Confira as orientações acima para concluir.
+                </p>
+                <p class="completion-error" id="${escapeHtml(errorId)}" data-completion-error role="alert" hidden></p>
+            </section>
+        `;
+    }
+
+    function buildPhaseCompletion(checklist, options = {}) {
+        if (!checklist.completed) return "";
+
+        const nextTitle = options.nextChecklistTitle;
+        const nextChecklistId = options.nextChecklistId;
+        const nextCopy = nextTitle
+            ? `<p>Próxima fase liberada: <strong>${escapeHtml(nextTitle)}</strong></p>`
+            : "<p>Você concluiu todas as fases desta jornada.</p>";
+        const nextAction = nextTitle && nextChecklistId ? `
+            <button
+                class="phase-next-button"
+                type="button"
+                data-action="open-checklist"
+                data-checklist-id="${escapeHtml(nextChecklistId)}"
+            >
+                Ir para a próxima fase
+                <i data-lucide="arrow-right" aria-hidden="true"></i>
+            </button>
+        ` : "";
+
+        return `
+            <section class="phase-completion-card" data-phase-completion aria-labelledby="phase-completion-title">
+                <span class="phase-completion-icon" aria-hidden="true"><i data-lucide="badge-check"></i></span>
+                <div>
+                    <span class="phase-completion-kicker">Fase concluída</span>
+                    <h4 id="phase-completion-title">${escapeHtml(checklist.title)}</h4>
+                    ${nextCopy}
+                    ${nextAction}
+                </div>
+            </section>
+        `;
+    }
+
+    function buildSelectedTask(checklist, copy, selectedTaskId, options = {}) {
         const selectedIndex = Math.max(checklist.tasks.findIndex(task => task.id === selectedTaskId), 0);
         const task = checklist.tasks[selectedIndex];
         if (!task) {
@@ -427,7 +528,7 @@
                         </section>
                     ` : ""}
 
-                    <section class="detail-guide-section detail-guide-completion">
+                    <section class="detail-guide-section detail-guide-completion" data-completion-observer>
                         <h4><i data-lucide="badge-check" aria-hidden="true"></i>Você terminou quando</h4>
                         <p>${escapeHtml(guide.completionCriteria)}</p>
                     </section>
@@ -443,15 +544,13 @@
                         <section class="detail-guide-section detail-guide-help">
                             <h4><i data-lucide="lightbulb" aria-hidden="true"></i>Importante</h4>
                             <div class="detail-guide-help-list">
-                                ${help.map(item => `
-                                    <div class="detail-guide-help-item">
-                                        <strong>${escapeHtml(item.title)}</strong>
-                                        <p>${escapeHtml(item.text)}</p>
-                                    </div>
-                                `).join("")}
+                                ${help.map(buildGuideHelpItem).join("")}
                             </div>
                         </section>
                     ` : ""}
+
+                    ${buildCompletionControl(checklist, task)}
+                    ${buildPhaseCompletion(checklist, options)}
                 </div>
             </article>
         `;
@@ -491,39 +590,34 @@
                     const guide = getTaskGuide(task.id);
                     const title = guide?.title || task.text;
                     const isSelected = task.id === selectedTaskId;
+                    const isLocked = task.locked === true;
+                    const stateLabel = isLocked ? "Bloqueada" : task.completed ? "Concluída" : "Pendente";
+                    const stateIcon = isLocked ? "lock" : task.completed ? "check" : "circle";
 
                     return `
                         <li
-                            class="detail-trail-item ${task.completed ? "is-completed" : ""} ${isSelected ? "is-selected" : ""}"
+                            class="detail-trail-item ${task.completed ? "is-completed" : ""} ${isSelected ? "is-selected" : ""} ${isLocked ? "is-locked" : ""}"
                             data-task-card
                             data-task-id="${escapeHtml(task.id)}"
                         >
-                            <label class="detail-task-check" title="${task.completed ? "Desmarcar etapa" : "Marcar etapa como concluída"}">
-                                <input
-                                    type="checkbox"
-                                    data-action="toggle-task"
-                                    data-checklist-id="${escapeHtml(checklist.id)}"
-                                    data-task-id="${escapeHtml(task.id)}"
-                                    aria-label="${task.completed ? "Desmarcar" : "Marcar"} ${escapeHtml(title)} como concluída"
-                                    ${task.completed ? "checked" : ""}
-                                >
-                                <span class="detail-trail-check" aria-hidden="true">
-                                    <i data-lucide="check"></i>
-                                </span>
-                            </label>
                             <button
                                 class="detail-trail-select"
                                 type="button"
                                 data-action="select-task"
                                 data-checklist-id="${escapeHtml(checklist.id)}"
                                 data-task-id="${escapeHtml(task.id)}"
+                                aria-label="Etapa ${index + 1}, ${escapeHtml(title)}, ${stateLabel.toLowerCase()}${isSelected ? ", selecionada" : ""}"
                                 aria-current="${isSelected ? "step" : "false"}"
                                 aria-controls="checklist-selected-step"
+                                ${isLocked ? "disabled" : ""}
                             >
+                                <span class="detail-trail-check" aria-hidden="true">
+                                    <i data-lucide="${stateIcon}"></i>
+                                </span>
                                 <span class="detail-trail-copy">
                                     <span class="detail-trail-meta">
                                         <span>Etapa ${getTaskNumber(index)}${isSelected ? " · selecionada" : ""}</span>
-                                        <span>${task.completed ? "Concluída" : "Pendente"}</span>
+                                        <span>${stateLabel}</span>
                                     </span>
                                     <strong>${escapeHtml(title)}</strong>
                                 </span>
@@ -571,11 +665,13 @@
     }
 
     function resolveSelectedTaskId(checklist, requestedTaskId) {
-        if (checklist.tasks.some(task => task.id === requestedTaskId)) {
+        if (checklist.tasks.some(task => task.id === requestedTaskId && task.locked !== true)) {
             return requestedTaskId;
         }
 
-        return checklist.tasks.find(task => !task.completed)?.id || checklist.tasks[0]?.id || null;
+        return checklist.tasks.find(task => !task.completed && task.locked !== true)?.id
+            || checklist.tasks.find(task => task.locked !== true)?.id
+            || null;
     }
 
     function buildChecklistLayout(checklist, options = {}) {
@@ -611,7 +707,7 @@
 
                 <div class="detail-workspace">
                     ${buildTrailPanel(checklist, copy, selectedTaskId)}
-                    ${buildSelectedTask(checklist, copy, selectedTaskId)}
+                    ${buildSelectedTask(checklist, copy, selectedTaskId, options)}
                 </div>
             </section>
         `;
