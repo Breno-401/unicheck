@@ -193,6 +193,7 @@ Arquivos principais:
 - [`platform/pages/checklist-academico/checklist-academico.html`](../../Unicheck/platform/pages/checklist-academico/checklist-academico.html)
 - [`js/services/checklist.js`](../../Unicheck/js/services/checklist.js)
 - [`js/data/checklist-data.js`](../../Unicheck/js/data/checklist-data.js)
+- [`js/data/checklist-content.js`](../../Unicheck/js/data/checklist-content.js)
 - [`platform/pages/checklist-academico/checklist-view.js`](../../Unicheck/platform/pages/checklist-academico/checklist-view.js)
 - [`platform/pages/checklist-academico/checklist-detail.js`](../../Unicheck/platform/pages/checklist-academico/checklist-detail.js)
 - [`platform/pages/checklist-academico/checklist-academico.js`](../../Unicheck/platform/pages/checklist-academico/checklist-academico.js)
@@ -206,8 +207,13 @@ Fluxo canônico com cache local:
 - faz em background uma unica consulta a `user_checklist_item_progress`, substitui o cache pela resposta valida e aplica somente operacoes explicitamente pendentes;
 - aplica regra de bloqueio entre fases;
 - mostra lista de fases;
-- abre a visao detalhada de uma fase com o mesmo padrao de cards de conclusao para todas as etapas;
+- abre a fase como uma trilha compacta com uma única etapa orientada por vez;
 - exibe conteudo informativo especifico por fase dentro da propria tela de checklist;
+- associa guias operacionais aos UUIDs canônicos dos cards sem criar novos itens de progresso ou gravar conteúdo textual no banco;
+- separa o estado de seleção do estado de conclusão: o item da trilha navega, enquanto o checkbox continua sendo a única ação de progresso;
+- mostra próxima ação, local, credencial, passos, critério de conclusão, contexto, ajuda e acesso direto apenas no painel da etapa selecionada;
+- no mobile, apresenta primeiro a lista e abre o conteúdo em uma visualização dedicada com retorno para a trilha;
+- aceita screenshots opcionais vinculados a passos individuais, preservando o card atual como única unidade oficial de conclusão;
 - trabalha com fases ja estruturadas com tarefas reais, de forma que o desbloqueio entre fases possa ser testado de ponta a ponta;
 - permite marcar itens como concluido;
 - ao marcar ou desmarcar, atualiza UI e `localStorage` imediatamente e sincroniza o Supabase em background;
