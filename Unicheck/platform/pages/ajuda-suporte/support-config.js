@@ -1,15 +1,9 @@
-// Fonte centralizada dos canais institucionais exibidos na central de ajuda.
-window.UniCheckSupportChannels = Object.freeze({
-    email: Object.freeze({
-        label: 'atendimento@salesiano.br',
-        href: 'mailto:atendimento@salesiano.br'
-    }),
-    whatsapp: Object.freeze({
-        label: '(27) 9 8123 4566',
-        href: 'https://wa.me/5527981234566'
-    }),
-    institutionalPortal: Object.freeze({
-        label: 'Acessar UniSales',
-        href: 'https://unisales.br/'
-    })
-});
+// Compatibilidade para integrações que ainda carreguem este arquivo diretamente.
+// A fonte canônica fica em platform/shared/js/support-channels.js.
+if (!window.UniCheckSupportChannels && window.UniCheckContacts) {
+    window.UniCheckSupportChannels = Object.freeze({
+        email: window.UniCheckContacts.email,
+        whatsapp: window.UniCheckContacts.multiatendimento,
+        institutionalPortal: window.UniCheckContacts.institutionalPortal
+    });
+}
