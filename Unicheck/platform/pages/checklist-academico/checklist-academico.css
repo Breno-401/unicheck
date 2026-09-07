@@ -279,8 +279,7 @@
     gap: var(--spacing-sm);
 }
 
-.progress-bar,
-.detail-progress-bar {
+.progress-bar {
     flex: 1;
     height: 9px;
     background: rgba(255, 255, 255, 0.08);
@@ -645,14 +644,17 @@
 }
 
 .detail-progress-bar {
-    flex: 0 0 7px;
+    flex: 0 0 5px;
     width: 100%;
-    height: 7px;
+    height: 5px;
+    min-height: 5px;
+    max-height: 5px;
     margin: 0.8rem 0 0.6rem;
     overflow: hidden;
-    background: var(--surface-subtle);
-    border: 1px solid var(--border);
-    border-radius: 999px;
+    background: color-mix(in srgb, var(--text-muted) 16%, var(--surface-subtle));
+    border: 0;
+    border-radius: 3px;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--border-strong) 42%, transparent);
 }
 
 .detail-progress-fill {
@@ -677,9 +679,7 @@
 
 .detail-trail-item {
     position: relative;
-    display: grid;
-    grid-template-columns: 42px minmax(0, 1fr);
-    align-items: stretch;
+    display: block;
     border-bottom: 1px solid var(--border);
     border-left: 3px solid transparent;
     transition: background var(--transition-fast), border-color var(--transition-fast);
@@ -694,26 +694,8 @@
     background: color-mix(in srgb, var(--phase-accent-color) 8%, var(--surface));
 }
 
-.detail-task-check {
-    width: 42px;
-    height: auto;
-    min-height: 72px;
-    border-radius: 0;
-}
-
-.detail-task-check:hover .detail-trail-check {
-    border-color: var(--phase-accent-color);
-}
-
-.detail-task-check input {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    clip-path: inset(50%);
-    white-space: nowrap;
+.detail-trail-item:hover:not(.is-locked) {
+    background: color-mix(in srgb, var(--phase-accent-color) 5%, var(--surface-elevated));
 }
 
 .detail-trail-check {
@@ -725,30 +707,34 @@
     background: var(--surface);
     border: 2px solid var(--border-strong);
     border-radius: 50%;
-    color: white;
+    color: var(--text-muted);
     transition: background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
 }
 
 .detail-trail-check svg {
-    width: 14px;
-    height: 14px;
-    opacity: 0;
-    transform: scale(0.7);
+    width: 12px;
+    height: 12px;
 }
 
-.detail-task-check input:checked + .detail-trail-check {
+.detail-trail-item.is-completed .detail-trail-check {
     background: var(--success);
     border-color: var(--success);
+    color: white;
 }
 
-.detail-task-check input:checked + .detail-trail-check svg {
-    opacity: 1;
-    transform: scale(1);
+.detail-trail-item.is-selected:not(.is-completed) .detail-trail-check {
+    border-color: var(--phase-accent-color);
+    color: var(--phase-accent-color);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--phase-accent-color) 12%, transparent);
 }
 
-.detail-task-check:has(input:focus-visible) {
-    outline: 3px solid var(--focus-ring);
-    outline-offset: -3px;
+.detail-trail-item.is-locked {
+    opacity: 0.62;
+    background: var(--surface-subtle);
+}
+
+.detail-trail-item.is-locked .detail-trail-check {
+    border-style: dashed;
 }
 
 .detail-trail-select {
@@ -756,16 +742,20 @@
     min-width: 0;
     min-height: 72px;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: 32px minmax(0, 1fr) auto;
     align-items: center;
     gap: 0.4rem;
-    padding: 0.72rem 0.7rem 0.72rem 0.1rem;
+    padding: 0.72rem 0.7rem 0.72rem 0.45rem;
     background: transparent;
     border: 0;
     color: inherit;
     font: inherit;
     text-align: left;
     cursor: pointer;
+}
+
+.detail-trail-select:disabled {
+    cursor: not-allowed;
 }
 
 .detail-trail-select:focus-visible {
@@ -1017,30 +1007,56 @@
     text-transform: none;
 }
 
-.detail-guide-link {
+.guide-action-link {
     display: inline-flex;
     align-items: center;
-    gap: 0.3rem;
-    color: var(--phase-accent-color);
-    font-size: 0.8rem;
+    justify-content: center;
+    gap: 0.42rem;
+    min-height: 36px;
+    padding: 0.48rem 0.68rem;
+    background: color-mix(in srgb, var(--phase-accent-color) 5%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--phase-accent-color) 42%, var(--border));
+    border-radius: 9px;
+    color: color-mix(in srgb, var(--phase-accent-color) 82%, var(--text-primary));
+    font-size: 0.79rem;
     font-weight: 750;
     text-decoration: none;
+    box-shadow: 0 1px 0 color-mix(in srgb, white 5%, transparent);
+    transition: background var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
 }
 
-.detail-guide-link:hover {
-    text-decoration: underline;
-    text-underline-offset: 3px;
+.guide-action-link:hover {
+    background: color-mix(in srgb, var(--phase-accent-color) 10%, var(--surface));
+    border-color: color-mix(in srgb, var(--phase-accent-color) 66%, var(--border));
+    box-shadow: 0 5px 14px color-mix(in srgb, var(--phase-accent-color) 12%, transparent);
+    transform: translateY(-1px);
 }
 
-.detail-guide-link:focus-visible {
+.guide-action-link:active {
+    box-shadow: none;
+    transform: translateY(0);
+}
+
+.guide-action-link:focus-visible {
     outline: 3px solid var(--focus-ring);
-    outline-offset: 3px;
-    border-radius: 3px;
+    outline-offset: 2px;
 }
 
-.detail-guide-link svg {
+.guide-action-link svg {
     width: 15px;
     height: 15px;
+    flex: 0 0 auto;
+}
+
+.guide-action-link .guide-action-link-arrow {
+    width: 13px;
+    height: 13px;
+    margin-left: 0.05rem;
+    transition: transform var(--transition-fast);
+}
+
+.guide-action-link:hover .guide-action-link-arrow {
+    transform: translate(1px, -1px);
 }
 
 .detail-guide-steps {
@@ -1174,6 +1190,174 @@
     font-size: 0.84rem;
 }
 
+.detail-guide-help-item .guide-action-link {
+    width: fit-content;
+    margin-top: 0.7rem;
+}
+
+.detail-completion-action {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.55rem 0.8rem;
+    margin-top: 1.45rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+}
+
+.complete-task-button,
+.phase-next-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 42px;
+    padding: 0.68rem 0.9rem;
+    border: 1px solid transparent;
+    border-radius: 11px;
+    background: var(--phase-accent);
+    color: white;
+    font: 750 0.86rem var(--font-primary);
+    box-shadow: 0 8px 20px color-mix(in srgb, var(--phase-accent-color) 22%, transparent);
+    cursor: pointer;
+    transition: background var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+.complete-task-button svg,
+.phase-next-button svg {
+    width: 17px;
+    height: 17px;
+}
+
+.complete-task-button:not(:disabled):hover,
+.phase-next-button:hover {
+    box-shadow: 0 11px 24px color-mix(in srgb, var(--phase-accent-color) 30%, transparent);
+    transform: translateY(-1px);
+}
+
+.complete-task-button:not(:disabled):active,
+.phase-next-button:active {
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--phase-accent-color) 20%, transparent);
+    transform: translateY(0);
+}
+
+.complete-task-button:focus-visible,
+.phase-next-button:focus-visible {
+    outline: 3px solid var(--focus-ring);
+    outline-offset: 2px;
+}
+
+.complete-task-button:disabled {
+    background: var(--surface-subtle);
+    border-color: var(--border);
+    color: var(--text-muted);
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+.complete-task-button.is-eligible {
+    background: var(--phase-accent);
+    border-color: transparent;
+    color: white;
+    box-shadow: 0 8px 20px color-mix(in srgb, var(--phase-accent-color) 22%, transparent);
+}
+
+.complete-task-button.is-loading svg {
+    animation: completionSpinner 720ms linear infinite;
+}
+
+.complete-task-button.is-completed {
+    background: var(--success-soft);
+    border-color: color-mix(in srgb, var(--success) 34%, var(--border));
+    color: var(--success);
+    opacity: 1;
+}
+
+.completion-helper,
+.completion-error {
+    flex: 1 1 240px;
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.76rem;
+    line-height: 1.45;
+}
+
+.completion-error {
+    flex-basis: 100%;
+    color: var(--danger, #ef4444);
+}
+
+.phase-completion-card {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.8rem;
+    margin-top: 1.2rem;
+    padding: 1rem;
+    overflow: hidden;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--success) 10%, var(--surface)), var(--surface));
+    border: 1px solid color-mix(in srgb, var(--success) 35%, var(--border));
+    border-radius: 15px;
+}
+
+.phase-completion-card.is-celebrating {
+    animation: phaseCardCelebrate 720ms cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.phase-completion-icon {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    place-items: center;
+    border-radius: 12px;
+    background: var(--success-soft);
+    color: var(--success);
+}
+
+.phase-completion-icon svg {
+    width: 21px;
+    height: 21px;
+}
+
+.phase-completion-kicker {
+    color: var(--success);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+}
+
+.phase-completion-card h4 {
+    margin: 0.16rem 0 0;
+    color: var(--text-primary);
+    font: 700 1.02rem var(--font-heading);
+}
+
+.phase-completion-card p {
+    margin: 0.38rem 0 0;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    line-height: 1.45;
+}
+
+.phase-next-button {
+    min-height: 38px;
+    margin-top: 0.75rem;
+    padding: 0.55rem 0.72rem;
+    font-size: 0.8rem;
+}
+
+@keyframes completionSpinner {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes phaseCardCelebrate {
+    0% { opacity: 0; transform: translateY(8px) scale(.98); }
+    60% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--success) 13%, transparent); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 .detail-guide-figure {
     max-width: 100%;
     margin: 0.8rem 0 0;
@@ -1290,6 +1474,21 @@
         align-items: flex-start;
         flex-direction: column;
     }
+
+    .guide-action-link,
+    .detail-guide-help-item .guide-action-link,
+    .complete-task-button,
+    .phase-next-button {
+        width: 100%;
+    }
+
+    .completion-helper {
+        flex-basis: 100%;
+    }
+
+    .phase-completion-card {
+        padding: 0.9rem;
+    }
 }
 
 /* Feedback de progresso local-first. As classes sao aplicadas logo apos a
@@ -1309,12 +1508,8 @@
     animation: taskComplete 420ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.detail-trail-item.just-reopened {
-    animation: taskReopen 280ms ease-out;
-}
-
 .detail-trail-item.just-completed .detail-trail-check {
-    animation: checkboxComplete 360ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: indicatorComplete 360ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .detail-trail-item.just-completed .detail-trail-meta {
@@ -1339,12 +1534,7 @@
     100% { transform: scale(1); }
 }
 
-@keyframes taskReopen {
-    from { transform: scale(0.99); opacity: 0.88; }
-    to { transform: scale(1); opacity: 1; }
-}
-
-@keyframes checkboxComplete {
+@keyframes indicatorComplete {
     0% { transform: scale(0.72); }
     65% { transform: scale(1.16); }
     100% { transform: scale(1); }
@@ -1374,7 +1564,10 @@
     .detail-trail-check,
     .detail-task-state,
     .detail-trail-panel,
-    .checklist-card {
+    .checklist-card,
+    .phase-completion-card,
+    .complete-task-button,
+    .guide-action-link {
         animation: none !important;
         transition-duration: 0.01ms !important;
     }
