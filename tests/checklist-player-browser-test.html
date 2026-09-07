@@ -17,6 +17,7 @@
         .browser-test-shell { width: min(100% - 2rem, 1440px); margin: 0 auto; padding: 1rem 0 2rem; }
         .browser-test-shell.is-narrow { width: 390px; margin: 0; padding: 1rem; overflow: hidden; }
         .test-sidebar { position: fixed; z-index: 10; top: .5rem; left: .5rem; width: 250px; visibility: hidden; }
+        .test-sidebar.is-transfer-target { visibility: visible; }
         #browserTestResult { position: fixed; z-index: 9999; right: .5rem; bottom: .5rem; padding: .4rem .6rem; background: #08111f; color: white; font: 12px monospace; }
     </style>
 </head>
@@ -36,6 +37,10 @@
         document.documentElement.dataset.theme = theme;
         document.body.dataset.theme = theme;
         if (params.get("narrow") === "1") document.getElementById("browserTestShell").classList.add("is-narrow");
+        if (params.get("transfer") === "1" && params.get("target") !== "hidden") {
+            document.querySelector(".test-sidebar").classList.add("is-transfer-target");
+        }
+        if (params.get("target") === "collapsed") document.querySelector(".test-sidebar").classList.add("collapsed");
 
         const checklistId = number => `10000000-0000-4000-8000-${String(number).padStart(12, "0")}`;
         const firstChecklistId = checklistId(1);
@@ -169,6 +174,23 @@
             assert(!document.querySelector(".xp-reward"), "reload-no-xp-reward");
             assert(!document.querySelector(".xp-feedback"), "old-local-xp-absent-on-load");
 
+            if (params.get("max") === "1") {
+                window.dispatchEvent(new CustomEvent("unicheck:progression-updated", {
+                    detail: {
+                        previousProgression: window.UniCheckProgression.calculateFromCounts({ completedTasks: 56 }),
+                        progression: window.UniCheckProgression.calculateFromCounts({ completedTasks: 57 }),
+                        gainedXp: 10,
+                        phaseCompleted: false,
+                        phaseAccent: "#8b5cf6"
+                    }
+                }));
+                await wait(50);
+                const maxReward = document.querySelector(".xp-reward");
+                assert(maxReward?.textContent.includes("570 XP total"), "max-level-total-xp");
+                assert(maxReward?.textContent.includes("Nível máximo alcançado"), "max-level-destination");
+                assert(!maxReward?.textContent.includes("XP para"), "max-level-no-next-level");
+            }
+
             const shouldOpenStage = params.get("view") !== "list";
             let selectionClickDetail = null;
             if (shouldOpenStage) {
@@ -240,6 +262,8 @@
                         const reward = document.querySelector(".xp-reward");
                         assert(reward?.textContent.includes("+50 XP"), "phase-xp-reward-total");
                         assert(reward?.textContent.includes("Fase concluída"), "phase-xp-reward-label");
+                        assert(reward?.textContent.includes("20 XP para Explorador"), "phase-next-level-real-name");
+                        assert(reward?.classList.contains("xp-reward--phase"), "phase-reward-visual-tier");
                         assert(document.querySelectorAll(".xp-reward").length === 1, "phase-single-xp-reward");
                         assert(document.querySelector("[data-phase-completion]")?.textContent.includes("Fase concluída"), "phase-completed-feedback");
                         assert(document.querySelector(".phase-next-button"), "next-phase-action");
@@ -249,6 +273,7 @@
                         }
                     } else if (stateName === "levelup") {
                         assert(!document.querySelector(".xp-reward"), "level-up-suppresses-xp-reward");
+                        assert(!document.querySelector(".xp-energy-particle"), "level-up-suppresses-xp-transfer");
                         await wait(620);
                         const celebration = document.querySelector(".level-up-celebration");
                         assert(celebration?.textContent.includes("Nível 3"), "level-up-number");
@@ -256,13 +281,23 @@
                         assert(celebration?.textContent.includes("Próxima fase liberada"), "combined-next-phase");
                         const sidebarLabel = document.querySelector("[data-progression-level]");
                         assert(sidebarLabel?.textContent.includes("Nível 3"), "sidebar-level-updated");
+                        await wait(1700);
+                        assert(!document.querySelector(".xp-energy-particle"), "level-up-never-schedules-xp-transfer");
                     } else {
                         const reward = document.querySelector(".xp-reward");
                         const rewardRegion = document.querySelector(".xp-reward-region");
                         assert(reward?.textContent.includes("+10 XP"), "xp-reward-amount");
                         assert(reward?.textContent.includes("Etapa concluída"), "xp-reward-label");
                         assert(reward?.textContent.includes("30 / 100 XP"), "xp-reward-real-progress");
+                        assert(reward?.textContent.includes("70 XP para Explorador"), "xp-reward-next-level-real-name");
+                        const rewardFill = reward?.querySelector("[data-xp-reward-fill]");
+                        const rewardTrack = reward?.querySelector(".xp-reward-track");
+                        assert(rewardFill?.dataset.progressFrom === "20", "xp-reward-progress-starts-from-previous");
+                        assert(rewardFill?.dataset.progressTo === "30", "xp-reward-progress-targets-current");
+                        assert(rewardTrack && Math.round(parseFloat(getComputedStyle(rewardTrack).height || "0")) === 4, "xp-reward-thin-track");
+                        assert(reward?.style.getPropertyValue("--reward-accent") === "#0b61ff", "xp-reward-phase-accent");
                         assert(reward?.getAttribute("aria-live") === "polite", "xp-reward-polite-live-region");
+                        assert(reward?.getAttribute("aria-label").includes("Faltam 70 XP para o nível Explorador"), "xp-reward-accessible-destination");
                         assert(document.activeElement !== reward, "xp-reward-does-not-steal-focus");
                         assert(rewardRegion && getComputedStyle(rewardRegion).position === "fixed", "xp-reward-global-position");
                         assert(rewardRegion && getComputedStyle(rewardRegion).pointerEvents === "none", "xp-reward-non-blocking");
@@ -282,6 +317,32 @@
                             assert(sidebarXp?.textContent.includes("30 / 100 XP"), "sidebar-xp-updated-with-reward");
                         } else {
                             assert(document.querySelector(".sidebar-profile-progression")?.classList.contains("is-xp-updating"), "sidebar-xp-animation-started-with-reward");
+                        }
+                        if (params.get("transfer") === "1") {
+                            await wait(1550);
+                            const transferAllowed = innerWidth > 1024
+                                && !matchMedia("(prefers-reduced-motion: reduce)").matches
+                                && getComputedStyle(document.querySelector(".test-sidebar")).visibility !== "hidden"
+                                && !document.querySelector(".test-sidebar").classList.contains("collapsed");
+                            const particle = document.querySelector(".xp-energy-particle");
+                            assert(Boolean(particle) === transferAllowed, transferAllowed
+                                ? "xp-transfer-particle-created"
+                                : "xp-transfer-skipped-without-sidebar");
+                            if (transferAllowed && particle) {
+                                const particleAnimation = particle.getAnimations()[0];
+                                const particleKeyframes = particleAnimation?.effect?.getKeyframes?.() || [];
+                                assert(getComputedStyle(particle).position === "fixed", "xp-transfer-particle-fixed");
+                                assert(particleAnimation?.effect?.getTiming?.().duration === 560, "xp-transfer-duration");
+                                assert(
+                                    particleKeyframes[0]?.transform?.includes("translate3d")
+                                    && particleKeyframes.at(-1)?.transform?.includes("translate3d"),
+                                    "xp-transfer-uses-transform"
+                                );
+                                assert(particleKeyframes[0]?.opacity === "0" && particleKeyframes.at(-1)?.opacity === "0", "xp-transfer-uses-opacity");
+                                await wait(600);
+                                assert(!document.querySelector(".xp-energy-particle"), "xp-transfer-particle-removed");
+                                assert(document.querySelector(".sidebar-profile-progression")?.classList.contains("is-xp-receiving"), "sidebar-pulses-on-xp-arrival");
+                            }
                         }
                         if (params.get("queue") === "1") {
                             window.dispatchEvent(new CustomEvent("unicheck:progression-updated", {
