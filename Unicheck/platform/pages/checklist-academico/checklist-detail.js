@@ -561,19 +561,6 @@
         return PHASE_ACCENTS[phaseIndex % PHASE_ACCENTS.length];
     }
 
-    function buildOverview(copy) {
-        return `
-            <dl class="detail-overview-list">
-                ${copy.overview.map(item => `
-                    <div>
-                        <dt>${escapeHtml(item.label)}</dt>
-                        <dd>${escapeHtml(item.value)}</dd>
-                    </div>
-                `).join("")}
-            </dl>
-        `;
-    }
-
     function buildTrailList(checklist, selectedTaskId) {
         if (!checklist.tasks.length) {
             return `
@@ -702,7 +689,6 @@
                         <h2>${escapeHtml(checklist.title)}</h2>
                         <p>${escapeHtml(copy.helper)}</p>
                     </div>
-                    ${buildOverview(copy)}
                 </header>
 
                 <div class="detail-workspace">
