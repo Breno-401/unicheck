@@ -25,24 +25,24 @@
     const cardCopy = {
         "Primeiros passos na faculdade": {
             eyebrow: "Onboarding da turma",
-            description: "Crie a base da jornada com alinhamento de contatos, combinados e comunicacao oficial da turma.",
-            highlights: ["Organizacao da turma", "Canais oficiais", "Calendario academico", "Primeiros combinados"],
-            footnote: "Essa fase estrutura o ritmo para todo o restante da jornada.",
-            unlockHint: "Libera a navegacao dos sistemas e canais institucionais."
+            description: "Identifique o representante, entre no grupo certo e encontre as datas e os setores que orientam a primeira semana.",
+            highlights: ["Representante de turma", "Grupo dos alunos", "Calendário acadêmico", "Coordenação ou secretaria"],
+            footnote: "Esta fase separa os combinados da turma dos processos institucionais.",
+            unlockHint: "Prepara contatos e datas antes dos acessos acadêmicos."
         },
         "Portal Academico TOTVS": {
             eyebrow: "Portal do aluno",
-            description: "Acesse o portal, valide seu RA e encontre os documentos e menus que sustentam a rotina academica.",
-            highlights: ["Portal do Aluno", "Central do aluno", "Documentos e relatorios", "Acesso autenticado"],
-            footnote: "Depois disso, o aluno consulta boletos, documentos e avisos com autonomia.",
-            unlockHint: "Libera o uso consistente da central do aluno."
+            description: "Entre no Portal TOTVS e aprenda os caminhos reais para notas, faltas, grade, requerimentos, relatórios e financeiro.",
+            highlights: ["RA e primeiro acesso", "Notas e faltas", "Grade curricular", "Secretaria e financeiro"],
+            footnote: "Os guias usam os mesmos nomes exibidos nos menus do Portal.",
+            unlockHint: "Torna as consultas do Portal do Aluno previsíveis."
         },
         "Configuracao de Email": {
             eyebrow: "Email institucional",
-            description: "Ative o email institucional, teste login e garanta que a comunicacao da faculdade chegue sem ruido.",
-            highlights: ["Outlook/Webmail", "Senha atualizada", "Canal oficial", "Notificacoes ativas"],
-            footnote: "A caixa institucional vira a principal fonte de avisos e recuperacao de acesso.",
-            unlockHint: "Prepara o canal mais importante de comunicacao do aluno."
+            description: "Descubra seu endereço real, entre na conta Microsoft 365 correta e valide o envio e o recebimento de mensagens.",
+            highlights: ["Minha conta no AVA", "@souunisales.com.br", "Microsoft 365", "Teste de mensagens"],
+            footnote: "As credenciais desta fase são tratadas separadamente do Portal TOTVS.",
+            unlockHint: "Confirma o canal institucional antes das outras plataformas."
         },
         "Biblioteca Virtual": {
             eyebrow: "Pesquisa e acervo",
@@ -81,6 +81,8 @@
         searchTerm: "",
         user: null,
         currentChecklistId: null,
+        selectedTaskIds: {},
+        mobileStageOpen: false,
         syncInFlight: false,
         recentlyUnlockedChecklistId: null,
         initialized: false
@@ -302,12 +304,27 @@
         }
 
         const copy = getCardCopy(checklist);
+        const guideContent = (checklist.tasks || []).flatMap(task => {
+            const guide = window.UniCheckChecklistContent?.getGuide?.(task.id);
+            if (!guide) return [];
+            return [
+                guide.title,
+                guide.description,
+                guide.nextAction,
+                guide.where,
+                guide.completionCriteria,
+                guide.whyItMatters,
+                ...(guide.steps || []).flatMap(step => [step.text, step.path]),
+                ...(guide.quickHelp || []).flatMap(item => [item.title, item.text])
+            ];
+        });
         const haystack = [
             checklist.title,
             checklist.description,
             copy.description,
             copy.eyebrow,
-            ...(checklist.tasks || []).map(task => task.text)
+            ...(checklist.tasks || []).map(task => task.text),
+            ...guideContent
         ]
             .filter(Boolean)
             .join(" ")
@@ -531,7 +548,14 @@
             return;
         }
 
-        window.UniCheckChecklistDetail.render(refs.detailContent, checklist);
+        const selectedTaskId = window.UniCheckChecklistDetail.render(refs.detailContent, checklist, {
+            selectedTaskId: state.selectedTaskIds[checklist.id],
+            mobileStageOpen: state.mobileStageOpen
+        });
+
+        if (selectedTaskId) {
+            state.selectedTaskIds[checklist.id] = selectedTaskId;
+        }
     }
 
     function syncVisibleView() {
@@ -590,22 +614,8 @@
             animateNumber(element, before.progress, after.progress, value => `${value}%`);
         });
         scope.querySelectorAll("[data-progress-count]").forEach(element => {
-            animateNumber(element, beforeCount, afterCount, value => `${value}/${total} itens concluidos`, 320);
+            animateNumber(element, beforeCount, afterCount, value => `${value} de ${total} concluídas`, 320);
         });
-
-        const orb = scope.querySelector("[data-progress-orb]");
-        if (orb && !prefersReducedMotion()) {
-            const fromAngle = before.progress * 3.6;
-            const toAngle = after.progress * 3.6;
-            const startedAt = performance.now();
-            const animateOrb = now => {
-                const elapsed = Math.min((now - startedAt) / 480, 1);
-                const eased = 1 - Math.pow(1 - elapsed, 3);
-                orb.style.setProperty("--progress-angle", `${fromAngle + (toAngle - fromAngle) * eased}deg`);
-                if (elapsed < 1) requestAnimationFrame(animateOrb);
-            };
-            requestAnimationFrame(animateOrb);
-        }
 
         const taskCard = scope.querySelector(`[data-task-card][data-task-id="${taskId}"]`);
         if (taskCard && !prefersReducedMotion()) {
@@ -614,7 +624,7 @@
 
         if (!before.completed && after.completed && !prefersReducedMotion()) {
             scope.querySelector(".checklist-detail-shell")?.classList.add("phase-completed-feedback");
-            scope.querySelector(".detail-summary-card")?.classList.add("phase-complete-pulse");
+            scope.querySelector(".detail-trail-panel")?.classList.add("phase-complete-pulse");
         }
     }
 
@@ -698,9 +708,10 @@
 
         if (state.user?.id && completed && before && after) {
             const completedTask = after.tasks.find(task => task.id === taskId);
+            const completedGuide = window.UniCheckChecklistContent?.getGuide?.(taskId);
             window.UniCheckActivity?.record?.(state.user.id, {
                 type: "checklist_task_completed",
-                title: `Concluiu "${completedTask?.text || "Tarefa do checklist"}"`,
+                title: `Concluiu "${completedGuide?.title || completedTask?.text || "Tarefa do checklist"}"`,
                 context: after.title
             });
 
@@ -749,6 +760,7 @@
         }
 
         state.currentChecklistId = checklistId;
+        state.mobileStageOpen = false;
         syncVisibleView();
 
         if (shouldPushState) {
@@ -758,11 +770,47 @@
 
     function goBackToList(shouldPushState = true) {
         state.currentChecklistId = null;
+        state.mobileStageOpen = false;
         syncVisibleView();
 
         if (shouldPushState) {
             updateRoute(null);
         }
+    }
+
+    function selectTask(checklistId, taskId, shouldFocusStage = false) {
+        const checklist = getChecklistById(checklistId);
+        if (!checklist || checklist.id !== state.currentChecklistId || !checklist.tasks.some(task => task.id === taskId)) {
+            return;
+        }
+
+        state.selectedTaskIds[checklistId] = taskId;
+        state.mobileStageOpen = true;
+        renderDetailView();
+        const stage = refs.detailContent?.querySelector("#checklist-selected-step");
+        if (shouldFocusStage) {
+            stage?.focus?.({ preventScroll: true });
+        }
+
+        window.requestAnimationFrame(() => {
+            if (window.matchMedia?.("(max-width: 900px)").matches) {
+                stage?.scrollIntoView?.({
+                    behavior: prefersReducedMotion() ? "auto" : "smooth",
+                    block: "start"
+                });
+            }
+        });
+    }
+
+    function returnToTrail() {
+        state.mobileStageOpen = false;
+        renderDetailView();
+
+        window.requestAnimationFrame(() => {
+            const taskId = state.selectedTaskIds[state.currentChecklistId];
+            const selector = `[data-action="select-task"][data-task-id="${taskId}"]`;
+            refs.detailContent?.querySelector(selector)?.focus?.({ preventScroll: true });
+        });
     }
 
     function syncFromLocation() {
@@ -873,6 +921,20 @@
         }
 
         const action = actionElement.getAttribute("data-action");
+
+        if (action === "select-task") {
+            const checklistId = actionElement.getAttribute("data-checklist-id");
+            const taskId = actionElement.getAttribute("data-task-id");
+            if (checklistId && taskId) {
+                selectTask(checklistId, taskId, event.detail === 0);
+            }
+            return;
+        }
+
+        if (action === "back-to-trail") {
+            returnToTrail();
+            return;
+        }
 
         if (action === "open-checklist") {
             const checklistId = actionElement.getAttribute("data-checklist-id");
