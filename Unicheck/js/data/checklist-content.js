@@ -148,7 +148,11 @@
             quickHelp: [
                 {
                     title: "A senha inicial não funcionou?",
-                    text: "Use “Esqueceu a senha?” no Portal. Se o acesso continuar bloqueado, procure o Multiatendimento e confirme o e-mail pessoal cadastrado."
+                    text: "Use “Esqueceu a senha?” no Portal. Se ainda não conseguir acessar, fale com o atendimento.",
+                    action: {
+                        contact: "multiatendimento",
+                        label: "Falar com o Multiatendimento"
+                    }
                 },
                 {
                     title: "Não procure o semestre nessa tela",
