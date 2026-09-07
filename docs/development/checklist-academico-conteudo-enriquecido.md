@@ -12,7 +12,7 @@ Registro da implementação baseada na pesquisa `docs/checklist-academico-pesqui
 ## Experiência de consumo
 
 - A fase usa um player de trilha em duas colunas no desktop: lista compacta à esquerda e uma única etapa selecionada à direita.
-- Seleção e conclusão são estados independentes. Navegar não altera progresso; marcar ou desmarcar não troca a etapa aberta.
+- Seleção, conclusão e revisão são estados separados. Navegar não altera progresso; o indicador não é interativo; uma etapa pendente só pode ser concluída definitivamente pelo botão no fim do painel.
 - Ao entrar, a primeira etapa pendente é selecionada. Quando todas estão concluídas, a primeira etapa fica disponível para revisão.
 - No mobile, a lista aparece primeiro e o detalhe possui a ação “Voltar para a trilha”.
 - Próxima ação, passos, critério de conclusão, contexto e ajuda não são repetidos na lista.
