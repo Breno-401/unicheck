@@ -59,6 +59,23 @@
             </div>
         </section>
 
+        <section class="area-explorer" aria-labelledby="area-explorer-title">
+            <div class="container">
+                <div class="area-explorer-heading">
+                    <div>
+                        <span class="eyebrow">Explore por área</span>
+                        <h2 id="area-explorer-title">Qual caminho você quer conhecer?</h2>
+                    </div>
+                    <p>Escolha uma grande área para ver suas formações. A busca continua considerando o catálogo inteiro.</p>
+                </div>
+                <div class="area-selector" id="areaSelector" role="group" aria-label="Selecionar grande área"></div>
+                <label class="area-select-mobile" for="areaSelectMobile">
+                    <span>Grande área</span>
+                    <select id="areaSelectMobile"></select>
+                </label>
+            </div>
+        </section>
+
         <section class="catalog-controls" aria-labelledby="filters-title">
             <h2 class="sr-only" id="filters-title">Buscar e filtrar cursos</h2>
             <div class="container controls-inner">
@@ -81,15 +98,15 @@
         <section class="catalog-section" aria-labelledby="catalog-title">
             <div class="container catalog-heading">
                 <div>
-                    <span class="eyebrow">Explore as formações</span>
+                    <span class="eyebrow" id="catalogEyebrow">Explore as formações</span>
                     <h2 id="catalog-title">Encontre um caminho para seguir</h2>
                 </div>
                 <p id="resultCount" class="result-count" role="status" aria-live="polite"></p>
             </div>
             <div id="catalogo"></div>
             <div class="container empty-state" id="vazio" hidden>
-                <h2>Nenhum curso encontrado</h2>
-                <p>Ajuste a busca ou escolha outro filtro de grau.</p>
+                <h2 id="emptyTitle">Nenhum curso encontrado</h2>
+                <p id="emptyDescription">Ajuste a busca ou escolha outro filtro de grau.</p>
             </div>
             <noscript><p class="container empty-state">Ative o JavaScript para visualizar e filtrar o catálogo de cursos.</p></noscript>
         </section>
