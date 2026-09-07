@@ -193,6 +193,7 @@ Arquivos principais:
 - [`platform/pages/checklist-academico/checklist-academico.html`](../../Unicheck/platform/pages/checklist-academico/checklist-academico.html)
 - [`js/services/checklist.js`](../../Unicheck/js/services/checklist.js)
 - [`js/data/checklist-data.js`](../../Unicheck/js/data/checklist-data.js)
+- [`js/data/checklist-content.js`](../../Unicheck/js/data/checklist-content.js)
 - [`platform/pages/checklist-academico/checklist-view.js`](../../Unicheck/platform/pages/checklist-academico/checklist-view.js)
 - [`platform/pages/checklist-academico/checklist-detail.js`](../../Unicheck/platform/pages/checklist-academico/checklist-detail.js)
 - [`platform/pages/checklist-academico/checklist-academico.js`](../../Unicheck/platform/pages/checklist-academico/checklist-academico.js)
@@ -206,15 +207,20 @@ Fluxo canônico com cache local:
 - faz em background uma unica consulta a `user_checklist_item_progress`, substitui o cache pela resposta valida e aplica somente operacoes explicitamente pendentes;
 - aplica regra de bloqueio entre fases;
 - mostra lista de fases;
-- abre a visao detalhada de uma fase com o mesmo padrao de cards de conclusao para todas as etapas;
+- abre a fase como uma trilha compacta com uma única etapa orientada por vez;
 - exibe conteudo informativo especifico por fase dentro da propria tela de checklist;
+- associa guias operacionais aos UUIDs canônicos dos cards sem criar novos itens de progresso ou gravar conteúdo textual no banco;
+- separa seleção, conclusão e revisão: o item da trilha apenas navega, o indicador apenas comunica estado e a conclusão acontece no fim do painel orientado;
+- mostra próxima ação, local, credencial, passos, critério de conclusão, contexto, ajuda e acesso direto apenas no painel da etapa selecionada;
+- no mobile, apresenta primeiro a lista e abre o conteúdo em uma visualização dedicada com retorno para a trilha;
+- aceita screenshots opcionais vinculados a passos individuais, preservando o card atual como única unidade oficial de conclusão;
 - trabalha com fases ja estruturadas com tarefas reais, de forma que o desbloqueio entre fases possa ser testado de ponta a ponta;
-- permite marcar itens como concluido;
-- ao marcar ou desmarcar, atualiza UI e `localStorage` imediatamente e sincroniza o Supabase em background;
-- a camada de apresentacao interpola barra, percentual, contador, checkbox e estado do card usando o estado local anterior e o novo, sem aguardar o Supabase;
-- ao concluir uma fase, a interface destaca a conclusao e sinaliza visualmente o desbloqueio da fase seguinte quando a lista e exibida;
-- ao concluir uma tarefa, mostra feedback visual curto de `+10 XP`; quando a mesma acao conclui a fase, mostra tambem `+50 XP`, sem persistir um contador de XP;
-- falhas remotas nao revertem a UI: a alteracao permanece numa fila `unicheck_checklist_pending_sync_v1:<user_id>`, tentada novamente em uma nova alteracao ou quando o navegador volta a ficar online;
+- libera o botão de conclusão somente depois de seis segundos de permanência e da visualização do critério “Você terminou quando”, sem exigir acesso a links externos;
+- aceita apenas a transição monotônica `false → true`; revisão não reabre tarefas nem altera XP ou desbloqueios;
+- ao concluir, salva cache e fila local antes dos efeitos finais; depois interpola barra, percentual, contador e indicador sem aguardar a escrita remota;
+- ao concluir uma fase, exibe um painel de conquista e sinaliza o desbloqueio da fase seguinte;
+- ao concluir uma tarefa, mostra feedback visual curto de `+10 XP`; quando a mesma ação conclui a fase, mostra também `+40 XP`, sem persistir um contador de XP;
+- falhas remotas não revertem a UI: a conclusão permanece numa fila `unicheck_checklist_pending_sync_v2:<user_id>`, tentada novamente em uma nova alteração ou quando o navegador volta a ficar online;
 - libera a fase seguinte quando a atual e finalizada.
 
 Regra central do modulo:
@@ -495,8 +501,8 @@ Distincao de persistencia:
 - Fase posterior depende da conclusao da anterior.
 - Progresso pode vir do banco ou do cache local.
 - A estrutura do checklist e carregada das tabelas canônicas e usa `unicheck_checklist_catalog_v1` apenas como cache; o progresso continua obrigatoriamente separado por `user_id`.
-- Alteracoes de tarefa atualizam primeiro a UI e o cache por usuario e depois sincronizam com Supabase.
-- XP e a funcao `tarefas concluidas * 10 + fases completas * 50`; desmarcar e remarcar nunca acumula pontos fora do estado atual.
+- Conclusões atualizam primeiro o cache por usuário e a fila local; a UI final e seus efeitos só avançam depois que esse mecanismo local-first aceita a operação.
+- XP é a função `tarefas concluídas * 10 + fases completas * 40`; como a conclusão é monotônica e o cálculo parte do conjunto de UUIDs concluídos, a mesma tarefa não gera XP adicional.
 - Nao existe `user_xp`: em outro dispositivo, o mesmo progresso restaurado produz o mesmo XP e nivel.
 - O dashboard calcula imediatamente progresso e proxima acao usando `js/data/checklist-data.js` e o cache `unicheck_checklist_progress_v3:<user_id>`; online, o estado remoto confirmado substitui o cache e somente operacoes explicitas de `unicheck_checklist_pending_sync_v2:<user_id>` podem sobrepor temporariamente o remoto.
 - Atividades recentes sao isoladas por `user_id`, persistidas em `user_activity` e copiadas para um cache local depois da confirmacao remota.

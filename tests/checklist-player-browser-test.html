@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checklist player browser test</title>
+    <base href="/Unicheck/platform/pages/checklist-academico/">
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="/Unicheck/platform/shared/css/base/base.css">
+    <link rel="stylesheet" href="/Unicheck/platform/shared/css/layout/layout.css">
+    <link rel="stylesheet" href="/Unicheck/platform/shared/css/base/variaveis.css">
+    <link rel="stylesheet" href="/Unicheck/platform/shared/css/layout/style.css">
+    <link rel="stylesheet" href="/Unicheck/platform/pages/checklist-academico/checklist-academico.css?v=ux-polish-1">
+    <link rel="stylesheet" href="/Unicheck/platform/shared/css/layout/ui-polish.css">
+    <style>
+        body { min-height: 100vh; margin: 0; background: var(--bg-primary); }
+        .browser-test-shell { width: min(100% - 2rem, 1440px); margin: 0 auto; padding: 1rem 0 2rem; }
+        .browser-test-shell.is-narrow { width: 390px; margin: 0; padding: 1rem; overflow: hidden; }
+        .test-sidebar { position: fixed; z-index: 10; top: .5rem; left: .5rem; width: 250px; visibility: hidden; }
+        .test-sidebar.is-transfer-target { visibility: visible; }
+        #browserTestResult { position: fixed; z-index: 9999; right: .5rem; bottom: .5rem; padding: .4rem .6rem; background: #08111f; color: white; font: 12px monospace; }
+    </style>
+</head>
+<body class="page-checklist">
+    <aside class="sidebar test-sidebar"><div class="user-profile"></div></aside>
+    <main class="browser-test-shell" id="browserTestShell">
+        <div class="page-content"></div>
+    </main>
+    <output id="browserTestResult">PENDING</output>
+
+    <script>
+        const params = new URLSearchParams(location.search);
+        const theme = params.get("theme") === "dark" ? "dark" : "light";
+        const browserErrors = [];
+        addEventListener("error", event => browserErrors.push(event.message || "window-error"));
+        addEventListener("unhandledrejection", event => browserErrors.push(event.reason?.message || "unhandled-rejection"));
+        document.documentElement.dataset.theme = theme;
+        document.body.dataset.theme = theme;
+        if (params.get("narrow") === "1") document.getElementById("browserTestShell").classList.add("is-narrow");
+        if (params.get("transfer") === "1" && params.get("target") !== "hidden") {
+            document.querySelector(".test-sidebar").classList.add("is-transfer-target");
+        }
+        if (params.get("target") === "collapsed") document.querySelector(".test-sidebar").classList.add("collapsed");
+
+        const checklistId = number => `10000000-0000-4000-8000-${String(number).padStart(12, "0")}`;
+        const firstChecklistId = checklistId(1);
+        const taskId = number => `20000000-0000-4000-8000-${String(number).padStart(12, "0")}`;
+        const stateName = params.get("state") || "partial";
+        const progressMap = {};
+        const pendingMap = {};
+        const activities = [];
+        const notifications = [];
+        let openChecklistId = firstChecklistId;
+        window.__allowProgressWrites = true;
+
+        const completeTasks = (phaseNumber, taskNumbers) => {
+            const phaseId = checklistId(phaseNumber);
+            progressMap[phaseId] ||= { tasks: {} };
+            taskNumbers.forEach(number => { progressMap[phaseId].tasks[taskId(number)] = true; });
+        };
+        if (stateName === "partial") {
+            completeTasks(1, [1, 2]);
+        }
+        if (stateName === "full") {
+            completeTasks(1, [1, 2, 3, 4]);
+        }
+        if (stateName === "phase") {
+            completeTasks(1, [1, 2, 3]);
+        }
+        if (stateName === "portal") {
+            completeTasks(1, [1, 2, 3, 4]);
+            completeTasks(2, [5]);
+            openChecklistId = checklistId(2);
+        }
+        if (stateName === "levelup") {
+            completeTasks(1, [1, 2, 3, 4]);
+            completeTasks(2, [5, 6, 7, 8]);
+            completeTasks(3, [9, 10, 11]);
+            openChecklistId = checklistId(3);
+        }
+
+        window.UniCheckAuth = { getSession: async () => ({ user: { id: "browser-test-user" } }) };
+        window.UniCheckActivity = { record: (_userId, activity) => { activities.push(activity); } };
+        window.UniCheckNotifications = { record: (_userId, notification) => { notifications.push(notification); } };
+        window.UniCheckChecklist = {
+            readCachedProgress: () => structuredClone(progressMap),
+            writeCachedProgress: (_userId, value) => {
+                if (!window.__allowProgressWrites) return false;
+                Object.keys(progressMap).forEach(key => delete progressMap[key]);
+                Object.assign(progressMap, structuredClone(value));
+                return true;
+            },
+            readPendingProgress: () => structuredClone(pendingMap),
+            writePendingProgress: (_userId, value) => {
+                if (!window.__allowProgressWrites) return false;
+                Object.keys(pendingMap).forEach(key => delete pendingMap[key]);
+                Object.assign(pendingMap, structuredClone(value));
+                return true;
+            },
+            flushPendingProgress: async () => {
+                Object.keys(pendingMap).forEach(key => delete pendingMap[key]);
+            },
+            fetchUserProgressMap: async () => {
+                const snapshot = structuredClone(progressMap);
+                if (params.get("race") === "1") await new Promise(resolve => setTimeout(resolve, 7000));
+                return snapshot;
+            },
+            applyProgress: (checklists, progress) => {
+                let previousCompleted = true;
+                return checklists.map((checklist, index) => {
+                    const tasks = checklist.tasks.map(task => ({
+                        ...task,
+                        completed: progress[checklist.id]?.tasks?.[task.id] === true
+                    }));
+                    const completedCount = tasks.filter(task => task.completed).length;
+                    const completed = tasks.length > 0 && completedCount === tasks.length;
+                    const hydrated = {
+                        ...checklist,
+                        tasks,
+                        items: tasks,
+                        progress: tasks.length ? Math.round((completedCount / tasks.length) * 100) : 0,
+                        completed,
+                        locked: index > 0 && !previousCompleted
+                    };
+                    previousCompleted = completed;
+                    return hydrated;
+                });
+            }
+        };
+        location.hash = `checklist=${openChecklistId}`;
+    </script>
+    <script src="/Unicheck/js/data/checklist-data.js"></script>
+    <script>
+        window.UniCheckChecklistData.load = async () => window.UniCheckChecklistData.getChecklists();
+    </script>
+    <script src="/Unicheck/platform/shared/js/support-channels.js"></script>
+    <script src="/Unicheck/js/data/checklist-content.js"></script>
+    <script src="/Unicheck/js/services/progression.js"></script>
+    <script src="/Unicheck/platform/shared/js/progression-ui.js"></script>
+    <script src="/Unicheck/platform/pages/checklist-academico/checklist-detail.js"></script>
+    <script src="/Unicheck/platform/pages/checklist-academico/checklist-view.js"></script>
+    <script>
+        (async () => {
+            const result = document.getElementById("browserTestResult");
+            const failures = [];
+            const assert = (condition, message) => { if (!condition) failures.push(message); };
+            const wait = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
+
+            await window.UniCheckChecklistView.init();
+            await wait(80);
+
+            const expectedInitial = {
+                partial: taskId(3),
+                full: taskId(1),
+                phase: taskId(4),
+                portal: taskId(6),
+                levelup: taskId(12)
+            }[stateName] || taskId(1);
+            const initialStage = document.querySelector("[data-selected-task-id]");
+            assert(initialStage?.dataset.selectedTaskId === expectedInitial, "initial-selection");
+            assert(document.querySelectorAll("#checklist-selected-step").length === 1, "single-stage");
+            assert(document.querySelectorAll('[aria-current="step"]').length === 1, "single-current-step");
+            assert(document.querySelector('[data-action="select-task"]')?.tagName === "BUTTON", "keyboard-button");
+            const renderedDetail = document.querySelector(".checklist-detail-content");
+            assert(!renderedDetail.textContent.includes("Ver instruções"), "no-old-toggle");
+            assert(!renderedDetail.querySelector("[aria-expanded]"), "no-accordion-state");
+            assert(!renderedDetail.querySelector('input[type="checkbox"]'), "no-checkbox-indicator");
+            assert(!renderedDetail.querySelector('[role="checkbox"]'), "no-checkbox-role");
+            assert(!renderedDetail.querySelector('[data-action="toggle-task"]'), "no-toggle-action");
+            const detailHero = renderedDetail.querySelector(".detail-hero");
+            assert(!detailHero?.textContent.match(/Objetivo|Foco|Saída/i), "no-planning-labels");
+            assert(!detailHero?.querySelector(".detail-overview-list"), "no-planning-overview-space");
+            assert(parseFloat(getComputedStyle(detailHero).paddingBottom || "0") <= 16, "compact-detail-hero");
+            assert(!document.querySelector(".xp-reward"), "reload-no-xp-reward");
+            assert(!document.querySelector(".xp-feedback"), "old-local-xp-absent-on-load");
+
+            if (params.get("max") === "1") {
+                window.dispatchEvent(new CustomEvent("unicheck:progression-updated", {
+                    detail: {
+                        previousProgression: window.UniCheckProgression.calculateFromCounts({ completedTasks: 56 }),
+                        progression: window.UniCheckProgression.calculateFromCounts({ completedTasks: 57 }),
+                        gainedXp: 10,
+                        phaseCompleted: false,
+                        phaseAccent: "#8b5cf6"
+                    }
+                }));
+                await wait(50);
+                const maxReward = document.querySelector(".xp-reward");
+                assert(maxReward?.textContent.includes("570 XP total"), "max-level-total-xp");
+                assert(maxReward?.textContent.includes("Nível máximo alcançado"), "max-level-destination");
+                assert(!maxReward?.textContent.includes("XP para"), "max-level-no-next-level");
+            }
+
+            const shouldOpenStage = params.get("view") !== "list";
+            let selectionClickDetail = null;
+            if (shouldOpenStage) {
+                const selectors = [...document.querySelectorAll('[data-action="select-task"]')];
+                const targetSelector = params.get("interaction") === "1"
+                    ? selectors.find(element => element.dataset.taskId === expectedInitial)
+                    : selectors[1] || selectors[0];
+                targetSelector.addEventListener("click", event => { selectionClickDetail = event.detail; }, { once: true });
+                if (params.get("keyboard") === "1") targetSelector.click();
+                else targetSelector.dispatchEvent(new MouseEvent("click", { bubbles: true, detail: 1 }));
+                await wait(80);
+                assert(document.querySelector("[data-selected-task-id]")?.dataset.selectedTaskId === targetSelector.dataset.taskId, "select-step");
+                if (params.get("keyboard") === "1") assert(document.activeElement?.id === "checklist-selected-step", "keyboard-focus-stage");
+            }
+
+            if (stateName === "portal") {
+                const multi = [...document.querySelectorAll(".guide-action-link")]
+                    .find(link => link.textContent.includes("Multiatendimento"));
+                assert(multi?.href === window.UniCheckContacts.multiatendimento.href, "shared-multiatendimento-url");
+                assert(multi?.target === "_blank", "multiatendimento-external");
+            }
+            if (stateName === "full" && shouldOpenStage) {
+                document.querySelector(`[data-action="select-task"][data-task-id="${taskId(4)}"]`)?.click();
+                await wait(50);
+                const calendar = [...document.querySelectorAll(".guide-action-link")]
+                    .find(link => link.textContent.includes("calendário acadêmico"));
+                calendar?.focus();
+                const calendarStyle = calendar ? getComputedStyle(calendar) : null;
+                assert(calendar?.href === "https://unisales.br/calendario-academico/", "calendar-url");
+                assert(parseFloat(calendarStyle?.borderTopWidth || "0") >= 1, "calendar-button-border");
+                assert(calendarStyle?.outlineStyle !== "none", "calendar-focus-visible");
+            }
+
+            if (params.get("interaction") === "1") {
+                const completionButton = document.querySelector("[data-completion-button]");
+                const completedBefore = progressMap[openChecklistId]?.tasks?.[expectedInitial] === true;
+                assert(completionButton?.disabled === true, "completion-initially-disabled");
+                completionButton?.click();
+                await wait(80);
+                assert((progressMap[openChecklistId]?.tasks?.[expectedInitial] === true) === completedBefore, "fast-click-blocked");
+
+                const completionObserver = document.querySelector("[data-completion-observer]");
+                completionObserver?.scrollIntoView({ behavior: "auto", block: "center" });
+                document.querySelector(".detail-stage-panel")?.dispatchEvent(new Event("scroll"));
+                window.dispatchEvent(new Event("scroll"));
+                await wait(180);
+                assert(completionButton?.disabled === true, "minimum-time-still-blocked");
+                await wait(5940);
+                assert(completionButton?.disabled === false, "completion-enabled-after-guidance");
+
+                if (params.get("fail") === "1") window.__allowProgressWrites = false;
+                completionButton?.click();
+                completionButton?.click();
+                completionButton?.dispatchEvent(new MouseEvent("click", { bubbles: true, detail: 1 }));
+                await wait(180);
+
+                if (params.get("fail") === "1") {
+                    assert(progressMap[openChecklistId]?.tasks?.[expectedInitial] !== true, "failure-does-not-complete");
+                    assert(!document.querySelector("[data-completion-error]")?.hidden, "failure-is-visible");
+                    assert(activities.length === 0, "failure-no-activity");
+                    assert(!document.querySelector(".xp-reward"), "failure-no-xp");
+                } else {
+                    assert(progressMap[openChecklistId]?.tasks?.[expectedInitial] === true, "completion-persisted-locally");
+                    assert(activities.filter(activity => activity.type === "checklist_task_completed").length === 1, "single-activity-on-spam");
+                    assert(document.querySelector(`[data-task-card][data-task-id="${expectedInitial}"]`)?.classList.contains("is-completed"), "completion-becomes-final");
+                    assert(!document.querySelector(".xp-feedback"), "old-local-xp-removed");
+
+                    if (stateName === "phase") {
+                        const reward = document.querySelector(".xp-reward");
+                        assert(reward?.textContent.includes("+50 XP"), "phase-xp-reward-total");
+                        assert(reward?.textContent.includes("Fase concluída"), "phase-xp-reward-label");
+                        assert(reward?.textContent.includes("20 XP para Explorador"), "phase-next-level-real-name");
+                        assert(reward?.classList.contains("xp-reward--phase"), "phase-reward-visual-tier");
+                        assert(document.querySelectorAll(".xp-reward").length === 1, "phase-single-xp-reward");
+                        assert(document.querySelector("[data-phase-completion]")?.textContent.includes("Fase concluída"), "phase-completed-feedback");
+                        assert(document.querySelector(".phase-next-button"), "next-phase-action");
+                        const notification = document.querySelector(".profile-notification");
+                        if (innerWidth > 768 && reward && notification) {
+                            assert(reward.getBoundingClientRect().bottom <= notification.getBoundingClientRect().top, "phase-feedbacks-do-not-overlap");
+                        }
+                    } else if (stateName === "levelup") {
+                        assert(!document.querySelector(".xp-reward"), "level-up-suppresses-xp-reward");
+                        assert(!document.querySelector(".xp-energy-particle"), "level-up-suppresses-xp-transfer");
+                        await wait(620);
+                        const celebration = document.querySelector(".level-up-celebration");
+                        assert(celebration?.textContent.includes("Nível 3"), "level-up-number");
+                        assert(celebration?.textContent.includes("Fase concluída"), "combined-phase-level-up");
+                        assert(celebration?.textContent.includes("Próxima fase liberada"), "combined-next-phase");
+                        const sidebarLabel = document.querySelector("[data-progression-level]");
+                        assert(sidebarLabel?.textContent.includes("Nível 3"), "sidebar-level-updated");
+                        await wait(1700);
+                        assert(!document.querySelector(".xp-energy-particle"), "level-up-never-schedules-xp-transfer");
+                    } else {
+                        const reward = document.querySelector(".xp-reward");
+                        const rewardRegion = document.querySelector(".xp-reward-region");
+                        assert(reward?.textContent.includes("+10 XP"), "xp-reward-amount");
+                        assert(reward?.textContent.includes("Etapa concluída"), "xp-reward-label");
+                        assert(reward?.textContent.includes("30 / 100 XP"), "xp-reward-real-progress");
+                        assert(reward?.textContent.includes("70 XP para Explorador"), "xp-reward-next-level-real-name");
+                        const rewardFill = reward?.querySelector("[data-xp-reward-fill]");
+                        const rewardTrack = reward?.querySelector(".xp-reward-track");
+                        assert(rewardFill?.dataset.progressFrom === "20", "xp-reward-progress-starts-from-previous");
+                        assert(rewardFill?.dataset.progressTo === "30", "xp-reward-progress-targets-current");
+                        assert(rewardTrack && Math.round(parseFloat(getComputedStyle(rewardTrack).height || "0")) === 4, "xp-reward-thin-track");
+                        assert(reward?.style.getPropertyValue("--reward-accent") === "#0b61ff", "xp-reward-phase-accent");
+                        assert(reward?.getAttribute("aria-live") === "polite", "xp-reward-polite-live-region");
+                        assert(reward?.getAttribute("aria-label").includes("Faltam 70 XP para o nível Explorador"), "xp-reward-accessible-destination");
+                        assert(document.activeElement !== reward, "xp-reward-does-not-steal-focus");
+                        assert(rewardRegion && getComputedStyle(rewardRegion).position === "fixed", "xp-reward-global-position");
+                        assert(rewardRegion && getComputedStyle(rewardRegion).pointerEvents === "none", "xp-reward-non-blocking");
+                        if (reward && matchMedia("(prefers-reduced-motion: reduce)").matches) {
+                            assert(getComputedStyle(reward).transform === "none", "xp-reward-reduced-motion-no-transform");
+                        }
+                        if (rewardRegion && innerWidth <= 600) {
+                            assert(
+                                rewardRegion.offsetLeft >= 15
+                                && rewardRegion.offsetWidth <= document.documentElement.clientWidth - 30,
+                                "xp-reward-mobile-inset"
+                            );
+                        }
+                        const sidebarXp = document.querySelector("[data-progression-xp]");
+                        await wait(620);
+                        if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+                            assert(sidebarXp?.textContent.includes("30 / 100 XP"), "sidebar-xp-updated-with-reward");
+                        } else {
+                            assert(document.querySelector(".sidebar-profile-progression")?.classList.contains("is-xp-updating"), "sidebar-xp-animation-started-with-reward");
+                        }
+                        if (params.get("transfer") === "1") {
+                            await wait(1550);
+                            const transferAllowed = innerWidth > 1024
+                                && !matchMedia("(prefers-reduced-motion: reduce)").matches
+                                && getComputedStyle(document.querySelector(".test-sidebar")).visibility !== "hidden"
+                                && !document.querySelector(".test-sidebar").classList.contains("collapsed");
+                            const particle = document.querySelector(".xp-energy-particle");
+                            assert(Boolean(particle) === transferAllowed, transferAllowed
+                                ? "xp-transfer-particle-created"
+                                : "xp-transfer-skipped-without-sidebar");
+                            if (transferAllowed && particle) {
+                                const particleAnimation = particle.getAnimations()[0];
+                                const particleKeyframes = particleAnimation?.effect?.getKeyframes?.() || [];
+                                assert(getComputedStyle(particle).position === "fixed", "xp-transfer-particle-fixed");
+                                assert(particleAnimation?.effect?.getTiming?.().duration === 560, "xp-transfer-duration");
+                                assert(
+                                    particleKeyframes[0]?.transform?.includes("translate3d")
+                                    && particleKeyframes.at(-1)?.transform?.includes("translate3d"),
+                                    "xp-transfer-uses-transform"
+                                );
+                                assert(particleKeyframes[0]?.opacity === "0" && particleKeyframes.at(-1)?.opacity === "0", "xp-transfer-uses-opacity");
+                                await wait(600);
+                                assert(!document.querySelector(".xp-energy-particle"), "xp-transfer-particle-removed");
+                                assert(document.querySelector(".sidebar-profile-progression")?.classList.contains("is-xp-receiving"), "sidebar-pulses-on-xp-arrival");
+                            }
+                        }
+                        if (params.get("queue") === "1") {
+                            window.dispatchEvent(new CustomEvent("unicheck:progression-updated", {
+                                detail: {
+                                    previousProgression: window.UniCheckProgression.calculateFromCounts({ completedTasks: 3 }),
+                                    progression: window.UniCheckProgression.calculateFromCounts({ completedTasks: 4 }),
+                                    gainedXp: 10,
+                                    phaseCompleted: false
+                                }
+                            }));
+                            await wait(50);
+                            assert(document.querySelectorAll(".xp-reward").length === 1, "xp-reward-queue-no-overlap");
+                            await wait(2850);
+                            assert(document.querySelectorAll(".xp-reward").length === 1, "xp-reward-queue-continues-sequentially");
+                            assert(document.querySelector(".xp-reward")?.textContent.includes("40 / 100 XP"), "xp-reward-queue-shows-next-progress");
+                        }
+                        if (params.get("timing") === "1") {
+                            await wait(2050);
+                            assert(document.querySelector(".xp-reward"), "xp-reward-readable-duration");
+                            await wait(850);
+                            assert(!document.querySelector(".xp-reward"), "xp-reward-dismisses-after-animation");
+                        }
+                        await wait(180);
+                        const nextPending = document.querySelector("[data-selected-task-id]")?.dataset.selectedTaskId;
+                        assert(nextPending !== expectedInitial, "automatic-next-task");
+                    }
+
+                    document.querySelector(`[data-action="select-task"][data-task-id="${expectedInitial}"]`)?.click();
+                    await wait(80);
+                    const activityCount = activities.length;
+                    assert(document.querySelector(".complete-task-button.is-completed")?.disabled === true, "review-remains-completed");
+                    document.querySelector(".complete-task-button.is-completed")?.click();
+                    await wait(50);
+                    assert(activities.length === activityCount, "review-no-duplicate-effects");
+                    assert(progressMap[openChecklistId]?.tasks?.[expectedInitial] === true, "review-no-regression");
+                }
+            }
+
+            const workspace = document.querySelector(".detail-workspace");
+            const stage = document.querySelector(".detail-stage-panel");
+            const progressBar = document.querySelector(".detail-progress-bar");
+            assert(document.documentElement.scrollWidth <= document.documentElement.clientWidth, "no-page-horizontal-overflow");
+            assert(workspace.scrollWidth <= workspace.clientWidth, "no-workspace-horizontal-overflow");
+            if (stage.offsetParent) assert(stage.scrollWidth <= stage.clientWidth, "no-stage-horizontal-overflow");
+
+            if (matchMedia("(max-width: 900px)").matches) {
+                const trailDisplay = getComputedStyle(document.querySelector(".detail-trail-panel")).display;
+                const stageDisplay = getComputedStyle(document.querySelector(".detail-stage-panel")).display;
+                if (shouldOpenStage) {
+                    assert(trailDisplay === "none", "mobile-trail-hidden");
+                    assert(stageDisplay !== "none", "mobile-stage-visible");
+                    assert(getComputedStyle(document.querySelector(".detail-mobile-back")).display !== "none", "mobile-back-visible");
+                } else {
+                    assert(trailDisplay !== "none", "mobile-trail-visible");
+                    assert(stageDisplay === "none", "mobile-stage-hidden");
+                }
+            }
+
+            assert(Math.round(parseFloat(getComputedStyle(progressBar).height || "0")) === 5, "fixed-progress-thickness");
+
+            assert(browserErrors.length === 0, `console:${browserErrors.join("|")}`);
+
+            const sidebarXpMetric = document.querySelector("[data-progression-xp]")?.textContent || "missing";
+            const rewardRegionMetric = document.querySelector(".xp-reward-region");
+            const metrics = `vw${innerWidth}-doc${document.documentElement.clientWidth}/${document.documentElement.scrollWidth}-work${Math.round(workspace?.getBoundingClientRect().width || 0)}-stage${Math.round(stage?.getBoundingClientRect().width || 0)}-bar${Math.round(progressBar?.getBoundingClientRect().height || 0)}/${getComputedStyle(progressBar).flex}-xp${sidebarXpMetric}-reward${rewardRegionMetric?.offsetLeft ?? "gone"}/${rewardRegionMetric?.offsetWidth ?? "gone"}-active${document.activeElement?.id || document.activeElement?.tagName}-click${selectionClickDetail}`;
+            result.textContent = failures.length ? `FAIL:${failures.join(",")}:${metrics}` : `PASS:${stateName}:${theme}:${shouldOpenStage ? "detail" : "list"}:${metrics}`;
+            result.dataset.failures = failures.join(",");
+        })().catch(error => {
+            const result = document.getElementById("browserTestResult");
+            result.textContent = `ERROR:${error.message}`;
+        });
+    </script>
+</body>
+</html>
