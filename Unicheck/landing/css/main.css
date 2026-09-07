@@ -64,6 +64,8 @@ p { color: var(--muted); }
 .nav-links { display: flex; align-items: center; gap: clamp(10px, 2vw, 28px); margin-right: 12px; }
 .nav-links a { display: flex; min-height: 44px; align-items: center; padding: 8px 2px; color: #3e5659; font-size: .9rem; font-weight: 700; transition: color .2s ease; }
 .nav-links a:hover { color: var(--brand); }
+.nav-links a[aria-current="page"] { position: relative; color: var(--brand-dark); }
+.nav-links a[aria-current="page"]::after { content: ""; position: absolute; right: 2px; bottom: 6px; left: 2px; height: 2px; border-radius: 2px; background: var(--brand); }
 .menu-toggle { display: none; width: 46px; height: 46px; padding: 0; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); cursor: pointer; }
 .menu-toggle span { display: block; width: 20px; height: 2px; margin: 5px auto; border-radius: 2px; background: var(--ink); transition: transform .2s ease, opacity .2s ease; }
 .menu-toggle[aria-expanded="true"] span:first-child { transform: translateY(7px) rotate(45deg); }
@@ -175,7 +177,7 @@ p { color: var(--muted); }
 .site-footer { padding-top: 58px; color: #bed0d1; background: #051316; }
 .footer-grid { display: grid; grid-template-columns: 2fr repeat(3, 1fr); gap: 36px; padding-bottom: 48px; }
 .footer-brand p { max-width: 32ch; margin: 18px 0 0; color: #91a7a9; font-size: .9rem; }
-.site-footer .brand img { width: 135px; filter: brightness(0) invert(1); }
+.site-footer .brand img { width: 135px; }
 .site-footer h2 { margin-bottom: 18px; color: #fff; font-size: .85rem; letter-spacing: .04em; }
 .site-footer ul { display: grid; gap: 10px; }
 .site-footer li, .site-footer a, .footer-bottom p { color: #91a7a9; font-size: .84rem; }
@@ -197,6 +199,7 @@ p { color: var(--muted); }
     .navigation.is-open { max-height: 550px; padding-block: 16px 20px; border-color: var(--line); opacity: 1; visibility: visible; }
     .nav-links { display: grid; gap: 0; margin: 0 0 12px; }
     .nav-links a { min-height: 48px; border-bottom: 1px solid var(--line); }
+    .nav-links a[aria-current="page"]::after { top: 50%; right: 2px; bottom: auto; left: auto; width: 7px; height: 7px; border-radius: 50%; transform: translateY(-50%); }
     .navigation > .button { width: 100%; margin-top: 8px; }
     .hero-grid { grid-template-columns: 1fr; }
     .hero-copy { max-width: 690px; }

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#071a1e">
+    <title>UniCheck | Cursos superiores</title>
+    <link rel="icon" href="assets/images/logomernor.png" type="image/png">
+    <meta name="description" content="Conheça cursos superiores por grande área, formação e grau, com descrições, competências e cargas horárias de referência.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/cursos.css">
+</head>
+<body class="courses-page">
+    <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+    <header class="site-header" data-header>
+        <div class="container header-inner">
+            <a href="index.html#inicio" class="brand" aria-label="UniCheck — página inicial">
+                <img src="assets/images/logomernor.png" alt="UniCheck" width="498" height="211">
+            </a>
+
+            <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-navigation" aria-label="Abrir menu de navegação">
+                <span></span><span></span><span></span>
+            </button>
+
+            <div class="navigation" id="site-navigation">
+                <nav aria-label="Navegação principal">
+                    <ul class="nav-links">
+                        <li><a href="index.html#inicio">Início</a></li>
+                        <li><a href="cursos.html" aria-current="page">Cursos</a></li>
+                        <li><a href="index.html#recursos">Recursos</a></li>
+                        <li><a href="index.html#como-funciona">Como funciona</a></li>
+                        <li><a href="index.html#sobre">Sobre</a></li>
+                        <li><a href="index.html#faq">FAQ</a></li>
+                    </ul>
+                </nav>
+                <a class="button button-small button-outline" href="login-cadastro.html">Entrar</a>
+                <a class="button button-small" href="login-cadastro.html">Criar conta</a>
+            </div>
+        </div>
+    </header>
+
+    <main id="conteudo">
+        <section class="courses-hero" aria-labelledby="courses-title">
+            <div class="container courses-hero-inner">
+                <div class="courses-intro">
+                    <span class="eyebrow">Antes de escolher</span>
+                    <h1 id="courses-title">Cursos superiores, explicados em poucas linhas.</h1>
+                    <p>Um panorama das graduações brasileiras organizado por grande área e área de formação. Cada curso traz o que se estuda, a carga horária de referência e as competências esperadas de quem se forma — para você comparar caminhos sem abrir dezenas de páginas.</p>
+                </div>
+                <dl class="catalog-stats" aria-label="Estatísticas do catálogo">
+                    <div class="catalog-stat"><dd id="totalCursos">—</dd><dt>cursos descritos</dt></div>
+                    <div class="catalog-stat"><dd id="totalAreas">—</dd><dt>áreas de formação</dt></div>
+                    <div class="catalog-stat"><dd id="totalGrandes">—</dd><dt>grandes áreas</dt></div>
+                </dl>
+            </div>
+        </section>
+
+        <section class="area-explorer" aria-labelledby="area-explorer-title">
+            <div class="container">
+                <div class="area-explorer-heading">
+                    <div>
+                        <span class="eyebrow">Explore por área</span>
+                        <h2 id="area-explorer-title">Qual caminho você quer conhecer?</h2>
+                    </div>
+                    <p>Escolha uma grande área para ver suas formações. A busca continua considerando o catálogo inteiro.</p>
+                </div>
+                <div class="area-selector" id="areaSelector" role="group" aria-label="Selecionar grande área"></div>
+                <label class="area-select-mobile" for="areaSelectMobile">
+                    <span>Grande área</span>
+                    <select id="areaSelectMobile"></select>
+                </label>
+            </div>
+        </section>
+
+        <section class="catalog-controls" aria-labelledby="filters-title">
+            <h2 class="sr-only" id="filters-title">Buscar e filtrar cursos</h2>
+            <div class="container controls-inner">
+                <div class="filter-chips" role="group" aria-label="Filtrar por grau">
+                    <button class="filter-chip" type="button" data-tipo="todos" aria-pressed="true">Todos os graus</button>
+                    <button class="filter-chip" type="button" data-tipo="Bacharelado" aria-pressed="false">Bacharelado</button>
+                    <button class="filter-chip" type="button" data-tipo="Tecnólogo" aria-pressed="false">Tecnólogo</button>
+                    <button class="filter-chip" type="button" data-tipo="Licenciatura" aria-pressed="false">Licenciatura</button>
+                </div>
+                <label class="catalog-search" for="busca">
+                    <span class="sr-only">Buscar curso ou área</span>
+                    <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path>
+                    </svg>
+                    <input id="busca" type="search" placeholder="Buscar curso ou área" autocomplete="off">
+                </label>
+            </div>
+        </section>
+
+        <section class="catalog-section" aria-labelledby="catalog-title">
+            <div class="container catalog-heading">
+                <div>
+                    <span class="eyebrow" id="catalogEyebrow">Explore as formações</span>
+                    <h2 id="catalog-title">Encontre um caminho para seguir</h2>
+                </div>
+                <p id="resultCount" class="result-count" role="status" aria-live="polite"></p>
+            </div>
+            <div id="catalogo"></div>
+            <div class="container empty-state" id="vazio" hidden>
+                <h2 id="emptyTitle">Nenhum curso encontrado</h2>
+                <p id="emptyDescription">Ajuste a busca ou escolha outro filtro de grau.</p>
+            </div>
+            <noscript><p class="container empty-state">Ative o JavaScript para visualizar e filtrar o catálogo de cursos.</p></noscript>
+        </section>
+
+        <section class="container course-note" aria-labelledby="course-note-title">
+            <div class="note-icon" aria-hidden="true">i</div>
+            <div>
+                <h2 id="course-note-title">Sobre a carga horária indicada</h2>
+                <p>As cargas horárias são valores de referência: para os bacharelados e licenciaturas seguem as Diretrizes Curriculares Nacionais de cada curso e a carga mínima fixada pelo CNE; para os cursos superiores de tecnologia, a 4ª edição do Catálogo Nacional de Cursos Superiores de Tecnologia (CNCST), publicada pelo MEC em junho de 2024. Cada instituição pode ampliar esse mínimo, e estágio, atividades complementares e trabalho de conclusão variam conforme o projeto pedagógico. Confirme sempre a matriz curricular da instituição escolhida.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-grid">
+            <div class="footer-brand"><a href="index.html#inicio" class="brand"><img src="assets/images/logo.foto.png" alt="UniCheck" width="486" height="172"></a><p>Clareza e organização para uma jornada acadêmica mais leve.</p></div>
+            <div><h2>Plataforma</h2><ul><li><a href="cursos.html" aria-current="page">Cursos</a></li><li><a href="index.html#recursos">Recursos</a></li><li><a href="index.html#como-funciona">Como funciona</a></li><li><a href="index.html#sobre">Sobre</a></li></ul></div>
+            <div><h2>Suporte</h2><ul><li><a href="index.html#faq">Perguntas frequentes</a></li><li><a href="mailto:unicheck@outlook.com">Fale conosco</a></li><li><a href="https://discord.gg/uUURjuhQ" target="_blank" rel="noopener noreferrer">Comunidade</a></li></ul></div>
+            <div><h2>Acesso</h2><ul><li><a href="login-cadastro.html">Entrar</a></li><li><a href="login-cadastro.html">Criar conta</a></li></ul></div>
+        </div>
+        <div class="container footer-bottom"><p>© <span id="current-year"></span> UniCheck. Todos os direitos reservados.</p><a href="#conteudo">Voltar ao topo ↑</a></div>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <script src="js/cursos-data.js"></script>
+    <script src="js/cursos.js"></script>
+</body>
+</html>
