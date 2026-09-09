@@ -4,6 +4,7 @@
     const AVATAR_DIMENSION = 512;
     const AVATAR_QUALITY = 0.82;
     const ALLOWED_AVATAR_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+    const validation = window.UniCheckValidation;
 
     const state = {
         profile: {
@@ -181,27 +182,71 @@
         updateAvatarDisplay();
     }
 
-    function setBusy(isBusy) {
+    function setBusy(isBusy, actionLabel) {
         state.busy = isBusy;
         document.querySelectorAll("button, input").forEach(function (element) {
             if (element.id === "theme-toggle-switch") return;
             element.disabled = isBusy;
         });
+        document.getElementById("profileForm")?.setAttribute("aria-busy", String(isBusy));
+        document.getElementById("passwordForm")?.setAttribute("aria-busy", String(isBusy));
+
+        const saveLabel = document.getElementById("save-action-label");
+        if (isBusy && actionLabel && saveLabel) {
+            saveLabel.textContent = actionLabel;
+        } else if (!isBusy) {
+            syncActionArea();
+        }
+    }
+
+    function getFieldErrorElement(inputId) {
+        return document.getElementById(inputId + "Error");
+    }
+
+    function setFieldError(input, message) {
+        if (!(input instanceof HTMLInputElement)) return;
+        input.classList.add("error");
+        input.setAttribute("aria-invalid", "true");
+        const errorElement = getFieldErrorElement(input.id);
+        if (errorElement) errorElement.textContent = message;
+    }
+
+    function clearFieldError(input) {
+        if (!(input instanceof HTMLInputElement)) return;
+        input.classList.remove("error");
+        input.removeAttribute("aria-invalid");
+        const errorElement = getFieldErrorElement(input.id);
+        if (errorElement) errorElement.textContent = "";
     }
 
     function validateProfile(profile) {
-        if (!profile.nome || profile.nome.trim().length < 2) {
-            showNotification("Informe um nome com pelo menos 2 caracteres.", "error");
-            return false;
-        }
+        const nameInput = document.getElementById("nome");
+        const emailInput = document.getElementById("email");
+        const raInput = document.getElementById("ra");
+        const results = [
+            [nameInput, validation.validateFullName(profile.nome)],
+            [emailInput, validation.validateEmail(profile.email)],
+            [raInput, validation.validateRa(profile.ra)]
+        ];
 
-        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailPattern.test(profile.email || "")) {
-            showNotification("Informe um e-mail valido.", "error");
-            return false;
-        }
+        results.forEach(([input]) => clearFieldError(input));
+        profile.nome = results[0][1].value;
+        profile.email = results[1][1].value;
+        profile.ra = results[2][1].value;
 
-        return true;
+        if (nameInput) nameInput.value = profile.nome;
+        if (emailInput) emailInput.value = profile.email;
+        if (raInput) raInput.value = profile.ra || "";
+
+        let firstInvalid = null;
+        results.forEach(([input, result]) => {
+            if (result.valid) return;
+            setFieldError(input, result.error);
+            firstInvalid ||= input;
+        });
+
+        firstInvalid?.focus();
+        return !firstInvalid;
     }
 
     async function loadProfileData() {
@@ -260,16 +305,21 @@
     }
 
     async function saveProfileData() {
+        if (state.busy) return false;
+
         const nextProfile = {
-            nome: document.getElementById("nome")?.value.trim() || "",
-            email: document.getElementById("email")?.value.trim() || "",
-            ra: document.getElementById("ra")?.value.trim() || "",
+            nome: document.getElementById("nome")?.value || "",
+            email: document.getElementById("email")?.value || "",
+            ra: document.getElementById("ra")?.value || "",
             foto_url: state.profile.foto_url
         };
 
-        if (!validateProfile(nextProfile) || state.busy) return false;
+        if (!validateProfile(nextProfile)) {
+            showNotification("Revise os campos indicados antes de salvar.", "error");
+            return false;
+        }
 
-        setBusy(true);
+        setBusy(true, "Salvando...");
         try {
             if (state.photoRemoved && !state.pendingPhotoFile && state.initialProfile?.foto_url) {
                 await removeStoredAvatar();
@@ -332,7 +382,7 @@
             showNotification("Foto otimizada. Salve para enviar ao seu perfil.", "info");
         } catch (error) {
             console.error("[ProfileSettings] Falha ao otimizar avatar", error);
-            showNotification(error.message || "Nao foi possivel otimizar a foto.", "error");
+            showNotification("Não foi possível processar a foto selecionada.", "error");
         } finally {
             setBusy(false);
         }
@@ -372,30 +422,42 @@
     }
 
     function validatePassword(currentPassword, nextPassword, confirmation) {
+        const currentField = document.getElementById("senha-atual");
+        const nextField = document.getElementById("nova-senha");
+        const confirmationField = document.getElementById("confirmar-senha");
+        [currentField, nextField, confirmationField].forEach(clearFieldError);
+        let firstInvalid = null;
+
         if (!currentPassword) {
-            showNotification("Informe sua senha atual.", "error");
-            return false;
+            setFieldError(currentField, "Informe sua senha atual.");
+            firstInvalid ||= currentField;
         }
 
         if (nextPassword.length < 8) {
-            showNotification("A nova senha deve ter pelo menos 8 caracteres.", "error");
-            return false;
+            setFieldError(nextField, "A nova senha deve ter pelo menos 8 caracteres.");
+            firstInvalid ||= nextField;
         }
 
-        if (nextPassword !== confirmation) {
-            showNotification("As novas senhas nao coincidem.", "error");
-            return false;
+        if (!confirmation) {
+            setFieldError(confirmationField, "Confirme a nova senha.");
+            firstInvalid ||= confirmationField;
+        } else if (nextPassword !== confirmation) {
+            setFieldError(confirmationField, "As novas senhas não coincidem.");
+            firstInvalid ||= confirmationField;
         }
 
-        if (currentPassword === nextPassword) {
-            showNotification("A nova senha deve ser diferente da atual.", "error");
-            return false;
+        if (currentPassword && currentPassword === nextPassword) {
+            setFieldError(nextField, "A nova senha deve ser diferente da atual.");
+            firstInvalid ||= nextField;
         }
 
-        return true;
+        firstInvalid?.focus();
+        return !firstInvalid;
     }
 
     async function updatePassword() {
+        if (state.busy) return false;
+
         const currentField = document.getElementById("senha-atual");
         const nextField = document.getElementById("nova-senha");
         const confirmationField = document.getElementById("confirmar-senha");
@@ -403,9 +465,12 @@
         const nextPassword = nextField?.value || "";
         const confirmation = confirmationField?.value || "";
 
-        if (!validatePassword(currentPassword, nextPassword, confirmation) || state.busy) return false;
+        if (!validatePassword(currentPassword, nextPassword, confirmation)) {
+            showNotification("Revise os campos indicados antes de atualizar a senha.", "error");
+            return false;
+        }
 
-        setBusy(true);
+        setBusy(true, "Atualizando...");
         try {
             const user = await getAuthenticatedUser();
             if (!user.email) throw new Error("A conta autenticada nao possui e-mail.");
@@ -501,6 +566,7 @@
     function cancelCurrentChanges() {
         if (state.activeSection === "seguranca") {
             document.getElementById("passwordForm")?.reset();
+            document.querySelectorAll("#passwordForm input").forEach(clearFieldError);
             showNotification("Campos de senha limpos.", "info");
             return;
         }
@@ -511,6 +577,7 @@
             state.pendingPhotoFile = null;
             state.photoRemoved = false;
             updateProfileView();
+            document.querySelectorAll("#profileForm input").forEach(clearFieldError);
             showNotification("Alteracoes descartadas.", "info");
         }
     }
@@ -534,6 +601,12 @@
         document.getElementById("passwordForm")?.addEventListener("submit", async function (event) {
             event.preventDefault();
             await updatePassword();
+        });
+
+        document.querySelectorAll("#profileForm input, #passwordForm input").forEach(function (input) {
+            input.addEventListener("input", function () {
+                clearFieldError(input);
+            });
         });
     }
 
