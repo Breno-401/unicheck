@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     const auth = window.UniCheckAuth;
+    const validation = window.UniCheckValidation;
     const toast = document.getElementById("toast");
     const loginForm = document.getElementById("loginForm");
     const registerForm = document.getElementById("registerForm");
@@ -14,10 +15,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const authSubtitle = document.getElementById("authSubtitle");
     const switchPanelButtons = document.querySelectorAll("[data-switch-panel]");
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-
     let toastTimeout = null;
+    let loginPending = false;
+    let registerPending = false;
 
     if (!auth) {
         console.error("UniCheckAuth nao encontrado. Verifique a inclusao de js/core/config.js e js/core/auth.js.");
@@ -81,16 +81,24 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!(emailInput instanceof HTMLInputElement)) return false;
         if (!(passwordInput instanceof HTMLInputElement)) return false;
 
-        let valid = true;
+        let firstInvalid = null;
         clearFieldError(emailInput);
         clearFieldError(passwordInput);
 
-        if (!emailInput.value.trim()) valid = setFieldError(emailInput, "Informe seu e-mail.");
-        else if (!emailRegex.test(emailInput.value.trim())) valid = setFieldError(emailInput, "Informe um e-mail valido.");
+        const emailResult = validation.validateEmail(emailInput.value);
+        emailInput.value = emailResult.value;
+        if (!emailResult.valid) {
+            setFieldError(emailInput, emailResult.error);
+            firstInvalid ||= emailInput;
+        }
 
-        if (!passwordInput.value) valid = setFieldError(passwordInput, "Informe sua senha.");
+        if (!passwordInput.value) {
+            setFieldError(passwordInput, "Informe sua senha.");
+            firstInvalid ||= passwordInput;
+        }
 
-        return valid;
+        firstInvalid?.focus();
+        return !firstInvalid;
     }
 
     function validateRegister() {
@@ -104,15 +112,27 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!(nascimentoInput instanceof HTMLInputElement)) return false;
         if (!(senhaInput instanceof HTMLInputElement)) return false;
 
-        let valid = true;
+        let firstInvalid = null;
         [nomeInput, emailInput, nascimentoInput, senhaInput].forEach(clearFieldError);
 
-        if (nomeInput.value.trim().length < 3) valid = setFieldError(nomeInput, "Informe seu nome completo.");
-        if (!emailRegex.test(emailInput.value.trim())) valid = setFieldError(emailInput, "Informe um e-mail valido.");
-        if (!nascimentoInput.value) valid = setFieldError(nascimentoInput, "Informe sua data de nascimento.");
-        if (!passwordRegex.test(senhaInput.value)) valid = setFieldError(senhaInput, "Senha fraca. Use 8+ caracteres, maiuscula e numero.");
+        const results = [
+            [nomeInput, validation.validateFullName(nomeInput.value)],
+            [emailInput, validation.validateEmail(emailInput.value)],
+            [nascimentoInput, validation.validateBirthDate(nascimentoInput.value)],
+            [senhaInput, validation.validateRegistrationPassword(senhaInput.value)]
+        ];
 
-        return valid;
+        nomeInput.value = results[0][1].value;
+        emailInput.value = results[1][1].value;
+
+        results.forEach(([input, result]) => {
+            if (result.valid) return;
+            setFieldError(input, result.error);
+            firstInvalid ||= input;
+        });
+
+        firstInvalid?.focus();
+        return !firstInvalid;
     }
 
     function evaluatePasswordStrength(password) {
@@ -138,7 +158,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function setSubmitLoading(button, isLoading) {
         if (!(button instanceof HTMLButtonElement)) return;
+        const form = button.closest("form");
         button.disabled = isLoading;
+        form?.setAttribute("aria-busy", String(isLoading));
+        form?.querySelectorAll("input, button").forEach(control => {
+            if (control !== button) control.disabled = isLoading;
+        });
         button.textContent = isLoading ? "Processando..." : button.dataset.defaultLabel || button.textContent;
     }
 
@@ -180,12 +205,21 @@ document.addEventListener("DOMContentLoaded", () => {
     if (forgotPasswordLink) {
         forgotPasswordLink.addEventListener("click", event => {
             event.preventDefault();
-            showToast("Recuperacao de senha pode ser adicionada depois via Supabase Auth.", "error");
+            showToast("A recuperação de senha ainda não está disponível.", "error");
         });
     }
 
     if (senhaCadastroInput instanceof HTMLInputElement) {
         senhaCadastroInput.addEventListener("input", () => updateStrengthUI(senhaCadastroInput.value));
+    }
+
+    const birthDateInput = document.getElementById("nascimentoCadastro");
+    if (birthDateInput instanceof HTMLInputElement) {
+        const now = new Date();
+        const year = String(now.getFullYear());
+        const month = String(now.getMonth() + 1).padStart(2, "0");
+        const day = String(now.getDate()).padStart(2, "0");
+        birthDateInput.max = `${year}-${month}-${day}`;
     }
 
     document.addEventListener("input", event => {
@@ -196,12 +230,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (loginForm) {
         loginForm.addEventListener("submit", async event => {
             event.preventDefault();
+            if (loginPending) return;
             const submitButton = document.getElementById("loginSubmit");
             if (!validateLogin()) {
                 showToast("Corrija os erros para entrar.", "error");
                 return;
             }
 
+            loginPending = true;
             setSubmitLoading(submitButton, true);
             try {
                 const emailInput = document.getElementById("loginEmail");
@@ -219,8 +255,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 showToast("Login realizado com sucesso!", "success");
                 window.location.replace("../platform/index-interno.html");
             } catch (error) {
+                console.error("[UniCheckLogin] Falha ao entrar", error);
                 showToast(auth?.normalizeErrorMessage(error) || "Nao foi possivel entrar.", "error");
             } finally {
+                loginPending = false;
                 setSubmitLoading(submitButton, false);
             }
         });
@@ -229,12 +267,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (registerForm) {
         registerForm.addEventListener("submit", async event => {
             event.preventDefault();
+            if (registerPending) return;
             const submitButton = document.getElementById("registerSubmit");
             if (!validateRegister()) {
                 showToast("Corrija os erros para concluir o cadastro.", "error");
                 return;
             }
 
+            registerPending = true;
             setSubmitLoading(submitButton, true);
             try {
                 const nomeInput = document.getElementById("nomeCadastro");
@@ -243,8 +283,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 const senhaInput = document.getElementById("senhaCadastro");
 
                 const result = await auth.register({
-                    fullName: nomeInput.value.trim(),
-                    email: emailInput.value.trim(),
+                    fullName: nomeInput.value,
+                    email: emailInput.value,
                     birthDate: nascimentoInput.value,
                     password: senhaInput.value
                 });
@@ -255,13 +295,15 @@ document.addEventListener("DOMContentLoaded", () => {
                     showToast("Cadastro realizado. Verifique seu e-mail para confirmar a conta.", "success");
                 }
 
-                setSubmitLoading(submitButton, false);
                 registerForm.reset();
                 updateStrengthUI("");
                 setActiveTab("loginPanel");
             } catch (error) {
-                setSubmitLoading(submitButton, false);
+                console.error("[UniCheckRegister] Falha ao cadastrar", error);
                 showToast(auth?.normalizeErrorMessage(error) || "Nao foi possivel concluir o cadastro.", "error");
+            } finally {
+                registerPending = false;
+                setSubmitLoading(submitButton, false);
             }
         });
     }
