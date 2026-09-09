@@ -54,16 +54,16 @@
                 </nav>
 
                 <section id="loginPanel" class="form-panel is-active" role="tabpanel" aria-labelledby="authTitle">
-                    <form id="loginForm" novalidate>
+                    <form id="loginForm" novalidate aria-busy="false">
                         <div class="field-group">
                             <label class="field-label" for="loginEmail">E-mail</label>
-                            <input type="email" placeholder="seu.email@exemplo.com" id="loginEmail" autocomplete="email" required>
+                            <input type="email" placeholder="seu.email@exemplo.com" id="loginEmail" autocomplete="email" inputmode="email" maxlength="320" autocapitalize="none" spellcheck="false" aria-describedby="loginEmailError" required>
                             <p class="field-error" id="loginEmailError" aria-live="polite"></p>
                         </div>
                         <div class="field-group">
                             <div class="label-row"><label class="field-label" for="loginSenha">Senha</label><a href="#" class="action-link" id="forgotPasswordLink">Esqueceu a senha?</a></div>
                             <div class="password-field">
-                                <input type="password" placeholder="Digite sua senha" id="loginSenha" autocomplete="current-password" required minlength="8">
+                                <input type="password" placeholder="Digite sua senha" id="loginSenha" autocomplete="current-password" aria-describedby="loginSenhaError" required>
                                 <button type="button" class="toggle-password" data-toggle-password="loginSenha" aria-label="Mostrar senha" aria-pressed="false">Mostrar</button>
                             </div>
                             <p class="field-error" id="loginSenhaError" aria-live="polite"></p>
@@ -74,26 +74,26 @@
                 </section>
 
                 <section id="registerPanel" class="form-panel" role="tabpanel" aria-labelledby="authTitle" hidden>
-                    <form id="registerForm" novalidate>
+                    <form id="registerForm" novalidate aria-busy="false">
                         <div class="field-group">
                             <label class="field-label" for="nomeCadastro">Nome completo</label>
-                            <input type="text" placeholder="Como você gostaria de ser chamado" id="nomeCadastro" autocomplete="name" required>
+                            <input type="text" placeholder="Nome e sobrenome" id="nomeCadastro" autocomplete="name" maxlength="100" aria-describedby="nomeCadastroError" required>
                             <p class="field-error" id="nomeCadastroError" aria-live="polite"></p>
                         </div>
                         <div class="field-group">
                             <label class="field-label" for="emailCadastro">E-mail</label>
-                            <input type="email" placeholder="seu.email@exemplo.com" id="emailCadastro" autocomplete="email" required>
+                            <input type="email" placeholder="seu.email@exemplo.com" id="emailCadastro" autocomplete="email" inputmode="email" maxlength="320" autocapitalize="none" spellcheck="false" aria-describedby="emailCadastroError" required>
                             <p class="field-error" id="emailCadastroError" aria-live="polite"></p>
                         </div>
                         <div class="field-group">
                             <label class="field-label" for="nascimentoCadastro">Data de nascimento</label>
-                            <input type="date" id="nascimentoCadastro" autocomplete="bday" required>
+                            <input type="date" id="nascimentoCadastro" autocomplete="bday" aria-describedby="nascimentoCadastroError" required>
                             <p class="field-error" id="nascimentoCadastroError" aria-live="polite"></p>
                         </div>
                         <div class="field-group">
                             <label class="field-label" for="senhaCadastro">Crie uma senha</label>
                             <div class="password-field">
-                                <input type="password" placeholder="8+ caracteres, maiúscula e número" id="senhaCadastro" autocomplete="new-password" required minlength="8">
+                                <input type="password" placeholder="8+ caracteres, maiúscula e número" id="senhaCadastro" autocomplete="new-password" aria-describedby="strengthText senhaCadastroError" required minlength="8">
                                 <button type="button" class="toggle-password" data-toggle-password="senhaCadastro" aria-label="Mostrar senha" aria-pressed="false">Mostrar</button>
                             </div>
                             <div class="strength-wrap"><div class="strength-track"><div id="strength" class="strength" aria-hidden="true"></div></div><p id="strengthText" class="strength-text">Força da senha: fraca</p></div>
@@ -112,6 +112,7 @@
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../js/core/config.js"></script>
+    <script src="../js/core/validation.js"></script>
     <script src="../js/core/auth.js"></script>
     <script src="js/login.js"></script>
 </body>
