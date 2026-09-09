@@ -88,21 +88,24 @@
                         </div>
                     </div>
 
-                    <form class="form-grid" id="profileForm" novalidate>
+                    <form class="form-grid" id="profileForm" novalidate aria-busy="false">
                         <div class="form-group">
                             <label class="form-label" for="nome">Nome completo</label>
-                            <input type="text" id="nome" class="form-input" autocomplete="name" minlength="2" maxlength="120" required>
+                            <input type="text" id="nome" class="form-input" autocomplete="name" maxlength="100" aria-describedby="nomeError" required>
+                            <p class="form-error" id="nomeError" aria-live="polite"></p>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label" for="email">E-mail</label>
-                            <input type="email" id="email" class="form-input" autocomplete="email" inputmode="email" maxlength="320" required>
-                            <p class="field-hint">A alteração pode exigir confirmação no novo endereço.</p>
+                            <input type="email" id="email" class="form-input" autocomplete="email" inputmode="email" maxlength="320" autocapitalize="none" spellcheck="false" aria-describedby="emailHint emailError" required>
+                            <p class="field-hint" id="emailHint">A alteração pode exigir confirmação no novo endereço.</p>
+                            <p class="form-error" id="emailError" aria-live="polite"></p>
                         </div>
 
                         <div class="form-group full-width">
                             <label class="form-label" for="ra">Registro acadêmico (RA)</label>
-                            <input type="text" id="ra" class="form-input" autocomplete="off" maxlength="40" placeholder="Opcional">
+                            <input type="text" id="ra" class="form-input" autocomplete="off" maxlength="40" aria-describedby="raError" placeholder="Opcional">
+                            <p class="form-error" id="raError" aria-live="polite"></p>
                         </div>
                     </form>
                 </section>
@@ -138,20 +141,23 @@
                         </div>
                     </div>
 
-                    <form class="form-grid" id="passwordForm" novalidate>
+                    <form class="form-grid" id="passwordForm" novalidate aria-busy="false">
                         <div class="form-group full-width">
                             <label class="form-label" for="senha-atual">Senha atual</label>
-                            <input type="password" id="senha-atual" class="form-input" autocomplete="current-password" required>
+                            <input type="password" id="senha-atual" class="form-input" autocomplete="current-password" aria-describedby="senha-atualError" required>
+                            <p class="form-error" id="senha-atualError" aria-live="polite"></p>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label" for="nova-senha">Nova senha</label>
-                            <input type="password" id="nova-senha" class="form-input" autocomplete="new-password" minlength="8" required>
+                            <input type="password" id="nova-senha" class="form-input" autocomplete="new-password" minlength="8" aria-describedby="nova-senhaError" required>
+                            <p class="form-error" id="nova-senhaError" aria-live="polite"></p>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label" for="confirmar-senha">Confirmar nova senha</label>
-                            <input type="password" id="confirmar-senha" class="form-input" autocomplete="new-password" minlength="8" required>
+                            <input type="password" id="confirmar-senha" class="form-input" autocomplete="new-password" minlength="8" aria-describedby="confirmar-senhaError" required>
+                            <p class="form-error" id="confirmar-senhaError" aria-live="polite"></p>
                         </div>
                     </form>
                 </section>
@@ -176,6 +182,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../../../js/core/config.js"></script>
+    <script src="../../../js/core/validation.js"></script>
     <script src="../../../js/core/auth.js"></script>
     <script src="../../../js/services/profile.js"></script>
     <script src="../../../js/services/activity.js"></script>
