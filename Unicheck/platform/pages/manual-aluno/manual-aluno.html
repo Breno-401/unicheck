@@ -60,26 +60,25 @@
             </header>
 
             <div class="manual-content">
-                <section id="manualDiscovery" aria-labelledby="manualDiscoveryTitle">
-                    <div class="manual-intro"><div><span class="manual-kicker">Orientação sem complicação</span><h2 id="manualDiscoveryTitle">Encontre respostas para sua vida acadêmica</h2><p>Procedimentos, serviços e orientações do UniSales organizados de forma simples para você entender o que importa e onde resolver.</p><span class="manual-source-note"><i data-lucide="book-open-check"></i> Baseado no Manual do Aluno oficial do UniSales</span></div></div>
+                <section id="manualDiscovery" aria-label="Encontre uma orientação">
                     <div class="manual-search-area">
-                        <label for="manualSearch">Buscar no Manual do Aluno</label>
-                        <div class="manual-search-box"><i data-lucide="search" aria-hidden="true"></i><input id="manualSearch" type="search" autocomplete="off" placeholder="Buscar no Manual do Aluno..."><button id="clearManualSearch" type="button" aria-label="Limpar busca" hidden><i data-lucide="x"></i></button></div>
+                        <label for="manualSearch">Qual é a sua dúvida?</label>
+                        <div class="manual-search-box"><i data-lucide="search" aria-hidden="true"></i><input id="manualSearch" type="search" autocomplete="off" placeholder="Ex.: matrícula, boleto, biblioteca..." aria-controls="manualGrid"><button id="clearManualSearch" type="button" aria-label="Limpar busca" hidden><i data-lucide="x"></i></button></div>
                         <p id="manualResultsStatus" class="manual-results-status" role="status" aria-live="polite"></p>
                     </div>
-                    <section class="manual-quick-section" aria-labelledby="manualQuickTitle"><div class="manual-section-heading"><div><span class="manual-kicker">Direto ao assunto</span><h2 id="manualQuickTitle">Acessos rápidos</h2></div></div><div class="manual-quick-links" id="manualQuickLinks"></div></section>
-                    <div class="manual-filters" id="manualFilters" role="group" aria-label="Filtrar conteúdos por categoria"></div>
-                    <div class="manual-section-heading"><div><span class="manual-kicker">Navegue por assunto</span><h2 id="manualGridTitle">Categorias do Manual</h2></div><span id="manualCount"></span></div>
+                    <section class="manual-quick-section" id="manualQuickSection" aria-labelledby="manualQuickTitle"><div class="manual-section-heading"><h2 id="manualQuickTitle">No dia a dia</h2></div><div class="manual-quick-links" id="manualQuickLinks"></div></section>
+                    <div class="manual-filters" id="manualFilters" role="group" aria-label="Filtrar conteúdos por categoria" hidden></div>
+                    <div class="manual-section-heading"><div><h2 id="manualGridTitle" tabindex="-1">Encontre por assunto</h2><span id="manualCount"></span></div><button id="clearManualFilters" class="manual-clear-filters" type="button" hidden>Limpar filtros</button></div>
                     <div class="manual-grid" id="manualGrid" aria-labelledby="manualGridTitle"></div>
                     <div class="manual-empty" id="manualEmpty" hidden><i data-lucide="search-x"></i><h3>Nenhum conteúdo encontrado</h3><p>Tente outro termo ou consulte todas as categorias.</p><button id="resetManualFilters" type="button">Ver todo o Manual</button></div>
                 </section>
 
                 <article class="manual-detail" id="manualDetail" hidden aria-labelledby="manualDetailTitle">
                     <nav class="manual-breadcrumb" id="manualBreadcrumb" aria-label="Trilha de navegação"></nav>
-                    <button class="manual-back" id="manualBack" type="button"><i data-lucide="arrow-left"></i><span id="manualBackLabel">Voltar ao Manual</span></button>
+                    <button class="manual-back" id="manualBack" type="button"><i data-lucide="arrow-left"></i><span id="manualBackLabel">Voltar à busca e aos assuntos</span></button>
                     <div class="manual-detail-layout"><div class="manual-article"><div class="manual-detail-meta"><span id="manualDetailCategory"></span><span><i data-lucide="clock"></i><span id="manualDetailTime"></span></span></div><h1 id="manualDetailTitle" tabindex="-1"></h1><p class="manual-detail-summary" id="manualDetailSummary"></p><div class="manual-detail-body" id="manualDetailBody"></div><div class="manual-temporal-note" id="manualTemporalNote" hidden><i data-lucide="refresh-cw"></i><div><strong>Informação sujeita a atualização</strong><p id="manualTemporalText"></p></div></div><footer class="manual-source-footer"><i data-lucide="book-marked"></i><div><span>Fonte institucional</span><strong>Manual do Aluno 2024 — UniSales</strong><small id="manualSourcePages"></small></div></footer></div>
                         <aside class="manual-detail-aside"><section class="manual-related" aria-labelledby="manualRelatedTitle"><span class="manual-kicker">Continue explorando</span><h2 id="manualRelatedTitle">Você também pode precisar</h2><div id="manualRelatedList"></div></section></aside></div>
-                    <nav class="manual-article-navigation" aria-label="Navegação entre conteúdos"><button id="manualPrevious" type="button"></button><button id="manualNext" type="button"></button></nav>
+                    <nav class="manual-article-navigation" aria-label="Navegação entre conteúdos"><a id="manualPrevious" hidden></a><a id="manualNext" hidden></a></nav>
                 </article>
             </div>
         </main>
