@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="../../shared/js/sidebar-preference.js"></script>
     <title>Manual do Aluno - UniCheck</title>
     <link rel="icon" href="../../../assets/brand/favicon.svg" type="image/svg+xml" sizes="any">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,7 +27,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="logo-section"><div class="sidebar-logo-enhanced"><img src="../../assets/images/logo.png" alt="UniCheck Logo" class="sidebar-logo-image"></div><span class="logo-text">UniCheck</span></div>
-                <button class="sidebar-toggle" id="sidebarToggle" type="button" title="Recolher ou expandir menu lateral" aria-label="Recolher ou expandir menu lateral"><span class="hamburger-menu" aria-hidden="true"><span class="hamburger-line"></span><span class="hamburger-line"></span><span class="hamburger-line"></span></span></button>
+                <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-controls="sidebar" aria-expanded="true" aria-label="Recolher navegação" title="Recolher navegação"><i data-lucide="panel-left-close" aria-hidden="true"></i></button>
             </div>
             <div class="user-profile"><div class="user-avatar"><span>JS</span></div><div class="user-info"><h4>João Silva</h4><p>Aluno UniSales</p></div><div class="user-status"><span class="status-indicator online"></span></div></div>
             <nav class="sidebar-nav" aria-label="Navegação principal">
@@ -48,7 +49,7 @@
             <header class="main-header manual-header">
                 <div class="header-top">
                     <div class="header-mobile-controls"><button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-label="Abrir menu lateral"><i data-lucide="menu"></i></button></div>
-                    <div class="welcome-section"><p class="manual-eyebrow">Central de orientação acadêmica</p><h1 class="welcome-title">Manual do Aluno</h1><p class="welcome-subtitle">Tudo o que você precisa saber para navegar pela vida acadêmica.</p></div>
+                    <nav class="manual-page-breadcrumb" aria-label="Localização"><a href="../../index-interno.html">Início</a><span aria-hidden="true">/</span><span aria-current="page">Manual do Aluno</span></nav>
                 </div>
                 <div class="header-bottom-enhanced manual-header-actions"><div aria-hidden="true"></div><div class="header-actions-enhanced">
                     <button class="theme-toggle-mobile" id="themeToggleMobile" type="button" aria-label="Alternar tema claro ou escuro"><i data-lucide="moon"></i></button>
@@ -62,21 +63,21 @@
             <div class="manual-content">
                 <section id="manualDiscovery" aria-label="Encontre uma orientação">
                     <div class="manual-search-area">
-                        <label for="manualSearch">Qual é a sua dúvida?</label>
-                        <div class="manual-search-box"><i data-lucide="search" aria-hidden="true"></i><input id="manualSearch" type="search" autocomplete="off" placeholder="Ex.: matrícula, boleto, biblioteca..." aria-controls="manualGrid"><button id="clearManualSearch" type="button" aria-label="Limpar busca" hidden><i data-lucide="x"></i></button></div>
+                        <p class="manual-eyebrow">Central de orientação</p><h1><label for="manualSearch">Qual é a sua dúvida?</label></h1><p class="manual-search-intro">Encontre o que precisa e saiba por onde começar.</p>
+                        <div class="manual-search-box"><i data-lucide="search" aria-hidden="true"></i><input id="manualSearch" type="search" autocomplete="off" placeholder="Ex.: boleto ou matrícula" aria-controls="manualGrid"><button id="clearManualSearch" type="button" aria-label="Limpar busca" hidden><i data-lucide="x"></i></button></div>
                         <p id="manualResultsStatus" class="manual-results-status" role="status" aria-live="polite"></p>
                     </div>
-                    <section class="manual-quick-section" id="manualQuickSection" aria-labelledby="manualQuickTitle"><div class="manual-section-heading"><h2 id="manualQuickTitle">No dia a dia</h2></div><div class="manual-quick-links" id="manualQuickLinks"></div></section>
+                    <section class="manual-quick-section" id="manualQuickSection" aria-labelledby="manualQuickTitle"><div class="manual-section-heading"><h2 id="manualQuickTitle">Atalhos do dia a dia</h2></div><div class="manual-quick-links" id="manualQuickLinks"></div></section>
                     <div class="manual-filters" id="manualFilters" role="group" aria-label="Filtrar conteúdos por categoria" hidden></div>
                     <div class="manual-section-heading"><div><h2 id="manualGridTitle" tabindex="-1">Encontre por assunto</h2><span id="manualCount"></span></div><button id="clearManualFilters" class="manual-clear-filters" type="button" hidden>Limpar filtros</button></div>
                     <div class="manual-grid" id="manualGrid" aria-labelledby="manualGridTitle"></div>
-                    <div class="manual-empty" id="manualEmpty" hidden><i data-lucide="search-x"></i><h3>Nenhum conteúdo encontrado</h3><p>Tente outro termo ou consulte todas as categorias.</p><button id="resetManualFilters" type="button">Ver todo o Manual</button></div>
+                    <div class="manual-empty" id="manualEmpty" hidden><i data-lucide="search-x"></i><h3>Nenhum conteúdo encontrado</h3><p>Use palavras como boleto, histórico ou frequência, presentes no Manual. Se filtrou por assunto, tente também todas as categorias.</p><button id="resetManualFilters" type="button">Limpar busca e filtros</button><p><a href="../ajuda-suporte/ajuda-suporte.html">Problema com o UniCheck? Acesse Ajuda e Suporte</a></p></div>
                 </section>
 
                 <article class="manual-detail" id="manualDetail" hidden aria-labelledby="manualDetailTitle">
                     <nav class="manual-breadcrumb" id="manualBreadcrumb" aria-label="Trilha de navegação"></nav>
                     <button class="manual-back" id="manualBack" type="button"><i data-lucide="arrow-left"></i><span id="manualBackLabel">Voltar à busca e aos assuntos</span></button>
-                    <div class="manual-detail-layout"><div class="manual-article"><div class="manual-detail-meta"><span id="manualDetailCategory"></span><span><i data-lucide="clock"></i><span id="manualDetailTime"></span></span></div><h1 id="manualDetailTitle" tabindex="-1"></h1><p class="manual-detail-summary" id="manualDetailSummary"></p><div class="manual-detail-body" id="manualDetailBody"></div><div class="manual-temporal-note" id="manualTemporalNote" hidden><i data-lucide="refresh-cw"></i><div><strong>Informação sujeita a atualização</strong><p id="manualTemporalText"></p></div></div><footer class="manual-source-footer"><i data-lucide="book-marked"></i><div><span>Fonte institucional</span><strong>Manual do Aluno 2024 — UniSales</strong><small id="manualSourcePages"></small></div></footer></div>
+                    <div class="manual-detail-layout"><div class="manual-article"><div class="manual-detail-meta"><span id="manualDetailCategory"></span><span><i data-lucide="clock"></i><span id="manualDetailTime"></span></span></div><h1 id="manualDetailTitle" tabindex="-1"></h1><p class="manual-detail-summary" id="manualDetailSummary"></p><div class="manual-detail-body" id="manualDetailBody"></div><div class="manual-temporal-note" id="manualTemporalNote" hidden><i data-lucide="refresh-cw"></i><div><strong>Informação sujeita a atualização</strong><p id="manualTemporalText"></p></div></div></div>
                         <aside class="manual-detail-aside"><section class="manual-related" aria-labelledby="manualRelatedTitle"><span class="manual-kicker">Continue explorando</span><h2 id="manualRelatedTitle">Você também pode precisar</h2><div id="manualRelatedList"></div></section></aside></div>
                     <nav class="manual-article-navigation" aria-label="Navegação entre conteúdos"><a id="manualPrevious" hidden></a><a id="manualNext" hidden></a></nav>
                 </article>

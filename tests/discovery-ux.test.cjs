@@ -37,7 +37,10 @@ function loadPage(kind) {
         matchMedia: () => ({ matches: false }),
         history: { pushState() {}, replaceState() {} }
     };
-    const context = vm.createContext({ window, document, console, URL,
+    const historyEntries = [];
+    window.history.pushState = (_, __, url) => { window.location = new URL(url, window.location); historyEntries.push(window.location.href); };
+    window.history.replaceState = (_, __, url) => { window.location = new URL(url, window.location); historyEntries[historyEntries.length - 1] = window.location.href; };
+    const context = vm.createContext({ window, document, console, URL, URLSearchParams,
         history: window.history, requestAnimationFrame: callback => callback(),
         localStorage: { getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value) }
     });
@@ -46,7 +49,7 @@ function loadPage(kind) {
     if (isBenefits) vm.runInContext(read(benefitsDir + 'beneficios-brand-assets.js'), context);
     const exports = isBenefits
         ? 'state, cacheElements, bindEvents, getFilteredBenefits, renderBenefits, renderCategoryFilters, clearFilters, createBenefitCard, openDetails, closeModal, trapModalFocus, toggleFavorite'
-        : 'state, cacheElements, bindEvents, filteredArticles, renderDiscovery, renderFilters, resetFilters, openArticle, showDiscovery, renderSection, readHash';
+        : 'state, cacheElements, bindEvents, filteredArticles, renderDiscovery, renderFilters, resetFilters, openArticle, showDiscovery, renderSection, readHash, categoryCard, resultCard, renderNextStep';
     const source = read(isBenefits ? benefitsDir + 'beneficios-estudantis.js' : manualDir + 'manual-aluno.js');
     vm.runInContext(source.replace(/\}\)\(\);\s*$/, `window.testPage = {${exports}}; })();`), context);
     const api = window.testPage;
@@ -237,7 +240,8 @@ test('Manual mantém contexto ao voltar; limpar recupera índice e atalhos', () 
     api.resetFilters();
     assert.equal(nodes.get('manualEmpty').hidden, true);
     assert.equal(nodes.get('manualQuickSection').hidden, false);
-    assert.match(nodes.get('manualGrid').innerHTML, /manual-topic-links/);
+    assert.equal((nodes.get('manualGrid').innerHTML.match(/data-open-category=/g) || []).length, 8);
+    assert.doesNotMatch(nodes.get('manualGrid').innerHTML, /data-open-article=/);
 });
 
 test('Manual mantém seções, ressalvas e referências; detalhes complementares são expansíveis', () => {
@@ -251,7 +255,8 @@ test('Manual mantém seções, ressalvas e referências; detalhes complementares
             if (section.content) assert.ok(markup.includes(section.content));
         }
         assert.equal(nodes.get('manualTemporalNote').hidden, article.temporalFields.length === 0);
-        assert.match(nodes.get('manualSourcePages').textContent, /p\./);
+        assert.ok(article.sourceReference.pages.length > 0);
+        assert.doesNotMatch(markup, /Fonte institucional|manual-source-footer/);
     }
     assert.match(api.renderSection({ type: 'knowledge', title: 'Detalhes', content: 'Texto preservado' }), /<details/);
     assert.doesNotMatch(api.renderSection({ type: 'attention', title: 'Atenção', content: 'Restrição' }), /<details/);
@@ -269,4 +274,125 @@ test('Manual suporta links profundos inválidos e não duplica categorias ou ref
         article.relatedContent.forEach(id => assert.ok(ids.has(id)));
     }
     data.quickAccess.forEach(id => assert.ok(ids.has(id)));
+});
+
+test('Manual ordena título antes de palavras-chave, resumo e conteúdo, com empate estável', () => {
+    const { api, data } = loadPage('manual');
+    api.state.query = 'boleto';
+    assert.equal(api.filteredArticles()[0].id, 'mensalidades-boletos');
+    api.state.query = 'segunda via boleto';
+    assert.equal(api.filteredArticles()[0].id, 'mensalidades-boletos');
+    const fixtures = ['title', 'keywords', 'summary', 'content', 'content'].map((field, index) => ({
+        id: `ranking-${index}`, category: data.categories[0].id, title: 'Guia', keywords: [], summary: '', content: [], sections: [],
+        [field]: ['keywords', 'content'].includes(field) ? ['unico'] : 'unico'
+    }));
+    // Re-run the view with controlled data so ranking priorities are tested independently of catalog accidents.
+    const context = vm.createContext({ window: { UniCheckManualData: { ...data, articles: fixtures } }, document: { addEventListener() {} }, URLSearchParams });
+    const source = read(manualDir + 'manual-aluno.js').replace(/\}\)\(\);\s*$/, 'window.api = { state, filteredArticles }; })();');
+    vm.runInContext(source, context);
+    context.window.api.state.query = 'unico';
+    assert.deepEqual(Array.from(context.window.api.filteredArticles(), a => a.id), fixtures.map(a => a.id));
+    assert.deepEqual(Array.from(context.window.api.filteredArticles(), a => a.id), fixtures.map(a => a.id));
+});
+
+test('Manual serializa busca e categoria; atualizar, voltar e avançar recuperam o contexto da URL', () => {
+    const { api, nodes, window } = loadPage('manual');
+    nodes.get('manualSearch').listeners.input({ target: { value: 'segunda via boleto' } });
+    const resultsURL = window.location.href;
+    api.openArticle('mensalidades-boletos');
+    const articleURL = window.location.href;
+    api.state.query = '';
+    api.readHash();
+    assert.equal(api.state.query, 'segunda via boleto');
+    assert.equal(api.state.activeArticle, 'mensalidades-boletos');
+    assert.equal(nodes.get('manualSearch').value, 'segunda via boleto');
+    window.location = new URL(resultsURL);
+    api.readHash();
+    assert.equal(nodes.get('manualDetail').hidden, true);
+    assert.equal(api.filteredArticles()[0].id, 'mensalidades-boletos');
+    window.location = new URL(articleURL);
+    api.readHash();
+    assert.equal(nodes.get('manualDetail').hidden, false);
+    api.showDiscovery(true, 'utilidades');
+    const categoryURL = window.location.href;
+    api.state.category = 'all';
+    api.readHash();
+    assert.equal(api.state.category, 'utilidades');
+    assert.ok(categoryURL.includes('categoria=utilidades'));
+});
+
+test('Manual revela uma categoria por vez e busca nova atravessa todas as categorias', () => {
+    const { api, data, nodes } = loadPage('manual');
+    for (const category of data.categories) {
+        api.showDiscovery(true, category.id);
+        assert.ok(api.filteredArticles().every(article => article.category === category.id));
+        assert.equal(api.filteredArticles().length, data.articles.filter(article => article.category === category.id).length);
+    }
+    nodes.get('manualSearch').listeners.input({ target: { value: 'boleto' } });
+    assert.equal(api.state.category, 'all');
+    assert.equal(nodes.get('manualQuickSection').hidden, true);
+    assert.equal(nodes.get('manualFilters').hidden, false);
+    assert.match(nodes.get('manualResultsStatus').textContent, /orientaç/);
+});
+
+test('Manual mostra trechos reais e próximos passos apontam somente para orientações existentes', () => {
+    const { api, data } = loadPage('manual');
+    api.state.query = 'boleto';
+    const article = data.articles.find(a => a.id === 'mensalidades-boletos');
+    assert.match(api.resultCard(article), /manual-result-excerpt/);
+    assert.match(api.renderNextStep(article), /conteudo=multiatendimento/);
+    for (const item of data.articles) {
+        const markup = api.renderNextStep(item);
+        for (const match of markup.matchAll(/data-open-article="([^"]+)"/g)) {
+            assert.ok(data.articles.some(a => a.id === match[1]));
+            assert.notEqual(match[1], item.id);
+        }
+        assert.doesNotMatch(markup, /https?:|ajuda-suporte/);
+    }
+});
+
+test('Manual indexa requisitos, contexto, procedimentos e próxima ação do conteúdo enriquecido', () => {
+    const { api } = loadPage('manual');
+    for (const [query, expected] of [['certidão de estudos', 'aproveitamento-estudos'], ['segunda graduação', 'aproveitamento-estudos'], ['regularize débitos', 'rematricula'], ['90 dias', 'gestacao'], ['nome diário', 'nome-diario'], ['pesquisa institucional', 'cpa-avaliacao']]) {
+        api.state.query = query;
+        assert.ok(api.filteredArticles().some(article => article.id === expected), query);
+    }
+});
+
+test('Manual publica catálogo documentado sem seções vazias, relações inválidas ou fonte visual', () => {
+    const { data } = loadPage('manual');
+    assert.equal(data.categories.length, 8);
+    assert.equal(data.articles.length, 53);
+    for (const article of data.articles) {
+        assert.ok(article.sourceReference.pages.every(page => Number.isInteger(page) && page >= 1 && page <= 51));
+        assert.ok(article.nextStep?.text);
+        if (article.nextStep.articleId) assert.ok(data.articles.some(target => target.id === article.nextStep.articleId));
+        for (const section of article.sections) assert.ok(section.content?.trim() || section.items?.length, article.id);
+        assert.equal(new Set(article.relatedContent).size, article.relatedContent.length);
+        assert.ok(!article.relatedContent.includes(article.id));
+    }
+    assert.doesNotMatch(read(manualDir + 'manual-aluno.html'), /manual-source-footer|Fonte institucional/);
+    assert.doesNotMatch(data.sourcePolicy, /presumida vigente/);
+});
+
+test('Manual mantém requisitos, restrições e prazos visíveis fora de acordeões', () => {
+    const { api, data } = loadPage('manual');
+    for (const article of data.articles) for (const section of article.sections) {
+        if (['requirements', 'deadline', 'attention', 'steps'].includes(section.type)) assert.doesNotMatch(api.renderSection(section), /<details/);
+    }
+    const ree = data.articles.find(a => a.id === 'regime-especial-estudos');
+    assert.match(ree.sections.find(s => s.type === 'attention').items.join(' '), /ambulatorial/);
+    const aproveitamento = data.articles.find(a => a.id === 'aproveitamento-estudos');
+    assert.match(aproveitamento.context, /segunda graduação/);
+    assert.equal(aproveitamento.requirements.length, 2);
+});
+
+test('Manual usa ações externas documentadas com indicação de nova aba', () => {
+    const { api, nodes, data } = loadPage('manual');
+    for (const article of data.articles.filter(a => a.primaryAction)) {
+        api.openArticle(article.id);
+        assert.match(nodes.get('manualDetailBody').innerHTML, /rel="noopener noreferrer"/);
+        assert.match(nodes.get('manualDetailBody').innerHTML, /nova aba/);
+        assert.match(article.primaryAction.href, /^https:\/\//);
+    }
 });

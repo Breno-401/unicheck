@@ -19,70 +19,33 @@
     margin-bottom: var(--spacing-3xl);
 }
 
-.checklists-header-strip {
+/* Checklist completion, separate from the XP shown in the sidebar. */
+.checklist-journey {
     display: flex;
-    justify-content: space-between;
-    align-items: end;
-    gap: var(--spacing-xl);
-    padding: 1rem 1.1rem;
-    border-radius: 22px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.checklists-header-copy {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-}
-
-.hero-kicker {
-    display: inline-flex;
+    flex-wrap: wrap;
     align-items: center;
-    width: fit-content;
-    padding: 0.35rem 0.75rem;
-    border-radius: 999px;
-    background: rgba(11, 97, 255, 0.16);
-    color: #8cc3ff;
-    font-size: 0.74rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
+    gap: 12px 20px;
+    padding: 14px 18px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--surface);
 }
-
-.checklists-header-copy h2 {
-    margin: 0;
-    font-family: var(--font-heading);
-    font-size: clamp(1.2rem, 2vw, 1.7rem);
-    line-height: 1.15;
-    color: var(--text-primary);
+.journey-copy { flex: 1 1 13rem; min-width: 0; }
+.journey-copy h2 { margin: 0 0 4px; color: var(--text-secondary); font: 600 .8rem/1.4 var(--font-heading); }
+.journey-copy p { margin: 0; color: var(--text-primary); font-size: .9rem; line-height: 1.5; }
+.journey-copy strong { font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+.journey-progress { flex: 1 1 9rem; width: 100%; min-width: 0; height: 6px; appearance: none; border: 0; border-radius: 999px; overflow: hidden; background: var(--surface-subtle); color: var(--success); }
+.journey-progress::-webkit-progress-bar { background: var(--surface-subtle); border-radius: 999px; }
+.journey-progress::-webkit-progress-value { background: var(--success); border-radius: 999px; }
+.journey-progress::-moz-progress-bar { background: var(--success); border-radius: 999px; }
+.journey-context { flex: 1.4 1 17rem; min-width: 0; }
+.journey-current { margin: 0 0 5px; color: var(--text-primary); font-size: .8rem; font-weight: 600; line-height: 1.5; overflow-wrap: anywhere; }
+.journey-status { display: flex; flex-wrap: wrap; gap: 4px 12px; color: var(--text-secondary); font-size: .72rem; line-height: 1.5; }
+.journey-status > span { white-space: nowrap; }
+@media (max-width: 600px) {
+    .checklist-journey { gap: 10px; padding: 14px; }
+    .journey-progress { flex-basis: 100%; }
 }
-
-.checklists-header-stats {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.75rem;
-}
-
-.checklists-header-stats span {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    padding: 0.55rem 0.8rem;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.06);
-    color: var(--text-secondary);
-    font-size: 0.78rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-}
-
-.checklists-header-stats strong {
-    color: var(--text-primary);
-    font-size: 0.9rem;
-}
-
 .checklists-cards-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -163,11 +126,18 @@
     width: 60px;
     height: 60px;
     border-radius: 18px;
-    object-fit: cover;
-    background: rgba(255, 255, 255, 0.08);
+    flex: 0 0 auto;
+    box-sizing: border-box;
+    object-fit: contain;
+    object-position: center;
+    background: color-mix(in srgb, var(--phase-accent-color) 6%, var(--surface-elevated));
+    border: 1px solid var(--border);
     padding: 4px;
-    box-shadow: 0 10px 24px rgba(2, 6, 23, 0.24);
 }
+
+/* Horizontal wordmarks need width; compact symbols keep the same alignment. */
+.page-checklist .platform-logo.platform-logo--wide { width: 88px; padding: 4px 6px; }
+@media (max-width: 600px) { .page-checklist .platform-logo.platform-logo--wide { width: 76px; } }
 
 .phase-info {
     flex: 1;
@@ -467,13 +437,11 @@
 }
 
 @media (max-width: 768px) {
-    .checklists-header-strip,
     .card-status-row {
         flex-direction: column;
         align-items: stretch;
     }
 
-    .checklists-header-stats,
     .checklists-cards-grid {
         grid-template-columns: 1fr;
     }
@@ -497,8 +465,7 @@
 }
 
 @media (max-width: 480px) {
-    .platform-card,
-    .checklists-header-strip {
+    .platform-card {
         padding: 1rem;
     }
 

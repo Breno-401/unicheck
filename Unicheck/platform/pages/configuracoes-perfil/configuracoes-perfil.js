@@ -48,6 +48,7 @@
 
     function cloneProfile(profile) {
         return {
+            id: profile?.id || '',
             nome: profile?.nome || "",
             email: profile?.email || "",
             ra: profile?.ra || "",
@@ -152,6 +153,12 @@
         const avatar = document.getElementById("profile-avatar");
         if (!avatar) return;
 
+        avatar.dataset.avatarPreview = String(Boolean(state.pendingPhotoFile || state.photoRemoved));
+        if (avatar.dataset.avatarPreview === 'false' && window.ProfileManager?.refreshAvatar) {
+            window.ProfileManager.refreshAvatar();
+            return;
+        }
+
         const imageUrl = state.profile.avatarImage || state.profile.foto_url;
         if (imageUrl) {
             avatar.style.backgroundImage = "url('" + String(imageUrl).replaceAll("'", "%27") + "')";
@@ -160,7 +167,7 @@
             return;
         }
 
-        avatar.style.backgroundImage = "none";
+        avatar.style.backgroundImage = "";
         avatar.textContent = state.profile.avatarText || getInitials(state.profile.nome, state.profile.email);
         avatar.setAttribute("aria-label", "Iniciais de " + (state.profile.nome || "usuario"));
     }
@@ -253,6 +260,7 @@
         setBusy(true);
         try {
             const profile = await window.UniCheckProfile.getMyProfile();
+            if (!profile || profile.profilePending) throw new Error('Perfil ainda não disponível.');
             state.profile = cloneProfile(profile);
             state.initialProfile = cloneProfile(profile);
             state.pendingPhotoFile = null;
@@ -327,6 +335,7 @@
 
             nextProfile.foto_url = await uploadPendingAvatar();
             const savedProfile = await window.UniCheckProfile.updateMyProfile(nextProfile);
+            if (!savedProfile) throw new Error('A sessão mudou durante a atualização do perfil.');
 
             const requestedEmail = nextProfile.email;
             state.profile = cloneProfile(savedProfile);
@@ -671,6 +680,16 @@
         }
     }
 
+    window.addEventListener('unicheck:profile-updated', event => {
+        const profile = event.detail?.profile;
+        // Unsaved local previews remain local; committed avatars use the service.
+        if (!profile || profile.id !== state.profile.id || !state.initialProfile || state.busy || state.pendingPhotoFile || state.photoRemoved) return;
+        state.profile.foto_url = profile.foto_url;
+        state.profile.avatarImage = profile.foto_url;
+        state.initialProfile.foto_url = profile.foto_url;
+        state.initialProfile.avatarImage = profile.foto_url;
+        updateAvatarDisplay();
+    });
     window.addEventListener("beforeunload", revokePreviewUrl);
 
     if (document.readyState === "loading") {

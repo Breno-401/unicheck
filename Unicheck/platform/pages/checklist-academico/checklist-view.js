@@ -423,6 +423,7 @@
                             src="${escapeHtml(checklist.imageUrl)}"
                             alt="${escapeHtml(checklist.title)}"
                             class="platform-logo"
+                            onload="this.classList.toggle('platform-logo--wide', this.naturalWidth / this.naturalHeight > 1.6)"
                             onerror="this.onerror=null;this.src='${FALLBACK_IMAGE}'"
                         >
                         <div class="phase-info">
@@ -473,16 +474,27 @@
     }
 
     function buildListHeader(completedCount, activeCount, lockedCount) {
+        const total = state.checklists.length;
+        const available = state.checklists.filter(checklist => !checklist.completed && !checklist.locked);
+        const current = available.length === 1 ? available[0] : null;
+        const currentLabel = current
+            ? `Agora: Fase ${escapeHtml(current.phase)} · ${escapeHtml(current.title)}`
+            : completedCount === total ? "Todas as fases concluídas."
+            : "Confira as fases disponíveis abaixo.";
         return `
-            <section class="checklists-header-strip">
-                <div class="checklists-header-copy">
-                    <span class="hero-kicker">Trilha academica</span>
-                    <h2>Fases organizadas em ordem, com leitura simples e progresso claro.</h2>
+            <section class="checklist-journey" aria-label="Sua jornada acadêmica">
+                <div class="journey-copy">
+                    <h2>Sua jornada acadêmica</h2>
+                    <p><strong>${completedCount} de ${total}</strong> fases concluídas</p>
                 </div>
-                <div class="checklists-header-stats">
-                    <span><strong>${completedCount}</strong> concluidos</span>
-                    <span><strong>${activeCount}</strong> ativos</span>
-                    <span><strong>${lockedCount}</strong> bloqueados</span>
+                <progress class="journey-progress" value="${completedCount}" max="${total}" aria-label="Fases concluídas" aria-valuetext="${completedCount} de ${total} fases concluídas">${completedCount} de ${total}</progress>
+                <div class="journey-context">
+                    <p class="journey-current">${currentLabel}</p>
+                    <div class="journey-status">
+                        <span>${completedCount} ${completedCount === 1 ? "concluída" : "concluídas"}</span>
+                        <span>${activeCount} ${activeCount === 1 ? "ativa" : "ativas"}</span>
+                        <span>${lockedCount} ${lockedCount === 1 ? "bloqueada" : "bloqueadas"}</span>
+                    </div>
                 </div>
             </section>
         `;

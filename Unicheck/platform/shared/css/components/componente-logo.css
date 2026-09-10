@@ -53,8 +53,3 @@
   gap: var(--spacing-sm);
   padding: var(--spacing-sm) 0;
 }
-
-/* Controlar visibilidade da logo baseado no estado da sidebar */
-.sidebar.collapsed .logo-section .sidebar-logo-enhanced {
-  display: none;
-}

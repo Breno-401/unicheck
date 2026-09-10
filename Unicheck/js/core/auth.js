@@ -45,28 +45,30 @@
         const metadata = user?.user_metadata || {};
         const nome = metadata.full_name || metadata.nome || user?.email?.split("@")[0] || "Usuario";
 
-        const fotoUrl = metadata.photo_url || metadata.foto_url || null;
-
         return {
             id: user?.id || "",
             nome,
             email: user?.email || "",
             birthDate: metadata.birth_date || "",
             avatarText: getInitials(nome, user?.email),
-            foto_url: fotoUrl,
-            avatarImage: fotoUrl
+            profilePending: true
         };
     }
 
     function saveProfile(user) {
         if (!user) return null;
-        const profile = buildProfile(user);
-        localStorage.setItem(getProfileStorageKey(), JSON.stringify(profile));
+        let cached = null;
+        try { cached = JSON.parse(localStorage.getItem(getProfileStorageKey()) || 'null'); } catch (_) { /* Storage is optional. */ }
+        // Auth owns identity, never the table-owned avatar. Token refresh and
+        // repeated SIGNED_IN events must not replace a loaded table profile.
+        const profile = cached?.id === user.id ? cached : buildProfile(user);
+        try { localStorage.setItem(getProfileStorageKey(), JSON.stringify(profile)); } catch (_) { /* Storage is optional. */ }
         return profile;
     }
 
     function clearProfile() {
-        localStorage.removeItem(getProfileStorageKey());
+        try { localStorage.removeItem(getProfileStorageKey()); } catch (_) { /* Storage is optional. */ }
+        if (typeof CustomEvent === 'function') window.dispatchEvent?.(new CustomEvent('unicheck:session-changed', { detail: { userId: null, signedOut: true } }));
     }
 
     function clearSupabaseAuthStorage() {
@@ -339,9 +341,9 @@
             } else if (event === "SIGNED_OUT" || event === "USER_DELETED") {
                 clearProfile();
                 clearSupabaseAuthStorage();
-            } else {
-                clearProfile();
             }
+
+            if (session?.user && typeof CustomEvent === 'function') window.dispatchEvent?.(new CustomEvent('unicheck:session-changed', { detail: { userId: session.user.id } }));
 
             console.info("[UniCheckAuth] auth state change", {
                 event,
