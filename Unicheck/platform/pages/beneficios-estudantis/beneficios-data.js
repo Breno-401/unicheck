@@ -529,10 +529,22 @@
         'heroku-student': 'H', 'ableton-education': 'A', 'matlab-student': 'M'
     };
 
+    // Ordem editorial de descoberta, não uma medida de popularidade ou garantia de elegibilidade.
+    // Prioriza serviços cotidianos; preserva todas as condições do catálogo.
+    const discoveryOrder = [
+        'spotify', 'youtube-premium', 'microsoft365', 'adobe', 'notion', 'apple-music',
+        'meia-entrada', 'cartao-transcol-escolar', 'samsung-students', 'apple-education',
+        'github', 'figma', 'miro', 'jetbrains', 'github-copilot', 'aws', 'azure',
+        'autodesk', 'unidays-brasil', 'lenovo-students', 'dell-students',
+        'microsoft-store-education', 'id-jovem', 'isic', 'datacamp-student',
+        'tableau-students', 'matlab-student', 'ableton-education', 'unity-student',
+        '1password-student', 'mongodb', 'frontend-masters', 'gitkraken-student', 'heroku-student'
+    ];
     const benefits = rawBenefits.map(benefit => {
         const [sourceChannel, accessMethod] = sourceOverrides[benefit.id] || [benefit.sourceChannel || 'direct', benefit.accessMethod || 'student_verification'];
         return Object.freeze({
             ...benefit,
+            discoveryPriority: discoveryOrder.includes(benefit.id) ? discoveryOrder.indexOf(benefit.id) + 1 : 1000,
             subcategory: benefit.subcategory || benefit.category,
             sourceChannel,
             accessMethod,

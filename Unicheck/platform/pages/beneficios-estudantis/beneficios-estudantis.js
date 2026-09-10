@@ -9,7 +9,7 @@
     const BENEFITS_PER_PAGE = 12;
     const data = window.UniCheckBenefitsData || { benefits: [], categories: [] };
     const state = {
-        benefits: [...data.benefits],
+        benefits: [...data.benefits].sort((a, b) => (a.discoveryPriority ?? 1000) - (b.discoveryPriority ?? 1000) || a.id.localeCompare(b.id)),
         favorites: [],
         category: 'all',
         benefitType: 'all',
@@ -25,6 +25,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         cacheElements();
+        if (window.matchMedia?.('(max-width: 600px)').matches) document.getElementById('benefitsCategories').open = false;
         state.favorites = normalizeFavoriteIds(readStoredList(FAVORITES_CACHE_KEY));
         renderCategoryFilters();
         bindEvents();
@@ -38,6 +39,7 @@
         elements.grid = document.getElementById('platformsGrid');
         elements.search = document.getElementById('platformSearch');
         elements.clearSearch = document.getElementById('clearSearch');
+        elements.clearFilters = document.getElementById('clearBenefitFilters');
         elements.typeFilter = document.getElementById('benefitTypeFilter');
         elements.categoryFilters = document.getElementById('categoryFilters');
         elements.resultsTitle = document.getElementById('resultsTitle');
@@ -54,6 +56,7 @@
     }
 
     function bindEvents() {
+        elements.clearFilters?.addEventListener('click', clearFilters);
         const handleSearch = event => {
             state.search = event.currentTarget.value.trim();
             resetPagination();
@@ -89,6 +92,7 @@
             resetPagination();
             renderCategoryFilters();
             renderBenefits();
+            elements.categoryFilters.querySelector(`[data-category="${state.category}"]`)?.focus();
         });
         elements.grid?.addEventListener('click', handleGridClick);
         elements.pagination?.addEventListener('click', handlePaginationClick);
@@ -108,6 +112,7 @@
     }
 
     function renderCategoryFilters() {
+        document.getElementById('selectedBenefitCategory').textContent = getCategory(state.category)?.label || 'Todas';
         const activeCategories = data.categories.filter(category => state.benefits.some(benefit => getBenefitCategories(benefit).includes(category.id)));
         const options = [{ id: 'all', label: 'Todos' }, ...activeCategories];
         elements.categoryFilters.innerHTML = options.map(category => `
@@ -128,7 +133,8 @@
         const firstIndex = (state.currentPage - 1) * BENEFITS_PER_PAGE;
         const visibleBenefits = filtered.slice(firstIndex, firstIndex + BENEFITS_PER_PAGE);
         const query = state.search.trim();
-        elements.resultsTitle.textContent = query ? `Resultados para “${query}”` : 'Benefícios verificados';
+        elements.resultsTitle.textContent = query ? `Resultados para “${query}”` : state.favoritesOnly ? 'Meus favoritos' : 'Explore os benefícios';
+        elements.clearFilters.hidden = !(query || state.category !== 'all' || state.benefitType !== 'all' || state.favoritesOnly);
         elements.resultsSummary.textContent = getResultsSummary(filtered.length, firstIndex, visibleBenefits.length);
 
         if (!filtered.length) {
@@ -227,31 +233,26 @@
             : benefit.fallbackLabel
                 ? `<span class="benefit-brand-fallback" aria-hidden="true">${escapeHtml(benefit.fallbackLabel)}</span>`
                 : `<span class="benefit-icon" aria-hidden="true"><i data-lucide="${escapeHtml(benefit.icon || category?.icon || 'badge-percent')}"></i></span>`;
-        const verification = benefit.lastVerified
-            ? `<span class="verified-date" title="Oferta conferida em fonte oficial em ${formatDateLong(benefit.lastVerified)}"><i data-lucide="shield-check"></i> Verificado em ${formatMonthYear(benefit.lastVerified)}</span>`
-            : '';
-
         return `
             <article class="benefit-card" data-benefit-id="${escapeHtml(benefit.id)}">
                 <div class="benefit-card-top">
                     ${media}
                     <div class="benefit-heading">
-                        <span class="category-label">${escapeHtml(category?.label || benefit.category)}</span>
                         <h3>${escapeHtml(benefit.name)}</h3>
+                        <span class="category-label">${escapeHtml(category?.label || benefit.category)}</span>
                     </div>
                     <button type="button" class="favorite-btn${favorite ? ' active' : ''}" data-action="toggle-favorite" data-platform="${escapeHtml(benefit.id)}" aria-pressed="${favorite}" aria-label="${favorite ? 'Remover' : 'Adicionar'} ${escapeHtml(benefit.name)} ${favorite ? 'dos' : 'aos'} favoritos" title="${favorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}">
                         <i data-lucide="${favorite ? 'bookmark-check' : 'bookmark'}"></i>
                     </button>
                 </div>
                 <div class="benefit-card-body">
-                    <span class="benefit-badge ${getBenefitBadgeClass(benefit)}">${escapeHtml(benefit.benefitLabel)}</span>
+                    <p class="benefit-value">${escapeHtml(benefit.benefitLabel)}</p>
                     ${benefit.regionalLabel ? `<span class="regional-badge"><i data-lucide="map-pin"></i>${escapeHtml(benefit.regionalLabel)}</span>` : ''}
-                    <p>${escapeHtml(benefit.description)}</p>
+                    <p class="benefit-description">${escapeHtml(benefit.description)}</p>
                     <div class="benefit-audience"><i data-lucide="user-check" aria-hidden="true"></i><span>${escapeHtml(benefit.targetAudience)}</span></div>
-                    <div class="benefit-tags">${benefit.tags.slice(0, 3).map(tag => `<span>${escapeHtml(tag)}</span>`).join('')}</div>
+                    <div class="benefit-tags">${benefit.tags.slice(0, 2).map(tag => `<span>${escapeHtml(tag)}</span>`).join('')}</div>
                 </div>
                 <div class="benefit-card-footer">
-                    ${verification}
                     <button class="details-link" type="button" data-action="view-details" data-platform="${escapeHtml(benefit.id)}" aria-label="Ver detalhes de ${escapeHtml(benefit.name)}"><span>Ver detalhes</span><i data-lucide="arrow-right"></i></button>
                 </div>
             </article>`;
@@ -272,17 +273,18 @@
         lastFocusedElement = trigger || document.activeElement;
         const category = getCategory(benefit.category);
         const volatileNote = benefit.volatileFields?.length
-            ? `<div class="volatile-note"><i data-lucide="refresh-cw"></i><div><strong>Informação sujeita a atualização</strong><p>Preço, percentual, crédito ou condição promocional foi conferido em ${formatDateLong(benefit.lastVerified)}. Consulte a página oficial antes de contratar.</p></div></div>`
+            ? `<div class="volatile-note"><i data-lucide="info" aria-hidden="true"></i><div><strong>Antes de contratar</strong><p>Preços e condições podem mudar. Confira as regras no site oficial.</p></div></div>`
             : '';
         const institutionNote = benefit.status === 'institution_dependent'
             ? `<div class="institution-note"><i data-lucide="building-2"></i><div><strong>Depende da instituição</strong><p>O acesso só é liberado quando a instituição e o e-mail acadêmico atendem aos critérios do fornecedor.</p></div></div>`
             : '';
 
+        const officialUrl = getValidOfficialUrl(benefit.officialUrl);
         elements.modalTitle.textContent = benefit.name;
         elements.modalBody.innerHTML = `
             <div class="modal-benefit-summary">
                 <span class="category-label">${escapeHtml(category?.label || benefit.category)}</span>
-                <span class="benefit-badge ${getBenefitBadgeClass(benefit)}">${escapeHtml(benefit.benefitLabel)}</span>
+                <p class="benefit-value">${escapeHtml(benefit.benefitLabel)}</p>
                 <p>${escapeHtml(benefit.description)}</p>
             </div>
             ${volatileNote}${institutionNote}
@@ -293,13 +295,13 @@
                 <div><dt><i data-lucide="map-pin"></i> Disponibilidade</dt><dd>${escapeHtml(benefit.availability)}</dd></div>
                 <div><dt><i data-lucide="circle-alert"></i> Elegibilidade</dt><dd>${escapeHtml(benefit.eligibility)}</dd></div>
             </dl>
-            <div class="official-source"><i data-lucide="external-link"></i><div><strong>Fonte oficial</strong><span>Consultada em ${formatDateLong(benefit.lastVerified)}</span></div></div>`;
-        const officialUrl = getValidOfficialUrl(benefit.officialUrl);
+            ${officialUrl ? `<div class="official-source"><i data-lucide="external-link" aria-hidden="true"></i><div><strong>Fonte oficial</strong><a href="${escapeHtml(officialUrl)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(new URL(officialUrl).hostname)} (abre em nova aba)">${escapeHtml(new URL(officialUrl).hostname)}</a></div></div>` : ''}`;
         elements.modalOfficialLink.hidden = !officialUrl;
         elements.officialLinkUnavailable.hidden = Boolean(officialUrl);
         if (officialUrl) elements.modalOfficialLink.href = officialUrl;
         else elements.modalOfficialLink.removeAttribute('href');
         elements.modal.hidden = false;
+        document.getElementById('dashboardContainer').inert = true;
         document.body.classList.add('modal-open');
         elements.modal.querySelector('.modal-close')?.focus();
         refreshIcons();
@@ -308,6 +310,7 @@
     function closeModal() {
         if (!elements.modal || elements.modal.hidden) return;
         elements.modal.hidden = true;
+        document.getElementById('dashboardContainer').inert = false;
         document.body.classList.remove('modal-open');
         lastFocusedElement?.focus?.();
     }
@@ -370,7 +373,7 @@
                 ...getBenefitCategories(benefit).flatMap(id => [getCategory(id)?.label || id, ...getCategorySearchTerms(id)])
             ].join(' '));
             const favoriteMatches = !state.favoritesOnly || state.favorites.includes(benefit.id);
-            return categoryMatches && typeMatches && favoriteMatches && (!search || corpus.includes(search));
+            return categoryMatches && typeMatches && favoriteMatches && (!search || search.split(/\s+/).every(term => corpus.includes(term)));
         });
     }
 
@@ -397,15 +400,6 @@
         return terms[id] || [];
     }
 
-    function getBenefitBadgeClass(benefit) {
-        if (benefit.benefitType === 'student_discount') return 'is-discount';
-        if (benefit.benefitType === 'education_price') return 'is-education-price';
-        if (benefit.benefitType === 'institution_dependent') return 'is-institution';
-        if (['government_benefit', 'regional_benefit'].includes(benefit.benefitType)) return 'is-public';
-        if (benefit.benefitType === 'student_program') return 'is-program';
-        return 'is-free';
-    }
-
     function getAccessDescription(benefit) {
         const channelLabels = {
             github_student_pack: 'Disponível pelo GitHub Student Developer Pack.',
@@ -426,16 +420,6 @@
         const node = document.createElement('div');
         node.textContent = String(value ?? '');
         return node.innerHTML;
-    }
-
-    function formatMonthYear(value) {
-        const [year, month] = value.split('-').map(Number);
-        return new Intl.DateTimeFormat('pt-BR', { month: 'short', year: 'numeric' }).format(new Date(year, month - 1, 1)).replace('.', '');
-    }
-
-    function formatDateLong(value) {
-        const [year, month, day] = value.split('-').map(Number);
-        return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }).format(new Date(year, month - 1, day));
     }
 
     function refreshIcons() {
@@ -604,5 +588,8 @@
             context: 'Benefícios para Estudantes'
         });
         renderBenefits();
+        const nextFocus = elements.grid.querySelector(`[data-action="toggle-favorite"][data-platform="${platformId}"]`)
+            || elements.grid.querySelector('[data-action="toggle-favorite"]') || elements.favoritesFilter;
+        nextFocus?.focus();
     }
 })();

@@ -81,14 +81,6 @@
             </header>
 
             <div class="page-content benefits-page-content">
-                <section class="benefits-intro" aria-labelledby="benefitsIntroTitle">
-                    <div>
-                        <h2 id="benefitsIntroTitle">Escolha pelo benefício, não pela promessa</h2>
-                        <p>Reunimos somente ofertas com referência oficial consultada. A aprovação final sempre depende das regras de cada empresa.</p>
-                    </div>
-                    <div class="verification-note"><i data-lucide="shield-check"></i><span>Curadoria revisada em 16 ago. 2026</span></div>
-                </section>
-
                 <section class="benefits-controls" aria-label="Busca e filtros de benefícios">
                     <div class="benefits-search">
                         <label for="platformSearch">Buscar benefícios</label>
@@ -106,10 +98,15 @@
                             <option value="public">Direitos e benefícios públicos</option>
                         </select>
                     </div>
-                    <div class="category-filters" id="categoryFilters" aria-label="Filtrar por categoria"></div>
+                    <button class="favorites-filter" id="favoritesFilter" type="button" aria-pressed="false"><i data-lucide="bookmark" aria-hidden="true"></i><span>Meus favoritos</span></button>
+                    <details class="benefits-categories" id="benefitsCategories" open>
+                        <summary>Categorias <span id="selectedBenefitCategory">Todas</span></summary>
+                        <div class="benefit-category-options" id="categoryFilters" role="group" aria-label="Filtrar por categoria"></div>
+                    </details>
                 </section>
 
-                <div class="results-heading" aria-live="polite"><div><h2 id="resultsTitle" tabindex="-1">Benefícios verificados</h2><p id="resultsSummary"></p></div><button class="favorites-filter" id="favoritesFilter" type="button" aria-pressed="false"><i data-lucide="bookmark"></i><span>Favoritados</span></button></div>
+                <p class="benefits-editorial-note">Confira os requisitos e as condições no site oficial de cada benefício.</p>
+                <div class="results-heading"><div><h2 id="resultsTitle" tabindex="-1">Explore os benefícios</h2><p id="resultsSummary" role="status" aria-live="polite"></p></div><button class="clear-benefit-filters" id="clearBenefitFilters" type="button" hidden>Limpar filtros</button></div>
                 <section class="platforms-grid" id="platformsGrid" aria-labelledby="resultsTitle"></section>
                 <div class="benefits-pagination" id="benefitsPagination"></div>
             </div>
