@@ -25,7 +25,6 @@ const server = http.createServer((req, res) => {
     try {
         await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
         const origin = `http://127.0.0.1:${server.address().port}`;
-        const url = origin + '/Unicheck/platform/pages/manual-aluno/manual-aluno.html';
         browser = await chromium.launch({ channel: 'msedge', headless: true });
         const context = await browser.newContext();
         const fixture = { id: 'visual-fixture', nome: 'Aluno Exemplo', email: 'aluno@example.test', foto_url: null, avatarText: 'AE' };
@@ -41,29 +40,43 @@ const server = http.createServer((req, res) => {
             await page.goto(origin + `/Unicheck/platform/pages/${view}/${view}.html`);
             await page.locator(view === 'manual-aluno' ? '.manual-category' : '.platform-logo').first().waitFor();
             if (view === 'checklist-academico') {
-                await page.evaluate(() => {
-                    const progress = {};
-                    window.UniCheckChecklistData.getChecklists().slice(0, 3).forEach(c => { progress[c.id] = { tasks: Object.fromEntries(c.tasks.map(t => [t.id, true])) }; });
-                    window.UniCheckChecklist.writeCachedProgress('visual-fixture', progress);
-                });
-                await page.reload();
-                await page.locator('.platform-logo').first().waitFor();
-                assert.match(await page.locator('.checklists-header-stats').textContent(), /3\s+concluídos\s+1\s+ativo\s+3\s+bloqueados/);
+                // The summary follows the canonical phase state, including its endpoints.
+                for (const completed of [0, 7, 3]) {
+                    await page.evaluate(completed => {
+                        const progress = {};
+                        window.UniCheckChecklistData.getChecklists().slice(0, completed).forEach(c => { progress[c.id] = { tasks: Object.fromEntries(c.tasks.map(t => [t.id, true])) }; });
+                        window.UniCheckChecklist.writeCachedProgress('visual-fixture', progress);
+                    }, completed);
+                    await page.reload();
+                    await page.locator('.platform-logo').first().waitFor();
+                    assert.equal(await page.locator('.journey-progress').getAttribute('value'), String(completed));
+                    assert.equal(await page.locator('.journey-progress').getAttribute('max'), '7');
+                    assert.equal(await page.locator('.journey-progress').getAttribute('aria-valuetext'), `${completed} de 7 fases concluídas`);
+                    assert.match(await page.locator('.journey-current').textContent(), completed === 7 ? /Todas as fases concluídas/ : new RegExp(`Agora: Fase ${completed + 1}`));
+                }
+                assert.match(await page.locator('.journey-status').textContent(), /3\s+concluídas\s+1\s+ativa\s+3\s+bloqueadas/);
+                assert.match(await page.locator('.journey-current').textContent(), /Biblioteca Virtual/);
+                await page.locator('.header-search-enhanced .search-input').fill('TOTVS');
+                const filteredCount = await page.locator('.platform-card').count();
+                assert.ok(filteredCount > 0 && filteredCount < 7);
+                assert.equal(await page.locator('.journey-progress').getAttribute('max'), '7');
+                assert.equal(await page.locator('.journey-progress').getAttribute('value'), '3');
+                await page.locator('.header-search-enhanced .search-input').fill('');
                 await page.locator('.platform-logo').evaluateAll(images => Promise.all(images.map(image => image.decode())));
             }
             for (const theme of ['light', 'dark']) for (const width of [1920, 1600, 1440, 1366, 1280, 1024, 768, 390]) {
-                await page.setViewportSize({ width, height: 900 });
+                await page.setViewportSize({ width, height: 768 });
                 await page.evaluate(theme => { document.documentElement.dataset.theme = theme; document.body.dataset.theme = theme; }, theme);
                 await settle();
                 const violations = await page.evaluate(view => {
                     const failures = [];
                     if (document.documentElement.scrollWidth > innerWidth + 1) failures.push('document overflow');
-                    const selectors = view === 'manual-aluno' ? '.manual-category, .manual-quick-links a, .manual-search-box' : '.checklists-header-stats > span, .platform-logo';
+                    const selectors = view === 'manual-aluno' ? '.manual-category, .manual-quick-links a, .manual-search-box' : '.checklist-journey, .journey-current, .journey-status > span, .platform-logo';
                     const elements = [...document.querySelectorAll(selectors)];
                     for (const element of elements) {
                         const rect = element.getBoundingClientRect();
                         if (rect.left < -1 || rect.right > innerWidth + 1 || element.scrollWidth > element.clientWidth + 1) failures.push('element overflow: ' + element.className);
-                        if (element.matches('.checklists-header-stats > span')) {
+                        if (element.matches('.journey-status > span')) {
                             const range = document.createRange(); range.selectNodeContents(element);
                             const text = range.getBoundingClientRect();
                             if (text.left < rect.left || text.right > rect.right || text.bottom > rect.bottom) failures.push('badge text clipped');
@@ -75,13 +88,16 @@ const server = http.createServer((req, res) => {
                         }
                         if (element.matches('.platform-logo')) {
                             const css = getComputedStyle(element);
-                            if (!element.naturalWidth || css.objectFit !== 'contain' || css.flexShrink !== '0' || Math.abs(rect.width - rect.height) > 1) failures.push('logo cropped or deformed');
+                            if (!element.naturalWidth || css.objectFit !== 'contain' || css.flexShrink !== '0') failures.push('logo cropped or deformed');
+                            if (element.naturalWidth / element.naturalHeight > 1.6 && rect.width <= rect.height) failures.push('horizontal logo compressed into square');
                         }
                     }
                     return failures;
                 }, view);
                 assert.deepEqual(violations, [], `${view} ${theme} ${width}`);
-                results.push({ view, theme, width, violations });
+                const summaryHeight = view === 'checklist-academico' ? await page.locator('.checklist-journey').evaluate(el => el.getBoundingClientRect().height) : null;
+                results.push({ view, theme, width, violations, summaryHeight });
+                if (view === 'checklist-academico' && [1366, 768, 390].includes(width)) await page.screenshot({ path: path.join(output, `journey-${theme}-${width}.png`) });
                 if ([1366, 390].includes(width)) await page.screenshot({ path: path.join(output, `refinement-${view}-${theme}-${width}.png`), fullPage: true });
             }
             if (view === 'manual-aluno') {
@@ -103,6 +119,6 @@ const server = http.createServer((req, res) => {
         }
         assert.deepEqual(errors, []);
         fs.writeFileSync(path.join(output, 'refinement-results.json'), JSON.stringify({ results, errors, limitation: 'Local Edge with synthetic auth/profile/progress; no production services.' }, null, 2));
-        console.log(`PASS: ${results.length} responsive checks, badge geometry, logo containment, search, empty state, active filter and keyboard navigation.`);
+        console.log(`PASS: ${results.length} responsive checks, journey 0/7 + 3/7 + 7/7, current phase, search-independent totals, status geometry, logos and keyboard navigation.`);
     } finally { await browser?.close(); server.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });
