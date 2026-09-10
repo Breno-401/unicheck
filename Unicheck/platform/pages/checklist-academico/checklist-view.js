@@ -480,9 +480,9 @@
                     <h2>Fases organizadas em ordem, com leitura simples e progresso claro.</h2>
                 </div>
                 <div class="checklists-header-stats">
-                    <span><strong>${completedCount}</strong> concluidos</span>
-                    <span><strong>${activeCount}</strong> ativos</span>
-                    <span><strong>${lockedCount}</strong> bloqueados</span>
+                    <span><strong>${completedCount}</strong> ${completedCount === 1 ? "concluído" : "concluídos"}</span>
+                    <span><strong>${activeCount}</strong> ${activeCount === 1 ? "ativo" : "ativos"}</span>
+                    <span><strong>${lockedCount}</strong> ${lockedCount === 1 ? "bloqueado" : "bloqueados"}</span>
                 </div>
             </section>
         `;
