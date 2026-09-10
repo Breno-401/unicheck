@@ -43,8 +43,9 @@ function loadPage(kind) {
     });
     const isBenefits = kind === 'benefits';
     vm.runInContext(read(isBenefits ? benefitsDir + 'beneficios-data.js' : 'Unicheck/js/data/manual-data.js'), context);
+    if (isBenefits) vm.runInContext(read(benefitsDir + 'beneficios-brand-assets.js'), context);
     const exports = isBenefits
-        ? 'state, cacheElements, bindEvents, getFilteredBenefits, renderBenefits, renderCategoryFilters, clearFilters, createBenefitCard, openDetails, closeModal, toggleFavorite'
+        ? 'state, cacheElements, bindEvents, getFilteredBenefits, renderBenefits, renderCategoryFilters, clearFilters, createBenefitCard, openDetails, closeModal, trapModalFocus, toggleFavorite'
         : 'state, cacheElements, bindEvents, filteredArticles, renderDiscovery, renderFilters, resetFilters, openArticle, showDiscovery, renderSection, readHash';
     const source = read(isBenefits ? benefitsDir + 'beneficios-estudantis.js' : manualDir + 'manual-aluno.js');
     vm.runInContext(source.replace(/\}\)\(\);\s*$/, `window.testPage = {${exports}}; })();`), context);
@@ -60,6 +61,81 @@ test('catálogo mantém todos os dados comerciais da main; apenas prioridade é 
     assert.equal(createHash('sha256').update(JSON.stringify(originalFields)).digest('hex'),
         '4f31e90602135a93d3c83fd6d4554b22ce2b8ac28e1a97f562237cc598263ceb');
     assert.equal(new Set(data.benefits.map(b => b.discoveryPriority)).size, 34);
+});
+
+test('card e modal compartilham marca; detalhes preservam requisitos sem bloco editorial', () => {
+    const { api, data, nodes } = loadPage('benefits');
+    for (const benefit of data.benefits) {
+        const card = api.createBenefitCard(benefit);
+        api.openDetails(benefit.id);
+        const body = nodes.get('modalBody').innerHTML;
+        assert.doesNotMatch(body, /Fonte oficial|official-source|lastVerified/);
+        for (const field of ['targetAudience', 'verification', 'eligibility', 'availability', 'description']) {
+            const escaped = benefit[field].replace(/[&<>"']/g, c => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'}[c]));
+            assert.ok(body.includes(escaped), `${benefit.id}: ${field}`);
+        }
+        assert.ok(card.includes(nodes.get('modalBrand').innerHTML));
+        assert.equal(nodes.get('platformModal').attributes['data-category'], benefit.category);
+        assert.match(card, /aria-haspopup="dialog"/);
+        assert.equal((card.match(/<button\b/g) || []).length, 2);
+        assert.doesNotMatch(card, /<button\b[^>]*>[\s\S]*?<button\b[\s\S]*?<\/button>[\s\S]*?<\/button>/);
+    }
+});
+
+test('ação de favorito é independente da abertura e modal devolve foco ao CTA', () => {
+    const { api, nodes } = loadPage('benefits');
+    const modal = nodes.get('platformModal');
+    modal.hidden = true;
+    const trigger = { dataset: { action: 'toggle-favorite', platform: 'spotify' }, focus() { this.focused = true; } };
+    const click = () => nodes.get('platformsGrid').listeners.click({ target: { closest: () => trigger } });
+    click();
+    assert.ok(api.state.favorites.includes('spotify'));
+    assert.equal(modal.hidden, true);
+    trigger.dataset.action = 'view-details';
+    click();
+    assert.equal(modal.hidden, false);
+    api.closeModal();
+    assert.equal(trigger.focused, true);
+});
+
+test('focus trap inclui disponibilidade expansível e ignora controles ocultos', () => {
+    const { api, nodes, document } = loadPage('benefits');
+    const make = hidden => ({ hidden, getClientRects: () => [1], focus() { document.activeElement = this; } });
+    const first = make(false), summary = make(false), hidden = make(true);
+    nodes.get('platformModal').querySelectorAll = selector => {
+        assert.ok(selector.includes('summary'));
+        return [first, summary, hidden];
+    };
+    document.activeElement = summary;
+    let prevented = 0;
+    api.trapModalFocus({ shiftKey: false, preventDefault() { prevented++; } });
+    assert.equal(document.activeElement, first);
+    api.trapModalFocus({ shiftKey: true, preventDefault() { prevented++; } });
+    assert.equal(document.activeElement, summary);
+    assert.equal(prevented, 2);
+});
+
+test('URL inválida não produz ação externa navegável', () => {
+    const { api, nodes } = loadPage('benefits');
+    api.state.benefits = [{ ...api.state.benefits[0], officialUrl: 'javascript:alert(1)' }];
+    api.openDetails(api.state.benefits[0].id);
+    assert.equal(nodes.get('modalOfficialLink').hidden, true);
+    assert.equal(nodes.get('officialLinkUnavailable').hidden, false);
+});
+
+test('assets de apresentação são locais, existentes e têm assinatura do formato declarado', () => {
+    const { window } = loadPage('benefits');
+    for (const asset of Object.values(window.UniCheckBenefitBrands)) {
+        const bytes = fs.readFileSync(path.resolve(root, benefitsDir, asset.logo));
+        const ext = path.extname(asset.logo);
+        if (ext === '.png') assert.equal(bytes.subarray(1, 4).toString(), 'PNG');
+        if (ext === '.ico') assert.equal(bytes.readUInt32LE(0), 65536);
+        if (ext === '.gif') assert.equal(bytes.subarray(0, 3).toString(), 'GIF');
+        if (ext === '.svg') {
+            assert.match(bytes.toString(), /<svg\b/);
+            assert.doesNotMatch(bytes.toString(), /<script\b|<foreignObject\b|\bonload\s*=/i);
+        }
+    }
 });
 
 test('descoberta prioriza marcas de uso amplo sem perder benefícios específicos', () => {
