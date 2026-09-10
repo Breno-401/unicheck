@@ -72,7 +72,7 @@
         article({ id: 'seguro-escolar', category: 'utilidades', title: 'Seguro escolar', summary: 'Registro do serviço descrito no Manual e necessidade de confirmação atual.', content: ['O Manual de 2024 descreve cobertura de assistência e acidentes por uma seguradora e publica canais para acionamento e ressarcimento.', 'Seguradora, cobertura, rede credenciada, vigência e contatos precisam de validação institucional antes de qualquer orientação atual.'], keywords: ['seguro', 'acidente', 'emergência', 'assistência', 'ressarcimento'], sourcePages: [30], requiresValidation: true, validationReason: 'Fornecedor, cobertura, vigência e canais do seguro podem ter mudado.' })
     ];
 
-    const quickAccess = ['portal-academico', 'ra-identidade-estudantil', 'rematricula', 'frequencia-faltas', 'historico-documentos', 'multiatendimento'];
+    const quickAccess = ['portal-academico', 'mensalidades-boletos', 'rematricula', 'biblioteca-fisica', 'historico-documentos', 'multiatendimento', 'ra-identidade-estudantil', 'frequencia-faltas'];
 
     const relatedContent = {
         'instituicao-salesiana': ['proposta-educacional', 'estrutura-academica', 'pastoral-universitaria'],
@@ -182,10 +182,25 @@
 
     const volatileArticles = new Set(['calendario-horarios', 'prazos-documentos', 'servicos-taxas', 'contatos-atendimento', 'seguro-escolar']);
     const contentRefinements = {
+        'prazos-documentos': ['Históricos, certificados, diplomas e declarações são solicitações atendidas pelo Multiatendimento. Confirme o prazo de emissão e retirada ao solicitar seu documento.'],
+        'servicos-taxas': ['Há serviços com solicitações gratuitas e cobradas, em formatos impresso e digital. Consulte o Multiatendimento para confirmar o valor antes de solicitar.'],
         'frequencia-faltas': ['O Manual diferencia faltas comuns de situações legalmente admitidas. Motivos como trabalho, transporte, cursos, palestras e eventos não geram automaticamente abono ou compensação.', 'O abono de faltas é previsto para obrigações com o serviço militar e deve ser requerido no Multiatendimento.'],
         'estacionamento': ['O UniSales disponibiliza estacionamento no campus.'],
         'calendario-horarios': ['O Calendário Acadêmico é publicado semestralmente e reúne atividades, datas e prazos limites para solicitações.', 'O horário individual de aulas é disponibilizado no Portal Acadêmico.'],
         'seguro-escolar': ['O Manual informa que o UniSales oferece seguro para pronto atendimento emergencial e acidentes pessoais, dentro e fora da Instituição.']
+    };
+    const summaryRefinements = {
+        'prazos-documentos': 'Saiba onde confirmar o prazo de emissão e retirada do seu documento.',
+        'servicos-taxas': 'Consulte as condições antes de solicitar um serviço ou uma segunda via.',
+        'contatos-atendimento': 'Encontre orientações sobre os setores e canais de atendimento.',
+        'seguro-escolar': 'Entenda o serviço descrito no Manual e onde consultar cobertura e atendimento.'
+    };
+    // Vocabulário de busca do aluno; não modifica os procedimentos institucionais.
+    const searchAliases = {
+        'mensalidades-boletos': ['emitir boleto', 'emissão de boleto', 'pagar mensalidade'],
+        'historico-documentos': ['solicitar documento', 'pedir histórico'],
+        'portal-academico': ['acessar portal', 'entrar no portal', 'plataforma acadêmica'],
+        'biblioteca-fisica': ['emprestar livro', 'empréstimo de livros']
     };
     const removeOldValidationLanguage = (text) => text.split(/(?<=\.)\s+/).filter((sentence) => !/(precisam?|devem?|exigem?|não devem).{0,90}(confirm|valid|presumid)|antes de (ser|uso|orientar)|pode[m]? ter mudado/i.test(sentence)).join(' ');
 
@@ -202,6 +217,8 @@
         const isVolatile = volatileArticles.has(item.id);
         return {
             ...item,
+            summary: summaryRefinements[item.id] || item.summary,
+            keywords: [...item.keywords, ...(searchAliases[item.id] || [])],
             content,
             sections,
             relatedContent: relatedContent[item.id] || [],
