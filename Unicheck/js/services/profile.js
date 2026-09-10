@@ -17,6 +17,19 @@
         return client;
     }
 
+    function getValidation() {
+        const validation = window.UniCheckValidation;
+        if (!validation) throw new Error("Módulo de validação não carregado.");
+        return validation;
+    }
+
+    function createPublicError(message) {
+        const error = new Error(message);
+        error.code = "UNICHECK_VALIDATION";
+        error.isUserSafe = true;
+        return error;
+    }
+
     async function getCurrentUser() {
         const auth = window.UniCheckAuth;
         if (!auth) {
@@ -54,8 +67,11 @@
     }
 
     function normalizeProfile(row, user) {
-        const nome = row?.nome || user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Usuario";
-        const email = row?.email || user?.email || "";
+        const validation = window.UniCheckValidation;
+        const nome = validation?.normalizeFullName(
+            row?.nome || user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Usuario"
+        ) || "Usuario";
+        const email = validation?.normalizeEmail(row?.email || user?.email || "") || "";
         // Avatar is sourced exclusively from public.users_profile. Auth metadata
         // must never become an image store (especially for data URLs/base64).
         const fotoUrl = row?.foto_url || null;
@@ -136,11 +152,12 @@
             return profile;
         }
 
-        const metadataName = (user.user_metadata?.full_name || "").trim();
+        const validation = getValidation();
+        const metadataName = validation.validateFullName(user.user_metadata?.full_name || "");
         const baseProfile = {
             [PROFILE_USER_ID_COLUMN]: user.id,
-            nome: metadataName.length >= 2 ? metadataName : "Usuario",
-            email: user.email || "",
+            nome: metadataName.valid ? metadataName.value : "Usuário UniCheck",
+            email: validation.normalizeEmail(user.email || ""),
             foto_url: null
         };
 
@@ -188,6 +205,15 @@
     async function updateMyProfile({ nome, email, foto_url, ra }) {
         const client = getClient();
         const user = await getCurrentUser();
+        const validation = getValidation();
+        const nameResult = validation.validateFullName(nome);
+        const emailResult = validation.validateEmail(email);
+        const raResult = validation.validateRa(ra);
+        const currentEmail = validation.normalizeEmail(user.email || "");
+
+        for (const result of [nameResult, emailResult, raResult]) {
+            if (!result.valid) throw createPublicError(result.error);
+        }
 
         console.info("[UniCheckProfile] Atualizando perfil", {
             userId: user.id || null,
@@ -195,9 +221,9 @@
         });
 
         const cleanProfile = {
-            nome: (nome || "").trim(),
-            email: (email || "").trim(),
-            ra: (ra || "").trim() || null,
+            nome: nameResult.value,
+            email: emailResult.value,
+            ra: raResult.value,
             foto_url: foto_url || null
         };
 
@@ -211,7 +237,7 @@
             }
         };
 
-        if (cleanProfile.email && cleanProfile.email !== user.email) {
+        if (cleanProfile.email && cleanProfile.email !== currentEmail) {
             updatePayload.email = cleanProfile.email;
         }
 
@@ -226,10 +252,11 @@
 
         // Com confirmacao de troca de e-mail habilitada, auth.users continua
         // retornando o endereco atual ate o usuario confirmar o novo.
-        const confirmedEmail = authData?.user?.email || user.email || cleanProfile.email;
+        const confirmedEmail = validation.normalizeEmail(
+            authData?.user?.email || currentEmail || cleanProfile.email
+        );
         const persistedProfile = {
             nome: cleanProfile.nome,
-            email: confirmedEmail,
             ra: cleanProfile.ra,
             foto_url: cleanProfile.foto_url
         };
@@ -250,6 +277,7 @@
                     .from(PROFILE_TABLE)
                     .insert({
                         [PROFILE_USER_ID_COLUMN]: user.id,
+                        email: confirmedEmail,
                         ...persistedProfile
                     })
                     .select("nome, email, foto_url, ra")
