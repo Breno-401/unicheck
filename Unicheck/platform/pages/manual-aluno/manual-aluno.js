@@ -13,7 +13,17 @@
     const categoryOrder = ['vida-academica', 'ferramentas', 'utilidades', 'campus', 'apoio', 'avaliacoes', 'formacao', 'comecando'];
     const orderedCategories = [...data.categories].sort((a, b) => categoryOrder.indexOf(a.id) - categoryOrder.indexOf(b.id));
     const searchIndex = new Map(data.articles.map(article => [article.id, searchableText(article)]));
-    const articleHref = id => `#conteudo=${encodeURIComponent(id)}`;
+    const contextParams = () => {
+        const params = new URLSearchParams();
+        if (state.query.trim()) params.set('busca', state.query);
+        if (state.category !== 'all') params.set('categoria', state.category);
+        return params;
+    };
+    const articleHref = id => `#conteudo=${encodeURIComponent(id)}${contextParams().size ? '&' + contextParams() : ''}`;
+    const escapeHTML = value => String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+    function saveDiscovery() {
+        history.replaceState({}, '', window.location.pathname + window.location.search + (contextParams().size ? '#' + contextParams() : ''));
+    }
     const scrollBehavior = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
 
     function cacheElements() {
@@ -33,7 +43,10 @@
         const score = article => {
             const title = normalize(article.title);
             return (title === query ? 100 : title.includes(query) ? 30 : 0)
-                + terms.reduce((sum, term) => sum + (title.includes(term) ? 8 : 0) + (normalize(article.keywords.join(' ')).includes(term) ? 3 : 0), 0);
+                + terms.reduce((sum, term) => sum + (title.includes(term) ? 16 : 0)
+                    + (normalize(article.keywords.join(' ')).includes(term) ? 8 : 0)
+                    + (normalize(article.summary).includes(term) ? 4 : 0)
+                    + (searchIndex.get(article.id).includes(term) ? 1 : 0), 0);
         };
         return data.articles.filter((article) => {
             if (state.category !== 'all' && article.category !== state.category) return false;
@@ -49,21 +62,32 @@
     }
 
     function renderQuickAccess() {
+        const labels = { 'portal-academico': 'Portal Acadêmico', 'mensalidades-boletos': 'Boletos', rematricula: 'Rematrícula', 'biblioteca-fisica': 'Biblioteca', 'historico-documentos': 'Histórico', multiatendimento: 'Multiatendimento', 'ra-identidade-estudantil': 'RA', 'frequencia-faltas': 'Frequência' };
         elements.manualQuickLinks.innerHTML = data.quickAccess.map((id) => {
             const article = articleById(id);
-            return `<a href="${articleHref(id)}" data-open-article="${id}"><i data-lucide="arrow-up-right" aria-hidden="true"></i><span>${article.title}</span></a>`;
+            return `<a href="${articleHref(id)}" data-open-article="${id}" aria-label="${article.title}"><i data-lucide="arrow-up-right" aria-hidden="true"></i><span>${labels[id] || article.title}</span></a>`;
         }).join('');
     }
 
     function categoryCard(category) {
         const count = articlesFor(category.id).length;
-        const previews = articlesFor(category.id).slice(0, 3).map(article => `<li><a href="${articleHref(article.id)}" data-open-article="${article.id}">${article.title}<i data-lucide="chevron-right" aria-hidden="true"></i></a></li>`).join('');
-        return `<article class="manual-card"><span class="manual-card-icon"><i data-lucide="${category.icon}" aria-hidden="true"></i></span><div class="manual-card-copy"><h3>${category.title}</h3><p>${category.description}</p></div><ul class="manual-topic-links">${previews}</ul><div class="manual-card-footer"><span>${count} orientações</span><button type="button" data-open-category="${category.id}" aria-label="Ver todas as orientações de ${category.title}">Ver todas <i data-lucide="arrow-right" aria-hidden="true"></i></button></div></article>`;
+        return `<button type="button" class="manual-category" data-open-category="${category.id}"><i data-lucide="${category.icon}" aria-hidden="true"></i><span><strong>${category.title}</strong><small>${category.description}</small><small>${count} orientações</small></span><i data-lucide="chevron-right" aria-hidden="true"></i></button>`;
+    }
+
+    function relatedExcerpt(article) {
+        const terms = normalize(state.query).split(/\s+/).filter(term => term.length > 2);
+        if (!terms.length) return '';
+        const passages = [...article.content, ...article.sections.flatMap(section => [section.content || '', ...(section.items || [])])];
+        const passage = passages.filter(text => text && text !== article.summary).sort((a, b) =>
+            terms.filter(term => normalize(b).includes(term)).length - terms.filter(term => normalize(a).includes(term)).length)[0];
+        if (!passage || !terms.some(term => normalize(passage).includes(term))) return '';
+        const position = Math.max(0, Math.min(...terms.map(term => normalize(passage).indexOf(term)).filter(index => index >= 0)) - 55);
+        return `<p class="manual-result-excerpt">${position ? '…' : ''}${escapeHTML(passage.slice(position, position + 190))}${passage.length > position + 190 ? '…' : ''}</p>`;
     }
 
     function resultCard(article) {
         const category = categoryById(article.category);
-        return `<article class="manual-result-card"><span class="manual-result-category">${category.title}</span><h3><a href="${articleHref(article.id)}" data-open-article="${article.id}">${article.title}</a></h3><p>${article.summary}</p><a class="manual-result-action" href="${articleHref(article.id)}" data-open-article="${article.id}" aria-label="Ler ${article.title}"><span>Ler orientação</span><i data-lucide="arrow-right" aria-hidden="true"></i></a></article>`;
+        return `<article class="manual-result-card"><span class="manual-result-category">${category.title}</span><h3><a href="${articleHref(article.id)}" data-open-article="${article.id}">${article.title}</a></h3><p>${article.summary}</p>${relatedExcerpt(article)}<a class="manual-result-action" href="${articleHref(article.id)}" data-open-article="${article.id}" aria-label="Ler ${article.title}"><span>Ler orientação</span><i data-lucide="arrow-right" aria-hidden="true"></i></a></article>`;
     }
 
     function renderDiscovery() {
@@ -126,6 +150,17 @@
         configure(elements.manualNext, next, 'next');
     }
 
+    function renderNextStep(article) {
+        // Only connect destinations already named by this article to existing guidance.
+        const destinations = article.sections.find(section => section.type === 'destination')?.items || [];
+        const guides = { 'Portal Acadêmico': 'portal-academico', 'Multiatendimento': 'multiatendimento', 'Biblioteca': 'biblioteca-fisica', 'Coordenação do curso': 'coordenacao-curso', 'Ambiente Virtual de Aprendizagem': 'ava-brightspace', 'Aplicativo Meu EduCONNECT': 'meu-educonnect', 'Ouvidoria': 'ouvidoria' };
+        const targets = [...new Set(destinations.map(destination => guides[destination]).filter(id => id && id !== article.id))];
+        const links = targets.map(id => `<a href="${articleHref(id)}" data-open-article="${id}">Ver como funciona: ${articleById(id).title}<i data-lucide="arrow-right" aria-hidden="true"></i></a>`).join('');
+        if (links) return `<section class="manual-next-step"><h2>Seu próximo passo</h2>${links}</section>`;
+        const related = articleById(article.relatedContent[0]);
+        return related ? `<a class="manual-support-link" href="${articleHref(related.id)}" data-open-article="${related.id}">Continue com: ${related.title}<i data-lucide="arrow-right" aria-hidden="true"></i></a>` : '';
+    }
+
     function openArticle(id, updateHash = true) {
         const article = articleById(id);
         if (!article) return showDiscovery(false);
@@ -138,7 +173,7 @@
         elements.manualDetailSummary.textContent = article.summary;
         const sectionOrder = { overview: 0, steps: 1, destination: 2, attention: 3, knowledge: 4 };
         elements.manualDetailBody.innerHTML = [...article.sections].sort((a, b) => sectionOrder[a.type] - sectionOrder[b.type]).map(renderSection).join('')
-            + '<a class="manual-support-link" href="../ajuda-suporte/ajuda-suporte.html">Precisa de ajuda? Ver canais de atendimento <i data-lucide="arrow-right" aria-hidden="true"></i></a>';
+            + renderNextStep(article);
         elements.manualTemporalNote.hidden = article.temporalFields.length === 0;
         elements.manualTemporalText.textContent = article.temporalFields.length ? `${article.temporalFields.join('; ')} podem sofrer alterações. Consulte o canal institucional para confirmar os dados atuais.` : '';
         elements.manualSourcePages.textContent = pageLabel(article.sourcePages);
@@ -150,7 +185,7 @@
         elements.manualDetail.hidden = false;
         elements.manualDetail.classList.remove('is-entering');
         requestAnimationFrame(() => elements.manualDetail.classList.add('is-entering'));
-        if (updateHash) history.pushState({ article: id }, '', `#conteudo=${encodeURIComponent(id)}`);
+        if (updateHash) history.pushState({ article: id }, '', articleHref(id));
         document.title = `${article.title} - Manual do Aluno | UniCheck`;
         window.scrollTo({ top: 0, behavior: scrollBehavior() });
         refreshIcons();
@@ -164,7 +199,7 @@
         elements.manualDetail.hidden = true;
         elements.manualDiscovery.hidden = false;
         document.title = 'Manual do Aluno - UniCheck';
-        if (updateHash) history.pushState({}, '', window.location.pathname + window.location.search);
+        if (updateHash || categoryId) history.pushState({}, '', window.location.pathname + window.location.search + (contextParams().size ? '#' + contextParams() : ''));
         renderDiscovery();
         if (updateHash || categoryId || wasReading) requestAnimationFrame(() => {
             const target = categoryId ? document.getElementById('manualGridTitle')
@@ -176,9 +211,11 @@
 
     function refreshIcons() { if (window.lucide) window.lucide.createIcons(); }
     function readHash() {
-        const match = window.location.hash.match(/^#conteudo=(.+)$/);
-        try { match ? openArticle(decodeURIComponent(match[1]), false) : showDiscovery(false); }
-        catch (error) { if (!(error instanceof URIError)) throw error; showDiscovery(false); }
+        const params = new URLSearchParams(window.location.hash.slice(1));
+        state.query = params.get('busca') || '';
+        state.category = categoryById(params.get('categoria')) ? params.get('categoria') : 'all';
+        elements.manualSearch.value = state.query;
+        params.has('conteudo') ? openArticle(params.get('conteudo'), false) : showDiscovery(false);
     }
     function openFromEvent(event) {
         const button = event.target.closest('[data-open-article]');
@@ -186,21 +223,22 @@
         event.preventDefault();
         openArticle(button.dataset.openArticle);
     }
-    function resetFilters() { state.query = ''; state.category = 'all'; elements.manualSearch.value = ''; renderDiscovery(); elements.manualSearch.focus(); }
+    function resetFilters() { state.query = ''; state.category = 'all'; elements.manualSearch.value = ''; saveDiscovery(); renderDiscovery(); elements.manualSearch.focus(); }
 
     function bindEvents() {
-        elements.manualSearch.addEventListener('input', (event) => { state.query = event.target.value; renderDiscovery(); });
-        elements.clearManualSearch.addEventListener('click', () => { state.query = ''; elements.manualSearch.value = ''; renderDiscovery(); elements.manualSearch.focus(); });
-        elements.manualFilters.addEventListener('click', (event) => { const button = event.target.closest('[data-category]'); if (!button) return; state.category = button.dataset.category; renderDiscovery(); });
+        elements.manualSearch.addEventListener('input', (event) => { state.query = event.target.value; state.category = 'all'; saveDiscovery(); renderDiscovery(); });
+        elements.clearManualSearch.addEventListener('click', () => { state.query = ''; elements.manualSearch.value = ''; saveDiscovery(); renderDiscovery(); elements.manualSearch.focus(); });
+        elements.manualFilters.addEventListener('click', (event) => { const button = event.target.closest('[data-category]'); if (!button) return; state.category = button.dataset.category; saveDiscovery(); renderDiscovery(); });
         elements.manualGrid.addEventListener('click', (event) => { const articleButton = event.target.closest('[data-open-article]'); if (articleButton) return openFromEvent(event); const categoryButton = event.target.closest('[data-open-category]'); if (categoryButton) showDiscovery(false, categoryButton.dataset.openCategory); });
         elements.manualQuickLinks.addEventListener('click', openFromEvent);
         elements.manualRelatedList.addEventListener('click', openFromEvent);
+        elements.manualDetailBody.addEventListener('click', openFromEvent);
         elements.manualPrevious.addEventListener('click', openFromEvent);
         elements.manualNext.addEventListener('click', openFromEvent);
         elements.resetManualFilters.addEventListener('click', resetFilters);
         document.getElementById('clearManualFilters').addEventListener('click', resetFilters);
         elements.manualBack.addEventListener('click', () => showDiscovery());
-        elements.manualBreadcrumb.addEventListener('click', (event) => { if (event.target.closest('[data-show-manual]')) { resetFilters(); showDiscovery(); } const categoryButton = event.target.closest('[data-show-category]'); if (categoryButton) { state.query = ''; elements.manualSearch.value = ''; showDiscovery(true, categoryButton.dataset.showCategory); } });
+        elements.manualBreadcrumb.addEventListener('click', (event) => { if (event.target.closest('[data-show-manual]')) { state.query = ''; state.category = 'all'; elements.manualSearch.value = ''; showDiscovery(); } const categoryButton = event.target.closest('[data-show-category]'); if (categoryButton) { state.query = ''; elements.manualSearch.value = ''; showDiscovery(true, categoryButton.dataset.showCategory); } });
         window.addEventListener('hashchange', readHash);
     }
 

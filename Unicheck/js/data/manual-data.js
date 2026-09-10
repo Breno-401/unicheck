@@ -197,7 +197,7 @@
     };
     // Vocabulário de busca do aluno; não modifica os procedimentos institucionais.
     const searchAliases = {
-        'mensalidades-boletos': ['emitir boleto', 'emissão de boleto', 'pagar mensalidade'],
+        'mensalidades-boletos': ['emitir boleto', 'emissão de boleto', 'pagar mensalidade', 'segunda via boleto'],
         'historico-documentos': ['solicitar documento', 'pedir histórico'],
         'portal-academico': ['acessar portal', 'entrar no portal', 'plataforma acadêmica'],
         'biblioteca-fisica': ['emprestar livro', 'empréstimo de livros']
