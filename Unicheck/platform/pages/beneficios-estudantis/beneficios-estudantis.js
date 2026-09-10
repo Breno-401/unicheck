@@ -225,16 +225,23 @@
         elements.resultsHeading.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' });
     }
 
+    function createBrandTile(benefit) {
+        const brand = window.UniCheckBenefitBrands?.[benefit.id];
+        const logo = brand?.logo || benefit.logo;
+        const content = logo
+            ? `<img src="${escapeHtml(logo)}" alt="" class="benefit-logo" width="32" height="32" decoding="async">`
+            : benefit.fallbackLabel
+                ? `<span class="benefit-brand-fallback" aria-hidden="true">${escapeHtml(benefit.fallbackLabel)}</span>`
+                : `<i data-lucide="${escapeHtml(benefit.icon || 'badge-percent')}" aria-hidden="true"></i>`;
+        return `<span class="benefit-logo-tile${brand?.inset === 'padded' ? ' benefit-logo-tile-padded' : ''}" aria-hidden="true">${content}</span>`;
+    }
+
     function createBenefitCard(benefit) {
         const favorite = state.favorites.includes(benefit.id);
         const category = getCategory(benefit.category);
-        const media = benefit.logo
-            ? `<img src="${escapeHtml(benefit.logo)}" alt="" class="benefit-logo">`
-            : benefit.fallbackLabel
-                ? `<span class="benefit-brand-fallback" aria-hidden="true">${escapeHtml(benefit.fallbackLabel)}</span>`
-                : `<span class="benefit-icon" aria-hidden="true"><i data-lucide="${escapeHtml(benefit.icon || category?.icon || 'badge-percent')}"></i></span>`;
+        const media = createBrandTile(benefit);
         return `
-            <article class="benefit-card" data-benefit-id="${escapeHtml(benefit.id)}">
+            <article class="benefit-card" data-category="${escapeHtml(benefit.category)}" data-benefit-id="${escapeHtml(benefit.id)}">
                 <div class="benefit-card-top">
                     ${media}
                     <div class="benefit-heading">
@@ -253,7 +260,7 @@
                     <div class="benefit-tags">${benefit.tags.slice(0, 2).map(tag => `<span>${escapeHtml(tag)}</span>`).join('')}</div>
                 </div>
                 <div class="benefit-card-footer">
-                    <button class="details-link" type="button" data-action="view-details" data-platform="${escapeHtml(benefit.id)}" aria-label="Ver detalhes de ${escapeHtml(benefit.name)}"><span>Ver detalhes</span><i data-lucide="arrow-right"></i></button>
+                    <button class="details-link" type="button" data-action="view-details" data-platform="${escapeHtml(benefit.id)}" aria-label="Ver benefício de ${escapeHtml(benefit.name)}" aria-haspopup="dialog"><span>Ver benefício</span><i data-lucide="arrow-right" aria-hidden="true"></i></button>
                 </div>
             </article>`;
     }
@@ -281,21 +288,28 @@
 
         const officialUrl = getValidOfficialUrl(benefit.officialUrl);
         elements.modalTitle.textContent = benefit.name;
+        elements.modal.setAttribute('data-category', benefit.category);
+        document.getElementById('modalBrand').innerHTML = createBrandTile(benefit);
+        document.getElementById('modalCategory').textContent = category?.label || benefit.category;
         elements.modalBody.innerHTML = `
             <div class="modal-benefit-summary">
-                <span class="category-label">${escapeHtml(category?.label || benefit.category)}</span>
                 <p class="benefit-value">${escapeHtml(benefit.benefitLabel)}</p>
                 <p>${escapeHtml(benefit.description)}</p>
             </div>
             ${volatileNote}${institutionNote}
-            <dl class="benefit-detail-list">
-                <div><dt><i data-lucide="users"></i> Para quem</dt><dd>${escapeHtml(benefit.targetAudience)}</dd></div>
-                <div><dt><i data-lucide="badge-check"></i> Como verificar</dt><dd>${escapeHtml(benefit.verification)}</dd></div>
-                <div><dt><i data-lucide="route"></i> Como acessar</dt><dd>${escapeHtml(getAccessDescription(benefit))}</dd></div>
-                <div><dt><i data-lucide="map-pin"></i> Disponibilidade</dt><dd>${escapeHtml(benefit.availability)}</dd></div>
-                <div><dt><i data-lucide="circle-alert"></i> Elegibilidade</dt><dd>${escapeHtml(benefit.eligibility)}</dd></div>
-            </dl>
-            ${officialUrl ? `<div class="official-source"><i data-lucide="external-link" aria-hidden="true"></i><div><strong>Fonte oficial</strong><a href="${escapeHtml(officialUrl)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(new URL(officialUrl).hostname)} (abre em nova aba)">${escapeHtml(new URL(officialUrl).hostname)}</a></div></div>` : ''}`;
+            <section class="benefit-requirements" aria-labelledby="requirementsTitle">
+                <h3 id="requirementsTitle">Antes de começar</h3>
+                <p class="modal-audience"><i data-lucide="users" aria-hidden="true"></i>${escapeHtml(benefit.targetAudience)}</p>
+                <p>${escapeHtml(benefit.eligibility)}</p>
+            </section>
+            <section class="benefit-access" aria-labelledby="accessTitle">
+                <h3 id="accessTitle">Como conseguir</h3>
+                <ol class="benefit-steps">
+                    <li><strong>Confira seu acesso</strong><p>${escapeHtml(benefit.verification)}</p></li>
+                    <li><strong>Acesse a plataforma</strong><p>${escapeHtml(getAccessDescription(benefit))}</p></li>
+                </ol>
+            </section>
+            <details class="benefit-availability"><summary>Onde está disponível</summary><p>${escapeHtml(benefit.availability)}</p></details>`;
         elements.modalOfficialLink.hidden = !officialUrl;
         elements.officialLinkUnavailable.hidden = Boolean(officialUrl);
         if (officialUrl) elements.modalOfficialLink.href = officialUrl;
@@ -316,7 +330,7 @@
     }
 
     function trapModalFocus(event) {
-        const focusable = [...elements.modal.querySelectorAll('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])')]
+        const focusable = [...elements.modal.querySelectorAll('a[href], button:not([disabled]), summary, [tabindex]:not([tabindex="-1"])')]
             .filter(item => !item.hidden && item.getClientRects().length);
         if (!focusable.length) return;
         const first = focusable[0];

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Benefícios para Estudantes - UniCheck</title>
-    <link rel="icon" href="../../../landing/assets/images/logomernor.png" type="image/png">
+    <link rel="icon" href="../../../assets/brand/favicon.svg" type="image/svg+xml" sizes="any">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -57,9 +57,9 @@
             <header class="main-header benefits-header">
                 <div class="header-mobile-controls"><button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-label="Abrir menu lateral"><i data-lucide="menu"></i></button></div>
                 <div class="welcome-section">
-                    <p class="benefits-eyebrow">Curadoria UniCheck</p>
+                    <p class="benefits-eyebrow">Sua vida universitária</p>
                     <h1 class="welcome-title">Benefícios para Estudantes</h1>
-                    <p class="welcome-subtitle">Ferramentas, planos gratuitos e descontos verificados para estudantes.</p>
+                    <p class="welcome-subtitle">Mais possibilidades para estudar, criar e aproveitar a faculdade.</p>
                 </div>
                 <div class="header-actions-enhanced">
                         <button class="theme-toggle-mobile" id="themeToggleMobile" type="button" aria-label="Alternar tema"><i data-lucide="moon"></i></button>
@@ -116,7 +116,7 @@
     <div class="modal" id="platformModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" hidden>
         <div class="modal-overlay" data-action="close-modal"></div>
         <div class="modal-content benefits-modal-content" tabindex="-1">
-            <div class="modal-header"><div><span class="modal-kicker">Detalhes do benefício</span><h2 id="modalTitle"></h2></div><button class="modal-close" type="button" data-action="close-modal" aria-label="Fechar detalhes"><i data-lucide="x"></i></button></div>
+            <div class="modal-header"><div class="modal-brand-heading"><span id="modalBrand"></span><div><span class="modal-kicker" id="modalCategory"></span><h2 id="modalTitle"></h2></div></div><button class="modal-close" type="button" data-action="close-modal" aria-label="Fechar detalhes"><i data-lucide="x"></i></button></div>
             <div class="modal-body" id="modalBody"></div>
             <div class="modal-footer"><button class="btn btn-secondary" type="button" data-action="close-modal">Fechar</button><a class="btn btn-primary" id="modalOfficialLink" href="#" target="_blank" rel="noopener noreferrer" aria-label="Ver oferta oficial (abre em nova aba)"><span>Ver oferta oficial</span><i data-lucide="external-link"></i></a><span class="official-link-unavailable" id="officialLinkUnavailable" hidden>Link oficial indisponível</span></div>
         </div>
@@ -138,6 +138,7 @@
     <script src="../../shared/js/profile-sync.js"></script>
     <script src="../../shared/js/page-state.js"></script>
     <script src="beneficios-data.js"></script>
+    <script src="beneficios-brand-assets.js"></script>
     <script src="beneficios-estudantis.js"></script>
 </body>
 </html>
