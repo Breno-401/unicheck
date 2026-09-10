@@ -16,6 +16,21 @@
         return client;
     }
 
+    function getValidation() {
+        const validation = window.UniCheckValidation;
+        if (!validation) {
+            throw new Error("Módulo de validação não carregado.");
+        }
+        return validation;
+    }
+
+    function createPublicError(message) {
+        const error = new Error(message);
+        error.code = "UNICHECK_VALIDATION";
+        error.isUserSafe = true;
+        return error;
+    }
+
     function getProfileStorageKey() {
         return window.UniCheckConfig?.STORAGE_KEYS?.USER_PROFILE || PROFILE_STORAGE_KEY;
     }
@@ -98,19 +113,43 @@
     function normalizeErrorMessage(error) {
         const message = error?.message || "Nao foi possivel concluir a autenticacao.";
 
+        if (error?.isUserSafe && message) {
+            return message;
+        }
+
         if (/invalid login credentials/i.test(message)) {
-            return "E-mail ou senha invalidos.";
+            return "E-mail ou senha inválidos.";
         }
 
         if (/email not confirmed/i.test(message)) {
-            return "Confirme seu e-mail no link enviado pelo Supabase antes de entrar.";
+            return "Confirme seu e-mail pelo link recebido antes de entrar.";
         }
 
         if (/already registered/i.test(message)) {
-            return "Este e-mail ja esta cadastrado.";
+            return "Este e-mail já está cadastrado.";
         }
 
-        return message;
+        if (/senha atual.*incorreta/i.test(message)) {
+            return "A senha atual está incorreta.";
+        }
+
+        if (/invalid.*email|email.*invalid/i.test(message)) {
+            return "Informe um endereço de e-mail válido.";
+        }
+
+        if (/weak password|password.*short|password.*characters/i.test(message)) {
+            return "A senha não atende aos requisitos de segurança.";
+        }
+
+        if (/rate limit|too many requests|over_email_send_rate_limit/i.test(message)) {
+            return "Muitas tentativas em pouco tempo. Aguarde alguns minutos e tente novamente.";
+        }
+
+        if (/failed to fetch|network|fetch failed/i.test(message)) {
+            return "Não foi possível conectar ao serviço. Verifique sua conexão e tente novamente.";
+        }
+
+        return "Não foi possível concluir a operação. Tente novamente.";
     }
 
     async function getSession() {
@@ -180,13 +219,23 @@
 
     async function register({ fullName, email, password, birthDate }) {
         const client = getClient();
+        const validation = getValidation();
+        const nameResult = validation.validateFullName(fullName);
+        const emailResult = validation.validateEmail(email);
+        const birthDateResult = validation.validateBirthDate(birthDate);
+        const passwordResult = validation.validateRegistrationPassword(password);
+
+        for (const result of [nameResult, emailResult, birthDateResult, passwordResult]) {
+            if (!result.valid) throw createPublicError(result.error);
+        }
+
         const { data, error } = await client.auth.signUp({
-            email,
-            password,
+            email: emailResult.value,
+            password: passwordResult.value,
             options: {
                 data: {
-                    full_name: fullName,
-                    birth_date: birthDate
+                    full_name: nameResult.value,
+                    birth_date: birthDateResult.value
                 }
             }
         });
@@ -198,8 +247,12 @@
 
     async function login({ email, password }) {
         const client = getClient();
+        const emailResult = getValidation().validateEmail(email);
+        if (!emailResult.valid) throw createPublicError(emailResult.error);
+        if (!password) throw createPublicError("Informe sua senha.");
+
         const { data, error } = await client.auth.signInWithPassword({
-            email,
+            email: emailResult.value,
             password
         });
 
