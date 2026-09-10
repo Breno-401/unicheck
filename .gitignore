@@ -2,3 +2,7 @@
 .idea_backup_*/
 .aider*
 
+# Materiais privados de consulta (nunca versionar)
+private-context/
+/docs/checklist-academico-pesquisa.pdf
+
