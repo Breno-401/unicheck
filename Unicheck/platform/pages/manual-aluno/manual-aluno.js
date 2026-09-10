@@ -9,7 +9,6 @@
     const categoryById = (id) => data.categories.find((category) => category.id === id);
     const articleById = (id) => data.articles.find((article) => article.id === id);
     const articlesFor = (categoryId) => data.articles.filter((article) => article.category === categoryId);
-    const pageLabel = (pages) => pages.length === 1 ? `p. ${pages[0]}` : `p. ${pages[0]}–${pages[pages.length - 1]}`;
     const categoryOrder = ['vida-academica', 'ferramentas', 'utilidades', 'campus', 'apoio', 'avaliacoes', 'formacao', 'comecando'];
     const orderedCategories = [...data.categories].sort((a, b) => categoryOrder.indexOf(a.id) - categoryOrder.indexOf(b.id));
     const searchIndex = new Map(data.articles.map(article => [article.id, searchableText(article)]));
@@ -32,7 +31,7 @@
 
     function searchableText(article) {
         const category = categoryById(article.category);
-        return normalize([article.title, article.summary, article.content.join(' '), article.keywords.join(' '), category.title, category.shortTitle,
+        return normalize([article.title, article.summary, article.content.join(' '), article.keywords.join(' '), category.title, category.shortTitle, article.context || '', article.nextStep?.text || '',
             ...article.sections.flatMap(section => [section.title, section.content || '', ...(section.items || [])])].join(' '));
     }
 
@@ -62,10 +61,10 @@
     }
 
     function renderQuickAccess() {
-        const labels = { 'portal-academico': 'Portal Acadêmico', 'mensalidades-boletos': 'Boletos', rematricula: 'Rematrícula', 'biblioteca-fisica': 'Biblioteca', 'historico-documentos': 'Histórico', multiatendimento: 'Multiatendimento', 'ra-identidade-estudantil': 'RA', 'frequencia-faltas': 'Frequência' };
+        const labels = { 'portal-academico': ['Acessar o Portal', 'monitor'], 'mensalidades-boletos': ['Emitir boleto', 'receipt'], rematricula: ['Renovar matrícula', 'calendar-check'], 'biblioteca-fisica': ['Emprestar um livro', 'book-open'], 'historico-documentos': ['Pedir histórico', 'file-text'], multiatendimento: ['Buscar atendimento', 'messages-square'], 'ra-identidade-estudantil': ['Consultar meu RA', 'contact-round'], 'frequencia-faltas': ['Entender minhas faltas', 'clipboard-check'] };
         elements.manualQuickLinks.innerHTML = data.quickAccess.map((id) => {
             const article = articleById(id);
-            return `<a href="${articleHref(id)}" data-open-article="${id}" aria-label="${article.title}"><i data-lucide="arrow-up-right" aria-hidden="true"></i><span>${labels[id] || article.title}</span></a>`;
+            return `<a href="${articleHref(id)}" data-open-article="${id}" aria-label="Orientação: ${article.title}"><i data-lucide="${labels[id][1]}" aria-hidden="true"></i><span>${labels[id][0]}</span><i class="manual-quick-arrow" data-lucide="arrow-right" aria-hidden="true"></i></a>`;
         }).join('');
     }
 
@@ -116,15 +115,15 @@
     }
 
     function sectionIcon(type) {
-        return { overview: 'info', knowledge: 'list-checks', steps: 'route', destination: 'map-pin', attention: 'triangle-alert' }[type] || 'book-open';
+        return { context: 'user-round', overview: 'info', knowledge: 'list-checks', requirements: 'clipboard-list', deadline: 'calendar-clock', outcome: 'check-check', steps: 'route', destination: 'map-pin', attention: 'triangle-alert' }[type] || 'book-open';
     }
 
     function renderSection(section, index) {
         const ordered = section.type === 'steps';
         const list = section.items ? `<${ordered ? 'ol' : 'ul'}>${section.items.map((item) => `<li>${item}</li>`).join('')}</${ordered ? 'ol' : 'ul'}>` : '';
         const content = `${section.content ? `<p>${section.content}</p>` : ''}${list}`;
-        if (section.type === 'knowledge' && section.title !== 'Pontos essenciais') return `<details class="manual-reading-section manual-reading-knowledge"><summary>${section.title}</summary>${content}</details>`;
-        return `<section class="manual-reading-section manual-reading-${section.type}" aria-labelledby="manualSection${index}"><div class="manual-reading-heading"><i data-lucide="${sectionIcon(section.type)}" aria-hidden="true"></i><h2 id="manualSection${index}">${section.title}</h2></div>${content}</section>`;
+        if (section.type === 'knowledge' && section.title !== 'Pontos essenciais') return `<details class="manual-reading-section manual-reading-knowledge"><summary>${section.title}</summary><div class="manual-expanded-content">${content}</div></details>`;
+        return `<section class="manual-reading-section manual-reading-${section.type}" aria-labelledby="manualSection${index}"><div class="manual-reading-heading"><i data-lucide="${sectionIcon(section.type)}" aria-hidden="true"></i><h2 id="manualSection${index}" tabindex="-1">${section.title}</h2></div>${content}</section>`;
     }
 
     function renderRelated(article) {
@@ -151,6 +150,10 @@
     }
 
     function renderNextStep(article) {
+        if (article.nextStep?.text) {
+            const next = articleById(article.nextStep.articleId);
+            return `<section class="manual-next-step"><h2>Seu próximo passo</h2><p>${escapeHTML(article.nextStep.text)}</p>${next ? `<a href="${articleHref(next.id)}" data-open-article="${next.id}">Ver orientação: ${next.title}<i data-lucide="arrow-right" aria-hidden="true"></i></a>` : ''}</section>`;
+        }
         // Only connect destinations already named by this article to existing guidance.
         const destinations = article.sections.find(section => section.type === 'destination')?.items || [];
         const guides = { 'Portal Acadêmico': 'portal-academico', 'Multiatendimento': 'multiatendimento', 'Biblioteca': 'biblioteca-fisica', 'Coordenação do curso': 'coordenacao-curso', 'Ambiente Virtual de Aprendizagem': 'ava-brightspace', 'Aplicativo Meu EduCONNECT': 'meu-educonnect', 'Ouvidoria': 'ouvidoria' };
@@ -171,12 +174,16 @@
         elements.manualDetailTime.textContent = `${article.estimatedReadingTime} min de leitura`;
         elements.manualDetailTitle.textContent = article.title;
         elements.manualDetailSummary.textContent = article.summary;
-        const sectionOrder = { overview: 0, steps: 1, destination: 2, attention: 3, knowledge: 4 };
-        elements.manualDetailBody.innerHTML = [...article.sections].sort((a, b) => sectionOrder[a.type] - sectionOrder[b.type]).map(renderSection).join('')
+        const sectionOrder = { context: 0, overview: 1, attention: 2, requirements: 3, steps: 4, destination: 5, deadline: 6, outcome: 7, knowledge: 8 };
+        const action = article.primaryAction;
+        const primaryAction = action ? `<a class="manual-primary-action" href="${escapeHTML(action.href)}" target="_blank" rel="noopener noreferrer">${escapeHTML(action.label)}<i data-lucide="external-link" aria-hidden="true"></i><span class="manual-external-label">nova aba</span></a>` : '';
+        const sortedSections = [...article.sections].sort((a, b) => sectionOrder[a.type] - sectionOrder[b.type]);
+        const jumps = sortedSections.map((section, index) => ['steps', 'requirements', 'deadline'].includes(section.type) ? `<button type="button" data-reading-target="manualSection${index}">${section.title}</button>` : '').join('');
+        const navigation = jumps ? `<nav class="manual-reading-navigation" aria-label="Nesta orientação">${jumps}</nav>` : '';
+        elements.manualDetailBody.innerHTML = primaryAction + navigation + sortedSections.map(renderSection).join('')
             + renderNextStep(article);
         elements.manualTemporalNote.hidden = article.temporalFields.length === 0;
         elements.manualTemporalText.textContent = article.temporalFields.length ? `${article.temporalFields.join('; ')} podem sofrer alterações. Consulte o canal institucional para confirmar os dados atuais.` : '';
-        elements.manualSourcePages.textContent = pageLabel(article.sourcePages);
         elements.manualBackLabel.textContent = state.query || state.category !== 'all' ? 'Voltar aos resultados' : 'Voltar aos assuntos';
         elements.manualBreadcrumb.innerHTML = `<button type="button" data-show-manual>Manual do Aluno</button><i data-lucide="chevron-right"></i><button type="button" data-show-category="${category.id}">${category.title}</button><i data-lucide="chevron-right"></i><span aria-current="page">${article.title}</span>`;
         renderRelated(article);
@@ -232,7 +239,16 @@
         elements.manualGrid.addEventListener('click', (event) => { const articleButton = event.target.closest('[data-open-article]'); if (articleButton) return openFromEvent(event); const categoryButton = event.target.closest('[data-open-category]'); if (categoryButton) showDiscovery(false, categoryButton.dataset.openCategory); });
         elements.manualQuickLinks.addEventListener('click', openFromEvent);
         elements.manualRelatedList.addEventListener('click', openFromEvent);
-        elements.manualDetailBody.addEventListener('click', openFromEvent);
+        elements.manualDetailBody.addEventListener('click', event => {
+            const jump = event.target.closest('[data-reading-target]');
+            if (jump) {
+                const heading = document.getElementById(jump.dataset.readingTarget);
+                heading?.focus({ preventScroll: true });
+                heading?.scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
+                return;
+            }
+            openFromEvent(event);
+        });
         elements.manualPrevious.addEventListener('click', openFromEvent);
         elements.manualNext.addEventListener('click', openFromEvent);
         elements.resetManualFilters.addEventListener('click', resetFilters);
