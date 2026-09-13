@@ -55,7 +55,7 @@ Não há globais `*.pdf` ou `*.docx`: documentos oficiais nesses formatos contin
 - não houve remoção apenas do índice (`git rm --cached`) nesta rodada;
 - nenhum material local foi apagado: os diretórios locais existentes continuam presentes, e os arquivos históricos não existem como arquivos do checkout atual.
 
-`git check-ignore -v` confirmou as regras para caminhos existentes como `private-context/`, `tmp/`, `.superpowers/`, `/docs/checklist-academico-pesquisa.pdf`, `*.local.pdf` e `*.local.docx`. Sem `--no-index`, `git check-ignore` não avalia caminhos inexistentes; probes hipotéticos com `git check-ignore -v --no-index -- docs/local/probe.md docs/context/probe.md .local-context/probe.md` confirmam que as três convenções já são classificadas pelas regras correspondentes.
+`git check-ignore -v` confirmou as regras para caminhos existentes como `private-context/`, `tmp/`, `.superpowers/`, `/docs/checklist-academico-pesquisa.pdf`, `*.local.pdf` e `*.local.docx`. Os probes documentados para `docs/local/probe.md`, `docs/context/probe.md` e `.local-context/probe.md` são hipotéticos: retornam as regras correspondentes tanto com quanto sem `--no-index`. Essa opção manda ignorar o índice e permite avaliar também caminhos rastreados conforme a semântica do Git; em ambos os modos, a evidência confirma que as três convenções estão cobertas.
 
 ## PDFs somente no histórico
 
