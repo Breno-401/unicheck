@@ -2,9 +2,55 @@
 .idea_backup_*/
 .aider*
 
+# Ambientes e credenciais (exemplos sem segredos podem ser versionados)
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+.npmrc
+.netrc
+.aws/
+.ssh/
+credentials.json
+service-account.json
+service-account-*.json
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+
+# Dependencias, caches e resultados locais
+node_modules/
+.cache/
+.npm/
+.netlify/
+coverage/
+test-results/
+playwright-report/
+*.log
+*.tsbuildinfo
+__pycache__/
+*.py[cod]
+.venv/
+
+# Configuracoes e contexto local de agentes
+.codex/
+.agents/
+.superpowers/
+.mcp.json
+*.local.md
+
 # Materiais privados de consulta (nunca versionar)
 private-context/
 /docs/checklist-academico-pesquisa.pdf
+docs/local/
+docs/context/
+.local-context/
+*.local.pdf
+*.local.docx
 
 # Artefatos temporarios de processamento, inspecao e testes
 tmp/
