@@ -6,3 +6,5 @@
 private-context/
 /docs/checklist-academico-pesquisa.pdf
 
+# Artefatos temporarios de processamento, inspecao e testes
+tmp/
