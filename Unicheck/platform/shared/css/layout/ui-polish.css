@@ -401,6 +401,28 @@ button, a, input { -webkit-tap-highlight-color: transparent; }
 .sidebar-profile-progression.is-xp-receiving .sidebar-progress-heading strong {
   animation: sidebarXpReceivedLevel 320ms ease-out;
 }
+.sidebar-profile-progression.is-xp-receiving .sidebar-level-indicator,
+.xp-mobile-indicator.is-xp-receiving {
+  animation: sidebarXpReceivedTrack 320ms ease-out;
+}
+.xp-mobile-indicator {
+  position: fixed;
+  z-index: 1900;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  display: grid;
+  gap: .45rem;
+  width: 148px;
+  padding: .7rem .85rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--surface-shadow);
+  color: var(--text-primary);
+  font-size: .75rem;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
 @keyframes sidebarXpReceivedTrack {
   45% { box-shadow: inset 0 0 0 1px var(--accent), 0 0 11px color-mix(in srgb, var(--accent) 42%, transparent); }
 }
@@ -520,6 +542,15 @@ button, a, input { -webkit-tap-highlight-color: transparent; }
   width: min(344px, calc(100vw - 3rem));
   pointer-events: none;
 }
+.xp-reward-announcement {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
 .xp-reward {
   --reward-accent: var(--accent);
   --reward-brand: var(--unicheck-primary, #6cbdb5);
@@ -536,7 +567,7 @@ button, a, input { -webkit-tap-highlight-color: transparent; }
   box-shadow: 0 16px 38px rgb(8 24 48 / 17%), 0 0 22px var(--reward-glow);
   color: var(--text-primary);
   isolation: isolate;
-  animation: xpRewardIn 320ms cubic-bezier(.22, 1, .36, 1) both, xpRewardOut 300ms ease-in 3.05s forwards;
+  animation: xpRewardIn 220ms cubic-bezier(.22, 1, .36, 1) both, xpRewardOut 220ms ease-in 1.48s forwards;
 }
 .xp-reward::before {
   position: absolute;
@@ -965,7 +996,7 @@ a.journey-phase-content:focus-visible { outline: 3px solid var(--focus-ring); ou
   .xp-reward {
     transform: none;
     box-shadow: 0 12px 28px rgb(8 24 48 / 14%);
-    animation: xpRewardReduced 3.4s ease both !important;
+    animation: none !important;
   }
   .xp-reward::before { filter: none; opacity: .35; }
   .xp-reward::after { box-shadow: none; }
@@ -973,8 +1004,9 @@ a.journey-phase-content:focus-visible { outline: 3px solid var(--focus-ring); ou
   .xp-reward-symbol { animation: none !important; text-shadow: none; transform: none; }
   .xp-reward-symbol::before,
   .xp-reward-symbol::after { text-shadow: none; }
-  .xp-reward-track > span { box-shadow: none; }
-  .sidebar-profile-progression.is-xp-receiving :is(.sidebar-progress-track, .sidebar-progress-track > span, .sidebar-progress-heading strong) {
+  .xp-reward-track > span { box-shadow: none; transition: none !important; }
+  .sidebar-profile-progression.is-xp-receiving :is(.sidebar-progress-track, .sidebar-progress-track > span, .sidebar-progress-heading strong, .sidebar-level-indicator),
+  .xp-mobile-indicator.is-xp-receiving {
     animation: none !important;
   }
 }
