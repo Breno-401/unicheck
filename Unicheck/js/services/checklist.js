@@ -14,18 +14,23 @@
         return client;
     }
 
-    function logSupabaseError(context, error, extra = {}) {
+    function logSupabaseError(context, error) {
         if (error?.unicheckChecklistLogged) return;
         if (error && typeof error === "object") {
             error.unicheckChecklistLogged = true;
         }
-        console.error(`[UniCheckChecklist] ${context}`, {
-            message: error?.message || String(error),
-            code: error?.code || null,
-            details: error?.details || null,
-            hint: error?.hint || null,
-            ...extra
-        });
+        // Only known operational messages reach the console; provider errors
+        // may include row contents, identifiers or credentials in their text.
+        switch (context) {
+            case 'fetch':
+                console.error('[UniCheckChecklist] Erro ao buscar progresso do usuario');
+                break;
+            case 'save':
+                console.error('[UniCheckChecklist] Erro ao salvar progresso');
+                break;
+            default:
+                console.error('[UniCheckChecklist] Erro ao sincronizar fila de progresso');
+        }
     }
 
     async function withTimeout(query, context) {
@@ -73,7 +78,7 @@
             const raw = localStorage.getItem(getProgressStorageKey(userId));
             return raw ? JSON.parse(raw) : {};
         } catch (error) {
-            console.warn("[UniCheckChecklist] Cache local de progresso invalido", error);
+            console.warn("[UniCheckChecklist] Cache local de progresso invalido");
             return {};
         }
     }
@@ -84,7 +89,7 @@
             localStorage.setItem(getProgressStorageKey(userId), JSON.stringify(progressMap || {}));
             return true;
         } catch (error) {
-            console.warn("[UniCheckChecklist] Nao foi possivel atualizar o cache de progresso", error);
+            console.warn("[UniCheckChecklist] Nao foi possivel atualizar o cache de progresso");
             return false;
         }
     }
@@ -104,7 +109,7 @@
             const raw = localStorage.getItem(`${PENDING_STORAGE_PREFIX}:${userId}`);
             return keepCompletedPendingEntries(raw ? JSON.parse(raw) : {});
         } catch (error) {
-            console.warn("[UniCheckChecklist] Fila local de progresso invalida", error);
+            console.warn("[UniCheckChecklist] Fila local de progresso invalida");
             return {};
         }
     }
@@ -115,7 +120,7 @@
             localStorage.setItem(`${PENDING_STORAGE_PREFIX}:${userId}`, JSON.stringify(keepCompletedPendingEntries(pendingMap)));
             return true;
         } catch (error) {
-            console.warn("[UniCheckChecklist] Nao foi possivel atualizar a fila de progresso", error);
+            console.warn("[UniCheckChecklist] Nao foi possivel atualizar a fila de progresso");
             return false;
         }
     }
@@ -170,7 +175,7 @@
             .eq("user_id", userId), "Consulta de progresso");
 
         if (error) {
-            logSupabaseError("Erro ao buscar progresso do usuario", error, { userId });
+            logSupabaseError('fetch', error);
             throw error;
         }
 
@@ -195,7 +200,7 @@
             .upsert(payload, { onConflict: "user_id,checklist_item_id" }), "Persistencia de progresso");
 
         if (error) {
-            logSupabaseError("Erro ao salvar progresso", error, { userId, checklistId, taskId });
+            logSupabaseError('save', error);
             throw error;
         }
         return payload;
@@ -214,7 +219,7 @@
             .from(CHECKLIST_PROGRESS_TABLE)
             .upsert(payload, { onConflict: "user_id,checklist_item_id" }), "Sincronizacao da fila de progresso");
         if (error) {
-            logSupabaseError("Erro ao sincronizar fila de progresso", error, { itemCount: payload.length });
+            logSupabaseError('sync', error);
             throw error;
         }
         return payload;

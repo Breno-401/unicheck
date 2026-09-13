@@ -70,7 +70,7 @@
 
     function writeCache(value) {
         try { localStorage.setItem(CACHE_KEY, JSON.stringify(value)); }
-        catch (error) { console.warn("[UniCheckChecklistData] Nao foi possivel salvar o catalogo local", error); }
+        catch (error) { console.warn("[UniCheckChecklistData] Nao foi possivel salvar o catalogo local"); }
     }
 
     function normalize(checklists, items) {
@@ -106,9 +106,7 @@
     function load(options = {}) {
         if (!refreshPromise || options.force) {
             refreshPromise = refreshRemote().catch(error => {
-                console.warn("[UniCheckChecklistData] Catalogo remoto indisponivel; usando estrutura local 7/28", {
-                    code: error?.code || null, message: error?.message || String(error), details: error?.details || null, hint: error?.hint || null
-                });
+                console.warn("[UniCheckChecklistData] Catalogo remoto indisponivel; usando estrutura local 7/28");
                 return getChecklists();
             }).finally(() => { refreshPromise = null; });
         }

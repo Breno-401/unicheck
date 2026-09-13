@@ -481,7 +481,7 @@
             });
             return [...latest.values()];
         } catch (error) {
-            console.warn('[UniCheckFavorites] Fila local inválida; mantendo cache', error);
+            console.warn('[UniCheckFavorites] Fila local inválida; mantendo cache');
             return [];
         }
     }
@@ -537,7 +537,7 @@
             writeFavoriteQueue(userId, readFavoriteQueue(userId).filter(item => processed.get(item.platform_id) !== item.action));
             return true;
         } catch (error) {
-            console.error('[UniCheckFavorites] Sincronização pendente; cache preservado', error);
+            console.error('[UniCheckFavorites] Sincronização pendente; cache preservado');
             return false;
         } finally { favoriteSyncInFlight = false; }
     }
@@ -572,7 +572,7 @@
             localStorage.setItem(remoteReadyKey, 'true');
             renderBenefits();
         } catch (error) {
-            console.error('[UniCheckFavorites] Restauração remota indisponível; usando favoritos locais', error);
+            console.error('[UniCheckFavorites] Restauração remota indisponível; usando favoritos locais');
         }
     }
 
@@ -580,7 +580,7 @@
         try {
             const userId = (await window.UniCheckAuth?.getSession?.())?.user?.id;
             if (userId) { favoriteUserId = userId; await flushFavoriteQueue(userId); }
-        } catch (error) { console.warn('[UniCheckFavorites] Fila pendente mantida', error); }
+        } catch (error) { console.warn('[UniCheckFavorites] Fila pendente mantida'); }
     }
 
     function toggleFavorite(platformId, button) {

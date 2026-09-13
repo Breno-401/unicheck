@@ -26,7 +26,7 @@
             const value = JSON.parse(localStorage.getItem(storageKey(userId)) || "[]");
             return Array.isArray(value) ? value : [];
         } catch (error) {
-            console.warn("[UniCheckNotifications] Cache invalido", error);
+            console.warn("[UniCheckNotifications] Cache invalido");
             return [];
         }
     }
@@ -36,7 +36,7 @@
         try {
             localStorage.setItem(storageKey(userId), JSON.stringify(value.slice(0, MAX_ITEMS)));
         } catch (error) {
-            console.warn("[UniCheckNotifications] Falha ao salvar cache", error);
+            console.warn("[UniCheckNotifications] Falha ao salvar cache");
         }
     }
 
@@ -192,13 +192,13 @@
                 .eq("event_key", payload.event_key)
                 .maybeSingle();
             if (existing.error) {
-                console.error("[UniCheckNotifications] Falha ao consultar notificacao existente", existing.error);
+                console.error("[UniCheckNotifications] Falha ao consultar notificacao existente");
                 return null;
             }
             return existing.data;
         }
         if (result.error) {
-            console.error("[UniCheckNotifications] Falha ao registrar notificacao", result.error);
+            console.error("[UniCheckNotifications] Falha ao registrar notificacao");
             return null;
         }
 
@@ -215,7 +215,7 @@
         const { error } = await getClient().from(TABLE).update({ read: true })
             .eq("user_id", currentUserId).eq("id", id);
         if (error) {
-            console.error("[UniCheckNotifications] Falha ao marcar notificacao como lida", error);
+            console.error("[UniCheckNotifications] Falha ao marcar notificacao como lida");
             return;
         }
         items = items.map(item => item.id === id ? { ...item, read: true } : item);
@@ -240,7 +240,7 @@
             try {
                 await restore(session.user.id);
             } catch (error) {
-                console.error("[UniCheckNotifications] Falha ao restaurar notificacoes", error);
+                console.error("[UniCheckNotifications] Falha ao restaurar notificacoes");
             }
         }
     }

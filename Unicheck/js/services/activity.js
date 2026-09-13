@@ -21,7 +21,7 @@
             const value = JSON.parse(localStorage.getItem(key(userId)) || "[]");
             return Array.isArray(value) ? value : [];
         } catch (error) {
-            console.warn("[UniCheckActivity] Cache local invalido", error);
+            console.warn("[UniCheckActivity] Cache local invalido");
             return [];
         }
     }
@@ -31,7 +31,7 @@
         try {
             localStorage.setItem(key(userId), JSON.stringify(items.slice(0, MAX_ITEMS)));
         } catch (error) {
-            console.warn("[UniCheckActivity] Falha ao atualizar o cache", error);
+            console.warn("[UniCheckActivity] Falha ao atualizar o cache");
         }
     }
 
@@ -121,7 +121,7 @@
 
         const { data, error } = await getClient().from(TABLE).insert(payload).select().single();
         if (error) {
-            console.error("[UniCheckActivity] Falha ao registrar atividade", error);
+            console.error("[UniCheckActivity] Falha ao registrar atividade");
             return null;
         }
 

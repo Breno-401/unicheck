@@ -106,3 +106,106 @@ test('nenhum arquivo rastreado passa a ser ignorado pelas regras do repositório
     assert.ok(tracked.length > 0);
     assert.deepEqual(git(['check-ignore', '--no-index', '--stdin'], tracked.join('\n')), []);
 });
+
+function productionJavaScript(dir = 'Unicheck') {
+    return fs.readdirSync(path.join(root, dir), { withFileTypes: true }).flatMap(entry => {
+        const file = `${dir}/${entry.name}`;
+        return entry.isDirectory() ? productionJavaScript(file) : file.endsWith('.js') ? [file] : [];
+    });
+}
+
+// Lexical inspection, not a search of source text: comments, quoted examples and
+// regex literals must not look like executable console calls. Templates remain
+// one argument, but interpolation is never approved as an operational message.
+function consoleCalls(source) {
+    const tokens = [];
+    const lexeme = /\s+|\/\/[^\r\n]*|\/\*[\s\S]*?\*\/|"(?:\\[\s\S]|[^"\\])*"|'(?:\\[\s\S]|[^'\\])*'|`(?:\\[\s\S]|[^`\\])*`|[\w$]+|\?\.|=>|[^\s]/gy;
+    let match;
+    while ((match = lexeme.exec(source))) {
+        const value = match[0];
+        if (/^\s|^\/\/|^\/\*/.test(value)) continue;
+        // A slash following these expression prefixes starts a regex literal.
+        if (value === '/' && (!tokens.length || /^(?:[=(:,!&|?\[{;]|return|=>)$/.test(tokens.at(-1).value))) {
+            const regex = /^\/(?:\\.|\[(?:\\.|[^\]\\])*\]|[^/\r\n\\])+\/[a-z]*/.exec(source.slice(match.index));
+            if (regex) {
+                tokens.push({ value: regex[0], offset: match.index });
+                lexeme.lastIndex = match.index + regex[0].length;
+                continue;
+            }
+        }
+        tokens.push({ value, offset: match.index });
+    }
+    const calls = [];
+    for (let index = 0; index < tokens.length; index += 1) {
+        if (tokens[index].value !== 'console') continue;
+        let cursor = index + 1;
+        let method;
+        if (['.', '?.'].includes(tokens[cursor]?.value)) {
+            method = tokens[++cursor]?.value;
+            cursor += 1;
+        } else if (tokens[cursor]?.value === '[' && tokens[cursor + 2]?.value === ']') {
+            method = tokens[cursor + 1].value.slice(1, -1);
+            cursor += 3;
+        }
+        if (tokens[cursor]?.value === '?.') cursor += 1;
+        if (tokens[cursor]?.value !== '(') continue;
+        const args = [];
+        let depth = 1;
+        while (++cursor < tokens.length) {
+            const token = tokens[cursor];
+            if (token.value === '(') depth += 1;
+            if (token.value === ')' && --depth === 0) break;
+            args.push(token.value);
+        }
+        calls.push({ method, args, line: source.slice(0, tokens[index].offset).split('\n').length });
+    }
+    return calls;
+}
+
+const staticConsoleMessage = call => call.args.length > 0 && call.args.length % 2 === 1 &&
+    call.args.every((value, index) => index % 2 === 1 ? value === ',' :
+        /^(?:"(?:\\[\s\S]|[^"\\])*"|'(?:\\[\s\S]|[^'\\])*'|`(?:\\[\s\S]|[^`\\])*`|\d+|true|false|null)$/.test(value) &&
+        !(value.startsWith('`') && value.includes('${')));
+
+test('auditoria de console ignora comentários, textos e regex e aceita warnings/errors estáticos', () => {
+    const source = [
+        '// console.log(user.email)',
+        '/* console.info(session) */',
+        'const help = "console.error(profile)";',
+        'const example = /console.log(user)/;',
+        'console.warn("Falha ao carregar perfil.");',
+        'console.error(`Sessão indisponível.`);',
+        'console.warn("Falha de perfil", "Tente novamente", 3);'
+    ].join('\n');
+    const calls = consoleCalls(source);
+    assert.deepEqual(calls.map(call => call.method), ['warn', 'error', 'warn']);
+    assert.ok(calls.every(staticConsoleMessage));
+});
+
+test('auditoria rejeita dados pessoais diretos, serializados, interpolados e erros brutos', () => {
+    for (const expression of ['user.email', 'profile.ra', 'user.id', 'session', 'profile', 'user',
+        'JSON.stringify({ email, ra, userId })', '`Perfil: ${JSON.stringify(profile)}`',
+        'error', 'error.message', '{ details: error.details }']) {
+        const calls = consoleCalls(`console.error("Falha operacional", ${expression});`);
+        assert.equal(calls.length, 1, expression);
+        assert.equal(staticConsoleMessage(calls[0]), false, expression);
+    }
+    assert.equal(consoleCalls('console["info"](session)')[0].method, 'info');
+    assert.equal(consoleCalls('console?.log?.(user)')[0].method, 'log');
+});
+
+test('JavaScript de produção não emite console.log/console.info de depuração', () => {
+    const violations = productionJavaScript().flatMap(file => consoleCalls(read(file))
+        .filter(call => ['log', 'info'].includes(call.method))
+        .map(call => `${file}:${call.line}: console.${call.method}`));
+    assert.deepEqual(violations, []);
+});
+
+test('console de produção não recebe PII, sessão, perfil, payload ou erro remoto bruto', () => {
+    // A literal-only sink prevents leaks even when a payload is renamed, nested,
+    // serialized, or carried inside a provider error's message/details/hint.
+    const violations = productionJavaScript().flatMap(file => consoleCalls(read(file))
+        .filter(call => !staticConsoleMessage(call))
+        .map(call => `${file}:${call.line}: console.${call.method} recebe dados dinâmicos`));
+    assert.deepEqual(violations, []);
+});
