@@ -168,17 +168,24 @@ let base;
         await emit(page, 3, 4);
         await emit(page, 4, 5);
         assert.equal(await xp(page), '50 / 100 XP');
-        const values = await page.evaluate(async () => {
-            const values = [];
-            new MutationObserver(() => values.push(document.querySelector('.sidebar [data-progression-xp]').textContent))
-                .observe(document.querySelector('.sidebar [data-progression-xp]'), { childList: true });
-            window.observedXpValues = values;
-            return values;
+        await page.evaluate(() => {
+            const label = document.querySelector('.sidebar [data-progression-xp]');
+            const textContent = Object.getOwnPropertyDescriptor(Node.prototype, 'textContent');
+            window.observedXpValues = [];
+            // Preserve real DOM writes, capturing each synchronously before another can replace it.
+            Object.defineProperty(label, 'textContent', {
+                configurable: true,
+                get() { return textContent.get.call(this); },
+                set(value) {
+                    textContent.set.call(this, value);
+                    window.observedXpValues.push(textContent.get.call(this));
+                }
+            });
         });
         await advance(page, 3400);
-        values.push(...await page.evaluate(() => observedXpValues));
+        const values = await page.evaluate(() => observedXpValues);
         assert.ok(values.length > 0);
-        assert.ok(values.every(value => value === '50 / 100 XP'), 'finishing an older batch cannot rewind current XP');
+        assert.deepEqual(values.filter(value => value !== '50 / 100 XP'), [], 'finishing an older batch cannot rewind current XP');
     }, { reduced: true });
     await scenario('announcement has one live text message after burst closes', async page => {
         await emit(page);

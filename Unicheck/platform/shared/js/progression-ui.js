@@ -304,7 +304,8 @@
         if (prefersReducedMotion()) updateSurface(activeBatch.progression, { instant: true });
         else schedule(() => transferXpToSidebar(element), XP_TRANSFER_DELAY_MS);
         schedule(() => {
-            updateSurface(activeBatch.progression);
+            // Reduced motion already applied the latest event, which may be newer than this batch.
+            if (!prefersReducedMotion()) updateSurface(activeBatch.progression);
             element.remove();
             activeXpReward = null;
             activeBatch = null;
