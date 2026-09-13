@@ -443,7 +443,7 @@ function renderAcademicProgress(summary) {
     }
 
     if (currentEl) currentEl.textContent = summary.currentPhase.title;
-    if (nextTaskEl) nextTaskEl.textContent = summary.nextTask?.title || summary.nextTask?.text || 'Continue de onde parou.';
+    if (nextTaskEl) nextTaskEl.textContent = window.UniCheckChecklistContent?.getGuide?.(summary.nextTask?.id)?.title || summary.nextTask?.title || summary.nextTask?.text || 'Continue de onde parou.';
     if (continueButton) {
         continueButton.href = `pages/checklist-academico/checklist-academico.html#checklist=${encodeURIComponent(summary.currentPhase.id)}`;
         continueButton.querySelector('span').textContent = 'Continuar';

@@ -16,12 +16,12 @@
     ];
 
     const checklistImages = {
-        "Portal Academico TOTVS": "../../assets/images/TOTVS.jpg",
-        "Configuracao de Email": "../../assets/images/outlook.png",
-        "Biblioteca Virtual": "../../assets/images/bibliotecaV.png",
-        "Microsoft Teams": "../../assets/images/MicrosoftT.png",
-        "Plataforma A+": "../../assets/images/platafromaA.png",
-        "Mentorias": "../../assets/images/logo.png"
+        "10000000-0000-4000-8000-000000000002": "../../assets/images/TOTVS.jpg",
+        "10000000-0000-4000-8000-000000000003": "../../assets/images/outlook.png",
+        "10000000-0000-4000-8000-000000000004": "../../assets/images/bibliotecaV.png",
+        "10000000-0000-4000-8000-000000000005": "../../assets/images/MicrosoftT.png",
+        "10000000-0000-4000-8000-000000000006": "../../assets/images/platafromaA.png",
+        "10000000-0000-4000-8000-000000000007": "../../assets/images/logo.png"
     };
 
     const cardCopy = {
@@ -46,33 +46,33 @@
             footnote: "As credenciais desta fase são tratadas separadamente do Portal TOTVS.",
             unlockHint: "Confirma o canal institucional antes das outras plataformas."
         },
-        "Biblioteca Virtual": {
-            eyebrow: "Pesquisa e acervo",
-            description: "Organize o acesso ao acervo digital e deixe a busca por livros, artigos e bases rapida e confiavel.",
-            highlights: ["Acervo digital", "Artigos e livros", "Busca por disciplina", "Materiais da area"],
-            footnote: "Uma biblioteca pronta reduz tempo perdido nas primeiras pesquisas.",
-            unlockHint: "Abre caminho para leitura, consulta e pesquisa academica."
+        "10000000-0000-4000-8000-000000000004": {
+            eyebrow: "Leitura e acervo digital",
+            description: "Entre na Pearson pelo AVA, cadastre seu e-mail institucional e valide o acesso pesquisando e abrindo um livro.",
+            highlights: ["Entrada pelo AVA", "Cadastro e confirmação", "Recuperação de acesso", "Busca e leitura"],
+            footnote: "Tenha o e-mail institucional acessível para conferir a mensagem de confirmação do cadastro.",
+            unlockHint: "Prepara o acesso aos livros usados nas disciplinas."
         },
-        "Microsoft Teams": {
-            eyebrow: "Comunicacao da turma",
-            description: "Configure equipes, canais e alertas para transformar o Teams no centro da comunicacao da turma.",
-            highlights: ["Equipe da disciplina", "Arquivos e canais", "Aulas e avisos", "Reunioes online"],
-            footnote: "A rotina de aula fica mais fluida quando o canal certo ja esta pronto.",
-            unlockHint: "Integra avisos, encontros e compartilhamento de arquivos."
+        "10000000-0000-4000-8000-000000000005": {
+            eyebrow: "Comunicação acadêmica",
+            description: "Entre com a conta @souunisales.com.br, encontre a equipe da sua turma e reconheça os canais e recursos disponíveis.",
+            highlights: ["Conta institucional", "Equipe da turma", "Teams e Outlook", "Materiais e encontros"],
+            footnote: "Teams e Outlook usam a mesma conta Microsoft acadêmica; acompanhe os dois para consultar comunicados.",
+            unlockHint: "Ajuda a localizar a comunicação da turma e a quem recorrer quando faltar acesso."
         },
-        "Plataforma A+": {
-            eyebrow: "Ferramenta complementar",
-            description: "Conclua o acesso inicial e deixe a plataforma complementar pronta para materiais e recursos extras.",
-            highlights: ["Acesso inicial", "Materiais extras", "Uso complementar", "Permissoes validas"],
-            footnote: "Essa etapa amplia os recursos sem fragmentar a experiencia do aluno.",
-            unlockHint: "Completa a malha de ferramentas complementares."
+        "10000000-0000-4000-8000-000000000006": {
+            eyebrow: "Ambiente Virtual de Aprendizagem",
+            description: "Acesse o AVA, confira suas disciplinas e abra conteúdos, atividades e notas disponíveis no ambiente do curso.",
+            highlights: ["RA e primeiro acesso", "Disciplinas matriculadas", "Conteúdos e unidades", "Atividades e notas"],
+            footnote: "Use RA e CPF no primeiro acesso e siga a troca de senha solicitada pelo AVA.",
+            unlockHint: "Prepara a consulta de materiais e atividades de cada disciplina."
         },
-        "Mentorias": {
-            eyebrow: "Apoio academico",
-            description: "Encontre o canal de apoio, entenda como agendar e deixe claro quando e como pedir suporte.",
-            highlights: ["Canal de apoio", "Agendamento", "Acompanhamento", "Orientacao recorrente"],
-            footnote: "A mentoria fecha a jornada com suporte continuo e mais seguranca.",
-            unlockHint: "Entrega o ultimo nivel de apoio para o semestre."
+        "10000000-0000-4000-8000-000000000007": {
+            eyebrow: "Monitoria do curso",
+            description: "Saiba quando procurar a Monitoria, consulte monitor e horários do seu curso e prepare a dúvida que deseja esclarecer.",
+            highlights: ["Quando usar a Monitoria", "Monitor e horários", "Preparação da dúvida", "Canal de retorno"],
+            footnote: "Confira o canal divulgado para o seu curso, como Teams, e-mail institucional ou atendimento presencial.",
+            unlockHint: "Deixa claro como buscar orientação sobre disciplinas, estudo e sistemas acadêmicos."
         }
     };
 
@@ -278,13 +278,12 @@
             return checklist.imageUrl;
         }
 
-        const normalizedTitle = normalizeTitleKey(checklist.title);
-        const imageEntry = Object.entries(checklistImages).find(([title]) => normalizeTitleKey(title) === normalizedTitle);
-
-        return imageEntry ? imageEntry[1] : FALLBACK_IMAGE;
+        return checklistImages[checklist.id] || FALLBACK_IMAGE;
     }
 
     function getCardCopy(checklist) {
+        if (cardCopy[checklist.id]) return cardCopy[checklist.id];
+
         const normalizedTitle = normalizeTitleKey(checklist.title);
         const copyEntry = Object.entries(cardCopy).find(([title]) => normalizeTitleKey(title) === normalizedTitle);
 
