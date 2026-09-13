@@ -46,3 +46,5 @@ node scripts/check-local-references.mjs
 Os arquivos SQL são versionados para reprodução e auditoria. Não execute migrations destrutivas sem seguir [a documentação do Supabase](Unicheck/supabase/README.md).
 
 Veja também [a visão de arquitetura](docs/architecture/application.md).
+
+Materiais de consulta, capturas e resultados locais ficam fora da documentação oficial versionada, conforme a [política de contexto local e histórico](docs/audits/local-context-2026-09-13.md).
