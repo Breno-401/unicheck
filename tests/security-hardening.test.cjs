@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
+const vm = require('node:vm');
 
 const root = path.resolve(__dirname, '..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
@@ -140,6 +141,7 @@ function consoleCalls(source) {
         if (tokens[index].value !== 'console') continue;
         let cursor = index + 1;
         let method;
+        if (tokens[cursor]?.value === '?.' && tokens[cursor + 1]?.value === '[') cursor += 1;
         if (['.', '?.'].includes(tokens[cursor]?.value)) {
             method = tokens[++cursor]?.value;
             cursor += 1;
@@ -192,6 +194,48 @@ test('auditoria rejeita dados pessoais diretos, serializados, interpolados e err
     }
     assert.equal(consoleCalls('console["info"](session)')[0].method, 'info');
     assert.equal(consoleCalls('console?.log?.(user)')[0].method, 'log');
+});
+
+for (const [source, method] of [
+    ['console?.["log"](user.email)', 'log'],
+    ['console?.["error"](JSON.stringify(profile))', 'error']
+]) {
+    test(`auditoria detecta acesso computado opcional: ${source}`, () => {
+        const calls = consoleCalls(source);
+        assert.equal(calls.length, 1);
+        assert.equal(calls[0].method, method);
+        assert.equal(staticConsoleMessage(calls[0]), false);
+    });
+}
+
+test('debugSidebar preserva a API global e retorna estado sem emitir no console', () => {
+    const source = read('Unicheck/platform/shared/js/platform-shell.js');
+    const definition = source.match(/window\.debugSidebar = function\(\) \{[\s\S]*?\n\};/);
+    assert.ok(definition, 'o shell deve continuar expondo window.debugSidebar');
+    const messages = [];
+    const classes = new Set(['collapsed']);
+    const sidebar = { classList: { contains: name => classes.has(name) }, style: { width: '68px' } };
+    const mainContent = { style: { marginLeft: '68px' } };
+    const window = {};
+    // Run the actual exported function with controlled DOM state. No lifecycle
+    // methods need to run to inspect this read-only compatibility contract.
+    vm.runInNewContext(definition[0], {
+        window, sidebar, mainContent,
+        console: new Proxy({}, { get: (_, method) => (...args) => messages.push({ method, args }) })
+    });
+    assert.equal(typeof window.debugSidebar, 'function');
+    assert.equal(window.debugSidebar.length, 0);
+    assert.deepEqual(JSON.parse(JSON.stringify(window.debugSidebar())), {
+        isCollapsed: true, isOpen: false, width: '68px', mainContentMargin: '68px'
+    });
+    classes.delete('collapsed');
+    classes.add('open');
+    sidebar.style.width = '280px';
+    mainContent.style.marginLeft = '0px';
+    assert.deepEqual(JSON.parse(JSON.stringify(window.debugSidebar())), {
+        isCollapsed: false, isOpen: true, width: '280px', mainContentMargin: '0px'
+    });
+    assert.deepEqual(messages, []);
 });
 
 test('JavaScript de produção não emite console.log/console.info de depuração', () => {

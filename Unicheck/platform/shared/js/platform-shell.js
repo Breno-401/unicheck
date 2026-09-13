@@ -931,6 +931,16 @@ window.toggleTheme = function() {
     toggleTheme();
 };
 
+// Mantém a API de inspeção sem publicar o estado no console.
+window.debugSidebar = function() {
+    return {
+        isCollapsed: sidebar?.classList.contains('collapsed'),
+        isOpen: sidebar?.classList.contains('open'),
+        width: sidebar?.style.width,
+        mainContentMargin: mainContent?.style.marginLeft
+    };
+};
+
 // ========================================
 // SINCRONIZAÇÃO DE PERFIL
 // ========================================
