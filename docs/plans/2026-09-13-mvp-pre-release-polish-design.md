@@ -27,11 +27,17 @@ O container genérico de progressão deixará de ser focável. A semântica fica
 
 ## Segurança incremental
 
-- Reforçar `.gitignore` para ambientes, credenciais, chaves privadas, logs, caches, outputs, artefatos de teste e configurações locais de agentes/Codex, preservando exemplos seguros.
+- Reforçar `.gitignore` para ambientes, credenciais, chaves privadas, logs, caches, outputs, artefatos de teste, configurações locais de agentes/Codex e material privado de consulta, preservando exemplos seguros e formatos documentais oficiais.
 - Impedir framing com `Content-Security-Policy: frame-ancestors 'none'` e `X-Frame-Options: DENY`.
 - Fixar versões exatas de Supabase JS e Lucide. SRI será usado apenas após baixar exatamente o recurso referenciado, calcular SHA-384 e confirmar compatibilidade/CORS; na ausência dessa prova, a versão será fixada sem um hash inventado.
 - Remover `console.log`/`console.info` de depuração e não registrar e-mail, RA, user id ou payload pessoal. Logs de erro necessários permanecem concisos e sem dados pessoais desnecessários.
 - O fluxo de Auth não será migrado para PKCE nesta rodada.
+
+## Documentação oficial e contexto local
+
+A auditoria separa conteúdo pelo propósito, não apenas pela extensão. `docs/architecture/`, `docs/audits/`, `docs/development/` e `docs/plans/` permanecem versionados: descrevem arquitetura, banco, decisões, testes e histórico técnico deliberadamente referenciados pelo README ou pela documentação atual. PDFs, DOCX, pesquisas-fonte, capturas, prompts, extrações e resultados locais ficam em `private-context/`, `tmp/`, `docs/local/`, `docs/context/` ou `.local-context/`, com sufixos `*.local.pdf`/`*.local.docx` disponíveis quando o arquivo precisa permanecer fora de uma pasta dedicada.
+
+Nenhum documento local do HEAD atual precisa ser removido do índice. Arquivos locais ignorados serão preservados fisicamente. O relatório registrará separadamente os PDFs encontrados apenas no histórico, sua alcançabilidade por refs locais/remotas e o nível de sensibilidade observado, sem reescrever histórico ou excluir branches.
 
 ## Migration Supabase preparada, não aplicada
 

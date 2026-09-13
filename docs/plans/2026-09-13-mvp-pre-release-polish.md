@@ -9,6 +9,7 @@
 - Preservar o fluxo atual de login/confirmação; não migrar Auth para PKCE.
 - Não aplicar migrations ou qualquer mudança em Supabase/Netlify remoto.
 - Não fazer redesign geral; somente mudanças incrementais ligadas aos achados aprovados.
+- Não apagar documentos locais, não reescrever histórico e não remover documentação técnica necessária; materiais de contexto já rastreados só podem sair do índice, permanecendo no computador.
 - Todo comportamento novo ou corrigido deve seguir RED → GREEN → REFACTOR e registrar o comando de teste no relatório da tarefa.
 - SRI somente pode ser adicionado para bytes de recurso exatos, estáveis, cujo SHA-384 foi calculado e cuja carga foi verificada.
 - Commits devem ser pequenos, semânticos e permanecer somente na branch autorizada.
@@ -37,7 +38,7 @@
 3. Fixar versões exatas compatíveis de Supabase JS e Lucide em todas as páginas.
 4. Calcular SRI SHA-384 a partir dos bytes exatos. Aplicar `integrity` e `crossorigin=anonymous` somente se a carga real permanecer compatível; caso contrário, manter somente pin exato e registrar a limitação.
 5. Adicionar `frame-ancestors 'none'` e `X-Frame-Options: DENY` sem impor uma CSP geral incompatível com os scripts atuais.
-6. Reforçar `.gitignore` sem ignorar arquivos necessários do projeto.
+6. Reforçar `.gitignore` sem ignorar arquivos necessários do projeto, incluindo as convenções locais `docs/local/`, `docs/context/`, `.local-context/`, `*.local.pdf` e `*.local.docx`, sem padrões globais `*.pdf`/`*.docx`.
 7. Executar os testes de hardening, referências locais e testes Node.
 8. Commit esperado: `fix: reforcar seguranca de configuracoes`.
 
@@ -73,6 +74,18 @@
 2. Adicionar `node --test tests/*.test.cjs` como etapa obrigatória, sem introduzir package manager ou nova infraestrutura.
 3. Executar localmente os mesmos dois comandos.
 4. Commit esperado: `ci: executar testes node na integridade`.
+
+## Task 6: Documentar a separação de contexto local e histórico
+
+**Ownership:** novo `docs/audits/local-context-2026-09-13.md` e, somente se necessário para descoberta da política, `README.md`. As regras de `.gitignore` pertencem à Task 2.
+
+1. Consolidar a auditoria read-only já realizada de `docs/`, diretórios semelhantes, índice atual e histórico Git.
+2. Registrar quais documentos Markdown permanecem oficiais e por quê; registrar separadamente `private-context/`, `tmp/`, `.superpowers/` e as novas convenções como locais/ignoradas.
+3. Registrar arquivos de contexto atualmente rastreados e eventuais remoções apenas do índice. Se não houver nenhum, declarar isso explicitamente.
+4. Registrar os PDFs encontrados somente no histórico, refs que ainda os alcançam e classificação entre referência comum e conteúdo potencialmente sensível, sem reescrever histórico nem excluir refs.
+5. Confirmar com `git check-ignore`, `git ls-files` e existência local que nenhum material local foi apagado.
+6. Executar testes Node e verificação de referências.
+7. Commit esperado: `docs: registrar politica de contexto local`.
 
 ## Verificação final e revisão
 
