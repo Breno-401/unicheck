@@ -13,7 +13,7 @@ function initializeIcons() {
             lucide.createIcons();
         }
     } catch (error) {
-        console.warn('Erro ao inicializar ícones Lucide:', error);
+        console.warn('Erro ao inicializar ícones Lucide:');
     }
 }
 
@@ -53,7 +53,7 @@ function initializeTheme() {
             }
         });
     } catch (error) {
-        console.warn('Erro ao inicializar tema:', error);
+        console.warn('Erro ao inicializar tema:');
         // Tema padrão como fallback
         htmlElement.setAttribute('data-theme', 'light');
     }
@@ -85,7 +85,7 @@ function updateThemeIcon() {
         // Re-inicializar ícones Lucide
         initializeIcons();
     } catch (error) {
-        console.warn('Erro ao atualizar ícones do tema:', error);
+        console.warn('Erro ao atualizar ícones do tema:');
     }
 }
 
@@ -107,7 +107,7 @@ function toggleTheme() {
         // Atualizar ícones
         updateThemeIcon();
     } catch (error) {
-        console.warn('Erro ao alternar tema:', error);
+        console.warn('Erro ao alternar tema:');
     }
 }
 
@@ -275,7 +275,7 @@ function getStoredProfile() {
         const rawProfile = localStorage.getItem(key);
         return rawProfile ? JSON.parse(rawProfile) : null;
     } catch (error) {
-        console.warn('Erro ao ler perfil armazenado:', error);
+        console.warn('Erro ao ler perfil armazenado:');
         return null;
     }
 }
@@ -291,7 +291,7 @@ function getStoredChecklistProgress(userId) {
         const raw = localStorage.getItem(getChecklistProgressKey(userId));
         return raw ? JSON.parse(raw) : {};
     } catch (error) {
-        console.warn('Erro ao ler progresso dos checklists do dashboard:', error);
+        console.warn('Erro ao ler progresso dos checklists do dashboard:');
         return {};
     }
 }
@@ -302,7 +302,7 @@ function hasStoredChecklistProgress(userId) {
     try {
         return localStorage.getItem(getChecklistProgressKey(userId)) !== null;
     } catch (error) {
-        console.warn('Erro ao verificar cache de progresso dos checklists:', error);
+        console.warn('Erro ao verificar cache de progresso dos checklists:');
         return false;
     }
 }
@@ -364,7 +364,7 @@ async function updateDashboardMetrics(syncRemote = false) {
             }
         }
     } catch (error) {
-        console.warn('Erro ao atualizar progresso da plataforma:', error);
+        console.warn('Erro ao atualizar progresso da plataforma:');
     }
 }
 
@@ -387,17 +387,11 @@ async function reconcileDashboardRemote(userId, restoreActivity = true) {
         );
         window.UniCheckChecklist.writeCachedProgress(userId, reconciled);
     } else if (progressResult.status === 'rejected') {
-        console.error('[UniCheckDashboard] Progresso remoto indisponivel; cache local preservado', {
-            message: progressResult.reason?.message || String(progressResult.reason),
-            userId
-        });
+        console.error('[UniCheckDashboard] Progresso remoto indisponivel; cache local preservado');
     }
 
     if (activityResult.status === 'rejected') {
-        console.error('[UniCheckDashboard] Atividades remotas indisponiveis; cache local preservado', {
-            message: activityResult.reason?.message || String(activityResult.reason),
-            userId
-        });
+        console.error('[UniCheckDashboard] Atividades remotas indisponiveis; cache local preservado');
     }
 
     if (hasStoredChecklistProgress(userId)) {
@@ -409,10 +403,7 @@ async function syncAndFetchDashboardProgress(userId) {
     try {
         await window.UniCheckChecklist?.flushPendingProgress?.(userId);
     } catch (error) {
-        console.error('[UniCheckDashboard] Fila de progresso continua pendente; reconciliando sem apagar o cache', {
-            message: error?.message || String(error),
-            userId
-        });
+        console.error('[UniCheckDashboard] Fila de progresso continua pendente; reconciliando sem apagar o cache');
     }
     return window.UniCheckChecklist?.fetchUserProgressMap?.(userId) || null;
 }
@@ -443,7 +434,7 @@ function renderAcademicProgress(summary) {
     }
 
     if (currentEl) currentEl.textContent = summary.currentPhase.title;
-    if (nextTaskEl) nextTaskEl.textContent = summary.nextTask?.title || summary.nextTask?.text || 'Continue de onde parou.';
+    if (nextTaskEl) nextTaskEl.textContent = window.UniCheckChecklistContent?.getGuide?.(summary.nextTask?.id)?.title || summary.nextTask?.title || summary.nextTask?.text || 'Continue de onde parou.';
     if (continueButton) {
         continueButton.href = `pages/checklist-academico/checklist-academico.html#checklist=${encodeURIComponent(summary.currentPhase.id)}`;
         continueButton.querySelector('span').textContent = 'Continuar';
@@ -734,13 +725,13 @@ function optimizePerformance() {
  */
 function setupErrorHandling() {
     window.addEventListener('error', function(e) {
-        console.warn('Erro capturado:', e.error);
+        console.warn('Erro capturado:');
         // Não interromper a experiência do usuário por erros não críticos
     });
     
     // Tratamento para promises rejeitadas
     window.addEventListener('unhandledrejection', function(e) {
-        console.warn('Promise rejeitada:', e.reason);
+        console.warn('Promise rejeitada:');
         e.preventDefault();
     });
 }
@@ -793,7 +784,6 @@ function improveAccessibility() {
  */
 function initializeDashboard() {
     try {
-        console.log('🚀 Inicializando Dashboard UniCheck...');
         window.UniCheckNotifications?.init?.();
         
         // Inicializar tema
@@ -867,17 +857,15 @@ function initializeDashboard() {
                 // Forçar re-renderização dos ícones
                 setTimeout(initializeIcons, 100);
             } catch (error) {
-                console.warn('Erro no redimensionamento:', error);
+                console.warn('Erro no redimensionamento:');
             }
         });
         
         // Emitir evento de inicialização completa
         document.dispatchEvent(new CustomEvent('dashboardInitialized'));
         
-        console.log('✅ Dashboard UniCheck inicializado com sucesso!');
-        
     } catch (error) {
-        console.error('❌ Erro na inicialização do dashboard:', error);
+        console.error('❌ Erro na inicialização do dashboard:');
     }
 }
 
@@ -936,23 +924,21 @@ document.addEventListener('DOMContentLoaded', initializeDashboard);
 // Função para recarregar ícones (útil para desenvolvedores)
 window.reloadIcons = function() {
     initializeIcons();
-    console.log('🔄 Ícones recarregados');
 };
 
 // Função para alternar tema rapidamente (útil para desenvolvedores)
 window.toggleTheme = function() {
     toggleTheme();
-    console.log('🌙 Tema alternado');
 };
 
-// Função para debug da sidebar (útil para desenvolvedores)
+// Mantém a API de inspeção sem publicar o estado no console.
 window.debugSidebar = function() {
-    console.log('Sidebar State:', {
+    return {
         isCollapsed: sidebar?.classList.contains('collapsed'),
         isOpen: sidebar?.classList.contains('open'),
         width: sidebar?.style.width,
         mainContentMargin: mainContent?.style.marginLeft
-    });
+    };
 };
 
 // ========================================
@@ -974,7 +960,7 @@ async function handleLogout() {
         try {
             await window.UniCheckAuth.logout();
         } catch (error) {
-            console.error('Erro ao fazer logout:', error);
+            console.error('Erro ao fazer logout:');
             alert(window.UniCheckAuth.normalizeErrorMessage(error));
         }
         return;
@@ -997,7 +983,7 @@ async function handleLogout() {
 document.addEventListener('DOMContentLoaded', function() {
     if (window.UniCheckAuth && typeof window.UniCheckAuth.requireAuth === 'function') {
         window.UniCheckAuth.requireAuth().catch(function(error) {
-            console.error('Erro ao validar sessao:', error);
+            console.error('Erro ao validar sessao:');
         });
     }
 

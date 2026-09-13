@@ -84,7 +84,7 @@
             const rawProfile = localStorage.getItem(getStorageKey());
             return rawProfile ? JSON.parse(rawProfile) : null;
         } catch (error) {
-            console.warn("[UniCheckProfile] Falha ao ler perfil em cache", error);
+            console.warn("[UniCheckProfile] Falha ao ler perfil em cache");
             return null;
         }
     }
@@ -125,27 +125,11 @@
         return persistLocalProfile(profile);
     }
 
-    function logRemoteError(context, error, userId) {
-        console.error(context, {
-            userId: userId || null,
-            code: error?.code || null,
-            message: error?.message || String(error),
-            details: error?.details || null,
-            hint: error?.hint || null,
-            status: error?.status || error?.statusCode || error?.response?.status || null
-        });
-    }
-
     async function ensureProfileRow(ticket) {
         const client = getClient();
         const cachedProfile = getStoredProfile();
         const user = await getCurrentUser();
         const safeCache = cachedProfile?.id === user.id ? cachedProfile : null;
-
-        console.info("[UniCheckProfile] Buscando perfil no Supabase", {
-            userId: user.id || null,
-            email: user.email || null
-        });
 
         let data = null;
         let error = null;
@@ -165,7 +149,7 @@
         }
 
         if (error) {
-            logRemoteError("[UniCheckProfile] Erro ao consultar users_profile", error, user.id);
+            console.error("[UniCheckProfile] Erro ao consultar users_profile");
             retryAfter = Date.now() + ERROR_COOLDOWN_MS;
             // Network failure is not evidence of avatar removal.
             return memoryEntry?.userId === user.id ? memoryEntry.profile : safeCache;
@@ -173,11 +157,6 @@
 
         if (data) {
             const profile = normalizeProfile(data, user);
-            console.info("[UniCheckProfile] Perfil encontrado na tabela users_profile", {
-                userId: user.id || null,
-                nome: profile.nome,
-                email: profile.email
-            });
             return publishRead(profile, ticket);
         }
 
@@ -197,17 +176,12 @@
             .single();
 
         if (insertError) {
-            logRemoteError("[UniCheckProfile] Erro ao criar perfil base", insertError, user.id);
+            console.error("[UniCheckProfile] Erro ao criar perfil base");
             retryAfter = Date.now() + ERROR_COOLDOWN_MS;
             return memoryEntry?.userId === user.id ? memoryEntry.profile : safeCache;
         }
 
         const profile = normalizeProfile(inserted, user);
-        console.info("[UniCheckProfile] Perfil base criado/atualizado", {
-            userId: user.id || null,
-            nome: profile.nome,
-            email: profile.email
-        });
         return publishRead(profile, ticket);
     }
 
@@ -255,11 +229,6 @@
         }
         const updateTicket = ++revision;
 
-        console.info("[UniCheckProfile] Atualizando perfil", {
-            userId: user.id || null,
-            emailAnterior: user.email || null
-        });
-
         const cleanProfile = {
             nome: nameResult.value,
             email: emailResult.value,
@@ -283,10 +252,7 @@
 
         const { data: authData, error: authError } = await client.auth.updateUser(updatePayload);
         if (authError) {
-            console.error("[UniCheckProfile] Erro ao atualizar auth.users", {
-                userId: user.id || null,
-                message: authError?.message || authError
-            });
+            console.error("[UniCheckProfile] Erro ao atualizar auth.users");
             throw authError;
         }
 
@@ -328,7 +294,7 @@
         }
 
         if (tableError) {
-            logRemoteError("[UniCheckProfile] Falha ao atualizar users_profile.", tableError, user.id);
+            console.error("[UniCheckProfile] Falha ao atualizar users_profile.");
             throw tableError;
         }
 
@@ -341,11 +307,6 @@
             }
         });
 
-        console.info("[UniCheckProfile] Perfil atualizado com sucesso", {
-            userId: user.id || null,
-            nome: profile.nome,
-            email: profile.email
-        });
         return publishRead(profile, updateTicket);
     }
 

@@ -80,7 +80,7 @@
         try {
             // Service emits profile-updated only for a current response.
             await window.UniCheckProfile?.getMyProfile?.();
-        } catch (error) { console.warn('Não foi possível atualizar o perfil.', error); }
+        } catch (error) { console.warn('Não foi possível atualizar o perfil.'); }
     }
     function bindAutoSync() {
         if (bound) return; bound = true;

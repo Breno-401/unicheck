@@ -200,8 +200,8 @@ Arquivos principais:
 
 Fluxo canônico com cache local:
 
-- `js/data/checklist-data.js` consulta fases e tarefas em `checklists` e `checklist_items`, normaliza o catalogo e salva `unicheck_checklist_catalog_v1`;
-- se uma consulta posterior falhar e ja houver catalogo valido em cache, usa essa copia local como fallback;
+- `js/data/checklist-data.js` consulta fases e tarefas em `checklists` e `checklist_items`, normaliza o catalogo e salva `unicheck_checklist_catalog_v2`;
+- inicia com o catálogo local 7/28; se a consulta remota falhar, mantém o catálogo disponível em memória (não relê o cache de catálogo na inicialização);
 - identifica o usuario pela sessao ja validada e le `unicheck_checklist_progress_v3:<user_id>`;
 - renderiza o progresso local assim que o catalogo esta disponivel;
 - faz em background uma unica consulta a `user_checklist_item_progress`, substitui o cache pela resposta valida e aplica somente operacoes explicitamente pendentes;
@@ -210,10 +210,16 @@ Fluxo canônico com cache local:
 - abre a fase como uma trilha compacta com uma única etapa orientada por vez;
 - exibe conteudo informativo especifico por fase dentro da propria tela de checklist;
 - associa guias operacionais aos UUIDs canônicos dos cards sem criar novos itens de progresso ou gravar conteúdo textual no banco;
+- os 28 cards possuem guias em `checklist-content.js`; a pesquisa complementar de setembro/2026 detalha Pearson, Teams, AVA e Monitoria, com correções pontuais de credenciais e Webmail;
+- `getChecklists()` aplica títulos e descrições de apresentação por UUID às fases 4–7, preservando o catálogo bruto e as tarefas remotas; por isso os rótulos AVA e Monitoria e apoio acadêmico sobrevivem ao refresh remoto sem migração;
+- imagens de identificação e textos auxiliares das fases 4–7 também usam UUID, sem depender do título legado; as correções de enquadramento dos logos e o resumo da jornada da main permanecem;
+- a Home carrega `checklist-content.js` e consulta o título da próxima tarefa pelo UUID, com fallback ao título canônico quando o guia não estiver disponível;
+- CTAs institucionais reutilizam `guide-action-link`; todos os encaminhamentos ao Multiatendimento resolvem o mesmo `UniCheckContacts.multiatendimento` de Ajuda e Suporte, sem copiar contatos para cada guia;
 - separa seleção, conclusão e revisão: o item da trilha apenas navega, o indicador apenas comunica estado e a conclusão acontece no fim do painel orientado;
 - mostra próxima ação, local, credencial, passos, critério de conclusão, contexto, ajuda e acesso direto apenas no painel da etapa selecionada;
 - no mobile, apresenta primeiro a lista e abre o conteúdo em uma visualização dedicada com retorno para a trilha;
 - aceita screenshots opcionais vinculados a passos individuais, preservando o card atual como única unidade oficial de conclusão;
+- `sourceDocument` e `sourcePages` são metadados editoriais, não renderizados; a matriz de evidências, ambiguidades e capturas pendentes está em `docs/development/checklist-academico-conteudo-enriquecido.md`;
 - trabalha com fases ja estruturadas com tarefas reais, de forma que o desbloqueio entre fases possa ser testado de ponta a ponta;
 - libera o botão de conclusão somente depois de seis segundos de permanência e da visualização do critério “Você terminou quando”, sem exigir acesso a links externos;
 - aceita apenas a transição monotônica `false → true`; revisão não reabre tarefas nem altera XP ou desbloqueios;
@@ -359,9 +365,9 @@ A sidebar compartilhada posiciona `Manual do Aluno` entre `Checklists Academicos
 
 ### `js/services/progression.js`
 
-- centraliza as recompensas de 10 XP por tarefa e 50 XP por fase completa;
+- centraliza as recompensas de 10 XP por tarefa e 40 XP por fase completa (50 XP ao concluir a última tarefa de uma fase);
 - calcula XP exclusivamente a partir do estado atual do progresso, sem tabela ou chave de armazenamento propria;
-- centraliza os cinco niveis e thresholds: Calouro (0), Explorador (90), Conectado (180), Veterano (360) e Expert Academico (540);
+- centraliza os cinco níveis e thresholds: Calouro (0), Explorador (100), Organizado (220), Conectado (380) e Veterano UniCheck (560);
 - informa nivel atual, proximo nivel, XP restante e percentual dentro do nivel;
 - aceita campos futuros de secoes concluidas e bonus do Manual do Aluno, mantidos com peso zero ate o recurso ser implementado;
 - fornece as recompensas visuais do clique, mas nao cria atividades nem notificacoes.
@@ -457,7 +463,7 @@ Chaves relevantes atualmente:
 - `platformFavorites:<user_id>`
 - `unicheck_favorites_sync_queue:<user_id>` (ultima operacao de adicionar/remover ainda pendente por plataforma)
 - `unicheck_favorites_remote_ready:<user_id>` (marca a migracao inicial do antigo cache somente local)
-- `unicheck_checklist_catalog_v1` (ultima copia valida de `checklists` e `checklist_items`)
+- `unicheck_checklist_catalog_v2` (última cópia remota válida de `checklists` e `checklist_items`, gravada mas não relida no bootstrap atual)
 - `unicheck_checklist_progress_v3:<user_id>`
 - `unicheck_activity_v1:<user_id>` (historico local, limitado a 20 eventos; dashboard exibe os 5 mais recentes)
 - `unicheck_notifications_v1:<user_id>` (cache de ate 30 notificacoes da conta)
@@ -496,14 +502,14 @@ Distincao de persistencia:
 - Checklists seguem ordem de fase.
 - Fase posterior depende da conclusao da anterior.
 - Progresso pode vir do banco ou do cache local.
-- A estrutura do checklist e carregada das tabelas canônicas e usa `unicheck_checklist_catalog_v1` apenas como cache; o progresso continua obrigatoriamente separado por `user_id`.
+- A estrutura do checklist é carregada das tabelas canônicas, com fallback local 7/28; `unicheck_checklist_catalog_v2` registra o catálogo remoto. O progresso continua obrigatoriamente separado por `user_id`.
 - Conclusões atualizam primeiro o cache por usuário e a fila local; a UI final e seus efeitos só avançam depois que esse mecanismo local-first aceita a operação.
 - XP é a função `tarefas concluídas * 10 + fases completas * 40`; como a conclusão é monotônica e o cálculo parte do conjunto de UUIDs concluídos, a mesma tarefa não gera XP adicional.
 - Nao existe `user_xp`: em outro dispositivo, o mesmo progresso restaurado produz o mesmo XP e nivel.
 - O dashboard calcula imediatamente progresso e proxima acao usando `js/data/checklist-data.js` e o cache `unicheck_checklist_progress_v3:<user_id>`; online, o estado remoto confirmado substitui o cache e somente operacoes explicitas de `unicheck_checklist_pending_sync_v2:<user_id>` podem sobrepor temporariamente o remoto.
 - Atividades recentes sao isoladas por `user_id`, persistidas em `user_activity` e copiadas para um cache local depois da confirmacao remota.
 - Notificacoes sao isoladas por `user_id`, persistidas em `user_notifications` e mantidas em cache apos confirmacao remota; atividade recente e notificacao nao sao tratadas como o mesmo registro.
-- Quando ja existe um catalogo valido em cache, uma falha temporaria ao consultar a estrutura remota nao impede o checklist de aparecer; alteracoes de progresso continuam na fila local ate a sincronizacao.
+- Uma falha temporária ao consultar a estrutura remota não impede o checklist de aparecer com o catálogo local ou já carregado em memória; alterações de progresso continuam na fila local até a sincronização.
 - Perfil e refletido em varias telas internas.
 - Logout deve limpar sessao e redirecionar para a area publica.
 - Somente a ausencia confirmada de sessao causa redirecionamento de uma pagina interna para o login; erros de perfil, checklist ou rede nao equivalem a logout.
@@ -524,7 +530,7 @@ O projeto funciona, mas existem inconsistencias tecnicas que precisam ser conhec
 - [`supabase/diagnostics/20260824_post_reset_validation.sql`](../../Unicheck/supabase/diagnostics/20260824_post_reset_validation.sql) valida contagens, ausencia do legado, RLS, grants, funcoes, trigger e bucket de avatar.
 - [`supabase-2026-08-24.md`](../audits/supabase-2026-08-24.md) registra o inventario remoto, a decisao de descartar dados de teste e os criterios de aceite.
 - [`js/services/profile.js`](../../Unicheck/js/services/profile.js) e o reset estao alinhados em `users_profile.id` como chave primaria e relacionamento com `auth.users.id`.
-- O total atual e 630 XP para 28 tarefas e 7 fases. Novas fontes devem ser adicionadas na configuracao de [`js/services/progression.js`](../../Unicheck/js/services/progression.js), sem espalhar valores pelos consumidores.
+- O total atual é 560 XP para 28 tarefas e 7 fases. Novas fontes devem ser adicionadas na configuração de [`js/services/progression.js`](../../Unicheck/js/services/progression.js), sem espalhar valores pelos consumidores. Esta rodada corrigiu a documentação antiga dos valores; a implementação da progressão permanece inalterada.
 - Alguns documentos auxiliares em `platform/pages/beneficios-estudantis/` e `platform/pages/checklist-academico/` descrevem funcionalidades de forma mais antiga do que o comportamento atual do codigo.
 
 Isto nao invalida a arquitetura geral, mas significa que este `architecture.md` deve ser tratado como a fonte de contexto mais fiel do estado atual do projeto.

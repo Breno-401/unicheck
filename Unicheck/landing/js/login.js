@@ -255,7 +255,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 showToast("Login realizado com sucesso!", "success");
                 window.location.replace("../platform/index-interno.html");
             } catch (error) {
-                console.error("[UniCheckLogin] Falha ao entrar", error);
+                console.error("[UniCheckLogin] Falha ao entrar");
                 showToast(auth?.normalizeErrorMessage(error) || "Nao foi possivel entrar.", "error");
             } finally {
                 loginPending = false;
@@ -299,7 +299,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 updateStrengthUI("");
                 setActiveTab("loginPanel");
             } catch (error) {
-                console.error("[UniCheckRegister] Falha ao cadastrar", error);
+                console.error("[UniCheckRegister] Falha ao cadastrar");
                 showToast(auth?.normalizeErrorMessage(error) || "Nao foi possivel concluir o cadastro.", "error");
             } finally {
                 registerPending = false;
@@ -323,6 +323,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         })
         .catch(error => {
-            console.warn("Nao foi possivel restaurar a sessao:", error);
+            console.warn("Nao foi possivel restaurar a sessao:");
         });
 });

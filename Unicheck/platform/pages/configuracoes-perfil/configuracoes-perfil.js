@@ -268,7 +268,7 @@
             revokePreviewUrl();
             updateProfileView();
         } catch (error) {
-            console.error("[ProfileSettings] Falha ao carregar perfil", error);
+            console.error("[ProfileSettings] Falha ao carregar perfil");
             showNotification("Nao foi possivel carregar seu perfil.", "error");
             throw error;
         } finally {
@@ -360,7 +360,7 @@
 
             return true;
         } catch (error) {
-            console.error("[ProfileSettings] Falha ao salvar perfil", error);
+            console.error("[ProfileSettings] Falha ao salvar perfil");
             showNotification(
                 window.UniCheckAuth?.normalizeErrorMessage?.(error) || "Nao foi possivel salvar o perfil.",
                 "error"
@@ -390,7 +390,7 @@
             updateAvatarDisplay();
             showNotification("Foto otimizada. Salve para enviar ao seu perfil.", "info");
         } catch (error) {
-            console.error("[ProfileSettings] Falha ao otimizar avatar", error);
+            console.error("[ProfileSettings] Falha ao otimizar avatar");
             showNotification("Não foi possível processar a foto selecionada.", "error");
         } finally {
             setBusy(false);
@@ -497,7 +497,7 @@
             showNotification("Senha atualizada com sucesso.", "success");
             return true;
         } catch (error) {
-            console.error("[ProfileSettings] Falha ao atualizar senha", error);
+            console.error("[ProfileSettings] Falha ao atualizar senha");
             showNotification(
                 window.UniCheckAuth?.normalizeErrorMessage?.(error) || error.message || "Nao foi possivel atualizar a senha.",
                 "error"
@@ -676,7 +676,7 @@
 
             await loadProfileData();
         } catch (error) {
-            console.error("[ProfileSettings] Falha ao inicializar pagina", error);
+            console.error("[ProfileSettings] Falha ao inicializar pagina");
         }
     }
 

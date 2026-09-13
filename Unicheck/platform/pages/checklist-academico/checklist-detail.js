@@ -106,132 +106,132 @@
                 "Documentos e avisos geralmente chegam por este canal, entao vale confirmar tudo."
             ]
         },
-        "Biblioteca Virtual": {
-            eyebrow: "Acesso a pesquisa",
-            helper: "Organize o acesso aos recursos de biblioteca e consulta academica em cards curtos e diretos.",
-            sectionTitle: "Acesso e pesquisa",
-            sectionDescription: "Esses cards representam a preparacao para usar bases, acervo e servicos de apoio a pesquisa.",
-            summaryLabel: "Resumo do acesso",
-            summaryStatus: "Pesquisa liberada",
-            summaryLead: "Biblioteca pronta para consulta",
-            nextStep: "Quando essa fase terminar, a busca por livros, artigos e documentos fica mais simples.",
-            unlockNote: "Aqui o aluno ganha mais autonomia para estudar com profundidade.",
+        "10000000-0000-4000-8000-000000000004": {
+            eyebrow: "Biblioteca Virtual Pearson",
+            helper: "Entre na Pearson pelo AVA, prepare o cadastro com seu e-mail institucional e confirme o acesso pesquisando e abrindo um livro.",
+            sectionTitle: "Da entrada pelo AVA à primeira leitura",
+            sectionDescription: "Consulte o caminho de acesso, o cadastro, a recuperação de senha e a busca no acervo.",
+            summaryLabel: "Acesso à Pearson",
+            summaryStatus: "Cadastro e leitura",
+            summaryLead: "Conta preparada para consultar o acervo",
+            nextStep: "Ao terminar, você conseguirá entrar na Pearson e abrir um livro para estudar. A próxima fase prepara o acesso ao Teams.",
+            unlockNote: "A Biblioteca Virtual reúne o acervo para leitura, com recursos como favoritos e anotações.",
             overview: [
-                { label: "Objetivo", value: "Usar a biblioteca" },
-                { label: "Foco", value: "Pesquisa e acervo" },
-                { label: "Saida", value: "Consulta habilitada" }
+                { label: "Objetivo", value: "Abrir um livro na Pearson" },
+                { label: "Foco", value: "Cadastro e busca no acervo" },
+                { label: "Saída", value: "Primeira leitura acessível" }
             ],
             beforeStart: [
-                "Separe seus dados de login academico, se a biblioteca exigir autenticacao.",
-                "Verifique se a instituicao usa catalogo, base digital ou ambos.",
-                "Anote os termos mais comuns da sua area para testar a busca."
+                "Comece pelo AVA da UniSales para manter o vínculo com a Biblioteca Virtual.",
+                "Tenha acesso ao e-mail institucional para conferir a confirmação do cadastro.",
+                "Escolha um título ou tema da sua disciplina para testar a busca."
             ],
             highlights: [
-                "Ajuda a localizar acervo e bases digitais com rapidez.",
-                "Apoia a consulta de artigos, livros e materiais de estudo.",
-                "Reduz tempo perdido em pesquisas dispersas."
+                "A entrada institucional da Pearson fica no AVA.",
+                "O cadastro usa e-mail institucional e senha escolhida pelo aluno.",
+                "A busca e a abertura de um livro confirmam que o acervo está acessível."
             ],
             taskContext: [
-                "Entrar na biblioteca com o acesso correto e o primeiro passo para a consulta.",
-                "Testar a busca ajuda a confirmar se o acervo digital esta funcionando.",
-                "Saber onde ficam reservas, downloads ou historicos facilita o uso recorrente.",
-                "Documentos e regras de uso evitam perda de tempo com acesso indevido."
+                "Entre no AVA e abra o acesso à Biblioteca Virtual até carregar a tela da Pearson.",
+                "Cadastre o e-mail institucional, confira a mensagem recebida e escolha sua senha da Biblioteca.",
+                "Confira o acesso e use a recuperação de senha com o e-mail ou CPF cadastrado quando precisar.",
+                "Pesquise um livro, abra um resultado e reconheça os recursos de leitura disponíveis."
             ]
         },
-        "Microsoft Teams": {
-            eyebrow: "Comunicacao da turma",
-            helper: "Configure a rotina de comunicacao e uso do Teams para aula, avisos e encontros com a turma.",
-            sectionTitle: "Rotina de comunicacao",
-            sectionDescription: "Os cards abaixo ajudam a montar um fluxo minimamente confiavel para mensagens e reunioes.",
-            summaryLabel: "Resumo da comunicacao",
-            summaryStatus: "Canal pronto",
-            summaryLead: "Teams configurado para uso academico",
-            nextStep: "Depois de concluir, a turma ganha um canal consistente para encontros, avisos e compartilhamento.",
-            unlockNote: "Quando o canal certo esta pronto, o caos de mensagens soltas cai muito.",
+        "10000000-0000-4000-8000-000000000005": {
+            eyebrow: "Comunicação acadêmica",
+            helper: "Use a conta @souunisales.com.br no Teams, encontre sua equipe e reconheça onde acompanhar comunicados, materiais e encontros.",
+            sectionTitle: "Conta, equipe e comunicação",
+            sectionDescription: "Confira a identidade institucional e os recursos que sua turma ou disciplina disponibiliza.",
+            summaryLabel: "Acesso ao Teams",
+            summaryStatus: "Conta e equipe conferidas",
+            summaryLead: "Comunicação da turma acessível",
+            nextStep: "Ao terminar, você saberá onde acompanhar sua turma no Teams. Depois, poderá explorar disciplinas e conteúdos no AVA.",
+            unlockNote: "Consulte Teams e Outlook com a mesma conta acadêmica para acompanhar comunicados institucionais.",
             overview: [
-                { label: "Objetivo", value: "Conectar a turma" },
-                { label: "Foco", value: "Aulas e avisos" },
-                { label: "Saida", value: "Canal ativo" }
+                { label: "Objetivo", value: "Encontrar a equipe da turma" },
+                { label: "Foco", value: "Conta e comunicação acadêmica" },
+                { label: "Saída", value: "Canais e recursos localizados" }
             ],
             beforeStart: [
-                "Confirme a conta de estudante vinculada ao Teams.",
-                "Atualize nome e avatar para facilitar reconhecimento pela turma.",
-                "Verifique se o aparelho permite notificacoes do aplicativo."
+                "Entre com o endereço @souunisales.com.br e a senha da conta Microsoft acadêmica.",
+                "Confira se a conta ativa é a mesma usada no Outlook institucional.",
+                "Use o navegador ou aplicativo disponível no seu dispositivo."
             ],
             highlights: [
-                "Centraliza avisos e encontros da turma.",
-                "Facilita compartilhamento de arquivos e recados.",
-                "Reduz a dependencia de mensagens soltas em outros apps."
+                "A conta acadêmica conecta Teams, Outlook e Microsoft 365.",
+                "A equipe e os canais devem corresponder à sua turma ou disciplina.",
+                "Problemas de acesso seguem para o Multiatendimento; dúvidas sobre a organização da disciplina, para a coordenação."
             ],
             taskContext: [
-                "Entrar com a conta correta evita misturar contatos pessoais e institucionais.",
-                "Validar credenciais garante que a conta esta pronta para aulas e grupos.",
-                "Saber onde fica a navegacao principal acelera a entrada em equipes e canais.",
-                "Materiais e comunicados tendem a ficar em canais especificos do curso."
+                "Abra o Teams e confirme que a conta @souunisales.com.br está ativa.",
+                "Localize e abra a equipe correspondente à sua turma ou disciplina.",
+                "Mantenha Teams e Outlook acessíveis para conferir os comunicados da conta institucional.",
+                "Reconheça os canais, materiais e avisos de encontros disponíveis para a sua turma."
             ]
         },
-        "Plataforma A+": {
-            eyebrow: "Ferramenta complementar",
-            helper: "Siga os cards para deixar o acesso a Plataforma A+ pronto e sem pendencias.",
-            sectionTitle: "Uso complementar",
-            sectionDescription: "A fase cobre a configuracao minima para operar uma ferramenta adicional da rotina academica.",
-            summaryLabel: "Resumo da plataforma",
-            summaryStatus: "Ambiente preparado",
-            summaryLead: "Plataforma complementar ativa",
-            nextStep: "Com esta fase pronta, o usuario passa a navegar melhor entre as ferramentas da jornada.",
-            unlockNote: "Aqui a jornada ganha profundidade sem sair do fluxo principal.",
+        "10000000-0000-4000-8000-000000000006": {
+            eyebrow: "Ambiente Virtual de Aprendizagem",
+            helper: "Entre no AVA, confira as disciplinas em que está matriculado e localize os conteúdos, atividades e notas disponíveis.",
+            sectionTitle: "Acesso, disciplinas e atividades",
+            sectionDescription: "Siga do primeiro acesso até a abertura de uma disciplina e de seus recursos de aprendizagem.",
+            summaryLabel: "Sua rotina no AVA",
+            summaryStatus: "Disciplinas e conteúdos conferidos",
+            summaryLead: "Materiais e atividades do curso acessíveis",
+            nextStep: "Ao terminar, você saberá consultar conteúdos e atividades no AVA. A próxima fase apresenta a Monitoria e os canais de apoio acadêmico.",
+            unlockNote: "Confira cada disciplina para acompanhar os materiais e atividades disponibilizados pelo professor.",
             overview: [
-                { label: "Objetivo", value: "Liberar acesso" },
-                { label: "Foco", value: "Configuracao final" },
-                { label: "Saida", value: "Ferramenta pronta" }
+                { label: "Objetivo", value: "Consultar uma disciplina no AVA" },
+                { label: "Foco", value: "Conteúdos, atividades e notas" },
+                { label: "Saída", value: "Recursos da disciplina localizados" }
             ],
             beforeStart: [
-                "Confirme qual ferramenta complementar esta sendo usada pela instituicao.",
-                "Verifique se existe login unico ou credenciais especificas.",
-                "Separe os dados de acesso e permissoes exigidas."
+                "Acesse o AVA a partir do site da UniSales.",
+                "No primeiro acesso, use RA como usuário e CPF como senha inicial; depois, siga a troca de senha solicitada.",
+                "Tenha em mente seu curso e período para conferir as disciplinas da home."
             ],
             highlights: [
-                "Evita falha de acesso na primeira tentativa.",
-                "Ajuda a mapear permissoes e recursos essenciais.",
-                "Deixa a rotina academica menos fragmentada."
+                "A home reúne as disciplinas em que você está matriculado.",
+                "Dentro da disciplina, consulte os conteúdos do professor e as Unidades de Aprendizagem disponíveis.",
+                "Abra atividades para ler as instruções e reconheça onde consultar as notas disponíveis."
             ],
             taskContext: [
-                "Abrir a ferramenta certa evita configuracao desnecessaria em apps errados.",
-                "Credenciais corretas garantem que o acesso seja aceito sem erro.",
-                "A navegacao principal precisa ser reconhecida para o uso diario.",
-                "A area de documentos ou recursos costuma concentrar o valor da plataforma."
+                "Entre com RA e a senha do AVA até carregar a home; no primeiro acesso, siga a troca da senha inicial.",
+                "Confira as disciplinas da home e abra uma correspondente ao seu curso e período.",
+                "Na disciplina, localize uma unidade ou conteúdo e abra pelo menos um material.",
+                "Localize uma atividade ou avaliação e reconheça onde consultar notas quando estiverem disponíveis."
             ]
         },
-        "Mentorias": {
-            eyebrow: "Apoio academico",
-            helper: "Use os cards para preparar o acompanhamento e o apoio academico que ajudam na adaptacao e permanencia.",
-            sectionTitle: "Fluxo de apoio",
-            sectionDescription: "Esta fase organiza a entrada em atividades de mentoria, acompanhamento e suporte ao estudante.",
-            summaryLabel: "Resumo do apoio",
-            summaryStatus: "Acompanhamento pronto",
-            summaryLead: "Mentoria organizada",
-            nextStep: "Depois disso, o suporte academico fica mais facil de acessar quando surgir duvida ou necessidade.",
-            unlockNote: "A ultima fase reforca permanencia, orientacao e seguranca na rotina.",
+        "10000000-0000-4000-8000-000000000007": {
+            eyebrow: "Monitoria e apoio acadêmico",
+            helper: "Entenda como a Monitoria ajuda nos estudos e nos sistemas acadêmicos, encontre monitor e horários e prepare sua dúvida.",
+            sectionTitle: "Da dúvida ao canal de apoio",
+            sectionDescription: "Identifique o apoio adequado e saiba como procurar e retornar ao monitor do seu curso.",
+            summaryLabel: "Orientação para buscar apoio",
+            summaryStatus: "Monitor e canal identificados",
+            summaryLead: "Dúvida preparada para a Monitoria",
+            nextStep: "Você encerra a trilha sabendo quando recorrer à Monitoria e onde consultar o canal e o horário de atendimento do seu curso.",
+            unlockNote: "A Monitoria apoia dúvidas sobre disciplinas, métodos de estudo e recursos como AVA, Biblioteca Virtual e Portal.",
             overview: [
-                { label: "Objetivo", value: "Ativar apoio" },
-                { label: "Foco", value: "Acompanhamento" },
-                { label: "Saida", value: "Suporte disponivel" }
+                { label: "Objetivo", value: "Saber quando procurar a Monitoria" },
+                { label: "Foco", value: "Monitor, horário e dúvida" },
+                { label: "Saída", value: "Canal de atendimento identificado" }
             ],
             beforeStart: [
-                "Identifique qual canal de mentoria a instituicao usa.",
-                "Verifique como agendar ou solicitar atendimento.",
-                "Tenha em mao temas que voce quer acompanhar de perto."
+                "Identifique a disciplina, tema ou sistema em que precisa de orientação.",
+                "Consulte os monitores e horários divulgados para o seu curso.",
+                "Confira o canal informado, como Teams, e-mail institucional ou atendimento presencial."
             ],
             highlights: [
-                "Apoia adaptacao e organizacao ao longo do semestre.",
-                "Ajuda na resolucao de problemas recorrentes.",
-                "Cria ponto de contato para orientacao academica."
+                "Alunos monitores ajudam a comunidade acadêmica com estudos e recursos institucionais.",
+                "Horários e canais variam conforme o curso e devem ser consultados na divulgação institucional.",
+                "Uma dúvida com disciplina, tema e dificuldade identificados facilita a orientação."
             ],
             taskContext: [
-                "Entender o canal correto evita perder chamados ou agendamentos.",
-                "Saber como solicitar ajuda reduz tempo de espera em momentos criticos.",
-                "Reconhecer a area de acompanhamento facilita o uso recorrente.",
-                "Definir temas ou demandas ajuda a tornar a mentoria mais objetiva."
+                "Reconheça quando a dúvida é de Monitoria e quando precisa da coordenação ou do Multiatendimento.",
+                "Localize o monitor relacionado ao seu curso e confira o horário e o canal de atendimento.",
+                "Resuma a disciplina ou tema, a dúvida e o que você já tentou para levar ao monitor.",
+                "Guarde onde consultar o canal e os horários para retornar ao monitor quando precisar."
             ]
         }
     };
@@ -255,6 +255,8 @@
     }
 
     function getChecklistCopy(checklist) {
+        if (CHECKLIST_COPY[checklist.id]) return CHECKLIST_COPY[checklist.id];
+
         const normalizedTitle = normalizeTitleKey(checklist.title);
         const copyEntry = Object.entries(CHECKLIST_COPY).find(([title]) => normalizeTitleKey(title) === normalizedTitle);
 

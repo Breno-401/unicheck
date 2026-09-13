@@ -16,6 +16,26 @@
         ["10000000-0000-4000-8000-000000000007", "Mentorias", "Entenda como acionar o acompanhamento, registrar demandas e usar os canais de apoio ao estudante.", ["Identificar o canal de apoio", "Localizar regras ou agenda de atendimento", "Registrar duvidas ou necessidades", "Confirmar o encaminhamento ou retorno"]]
     ];
 
+    // Rotulos de apresentacao por UUID; o catalogo e as tarefas persistidos permanecem intactos.
+    const PHASE_PRESENTATION = {
+        "10000000-0000-4000-8000-000000000004": {
+            title: "Biblioteca Virtual Pearson",
+            description: "Entre na Pearson pelo AVA, prepare o cadastro com seu e-mail institucional e pesquise um livro do acervo."
+        },
+        "10000000-0000-4000-8000-000000000005": {
+            title: "Microsoft Teams",
+            description: "Use a conta acadêmica no Teams, encontre sua turma e acompanhe os comunicados e recursos disponíveis."
+        },
+        "10000000-0000-4000-8000-000000000006": {
+            title: "AVA",
+            description: "Acesse o Ambiente Virtual de Aprendizagem, confira suas disciplinas e localize conteúdos, atividades e notas disponíveis."
+        },
+        "10000000-0000-4000-8000-000000000007": {
+            title: "Monitoria e apoio acadêmico",
+            description: "Entenda quando procurar a Monitoria, encontre o monitor e os horários do seu curso e prepare sua dúvida."
+        }
+    };
+
     const LOCAL_CATALOG = PHASES.map(([id, title, description, taskTitles], phaseIndex) => {
         const tasks = taskTitles.map((taskTitle, taskIndex) => ({
             id: `20000000-0000-4000-8000-${String((phaseIndex * 4) + taskIndex + 1).padStart(12, "0")}`,
@@ -50,7 +70,7 @@
 
     function writeCache(value) {
         try { localStorage.setItem(CACHE_KEY, JSON.stringify(value)); }
-        catch (error) { console.warn("[UniCheckChecklistData] Nao foi possivel salvar o catalogo local", error); }
+        catch (error) { console.warn("[UniCheckChecklistData] Nao foi possivel salvar o catalogo local"); }
     }
 
     function normalize(checklists, items) {
@@ -86,16 +106,19 @@
     function load(options = {}) {
         if (!refreshPromise || options.force) {
             refreshPromise = refreshRemote().catch(error => {
-                console.warn("[UniCheckChecklistData] Catalogo remoto indisponivel; usando estrutura local 7/28", {
-                    code: error?.code || null, message: error?.message || String(error), details: error?.details || null, hint: error?.hint || null
-                });
+                console.warn("[UniCheckChecklistData] Catalogo remoto indisponivel; usando estrutura local 7/28");
                 return getChecklists();
             }).finally(() => { refreshPromise = null; });
         }
         return Promise.resolve(getChecklists());
     }
 
-    function getChecklists() { return cloneCatalog(isCanonical(catalog) ? catalog : LOCAL_CATALOG); }
+    function getChecklists() {
+        return cloneCatalog(isCanonical(catalog) ? catalog : LOCAL_CATALOG).map(checklist => ({
+            ...checklist,
+            ...PHASE_PRESENTATION[checklist.id]
+        }));
+    }
 
     window.UniCheckChecklistData = { load, getChecklists, EXPECTED_PHASES, EXPECTED_TASKS };
 })();

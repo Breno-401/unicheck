@@ -1,21 +1,38 @@
 (function () {
     "use strict";
 
-    const XP_REWARD_DURATION_MS = 3400;
-    const XP_REWARD_QUEUE_GAP_MS = 120;
-    const XP_TRANSFER_DELAY_MS = 2150;
+    const XP_REWARD_DURATION_MS = 1700;
+    const XP_AGGREGATION_MS = 120;
+    const XP_TRANSFER_DELAY_MS = 240;
     const XP_TRANSFER_DURATION_MS = 560;
     const XP_RECEIVED_PULSE_MS = 320;
     let currentProgression = null;
     let transitionToken = 0;
     let activeXpReward = null;
-    let xpRewardTimer = null;
-    let xpTransferTimer = null;
-    let xpParticleTimer = null;
-    let xpPulseTimer = null;
+    let activeBatch = null;
+    let pendingBatch = null;
+    let mobileIndicator = null;
     let activeXpParticle = null;
     let activeXpAnimation = null;
-    const xpRewardQueue = [];
+    const feedbackTimers = new Set();
+    const feedbackFrames = new Set();
+
+    function schedule(callback, delay) {
+        const timer = window.setTimeout(() => {
+            feedbackTimers.delete(timer);
+            callback();
+        }, delay);
+        feedbackTimers.add(timer);
+        return timer;
+    }
+
+    function requestFrame(callback) {
+        const frame = window.requestAnimationFrame(now => {
+            feedbackFrames.delete(frame);
+            callback(now);
+        });
+        feedbackFrames.add(frame);
+    }
 
     function prefersReducedMotion() {
         return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
@@ -38,9 +55,8 @@
 
         surface = document.createElement("div");
         surface.className = "sidebar-profile-progression";
-        surface.tabIndex = 0;
         surface.innerHTML = `
-            <span class="sidebar-level-indicator" data-progression-indicator aria-hidden="true">1</span>
+            <span class="sidebar-level-indicator" data-progression-indicator role="progressbar" aria-label="Progresso para o próximo nível" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">1</span>
             <div class="sidebar-progress-details">
                 <div class="sidebar-progress-heading">
                     <strong data-progression-level>Calouro · Nível 1</strong>
@@ -78,61 +94,80 @@
         return accent && window.CSS?.supports?.("color", accent) ? accent : null;
     }
 
-    function getSidebarProgressTarget() {
-        if (prefersReducedMotion() || window.matchMedia?.("(max-width: 1024px)").matches) return null;
-
-        const sidebar = document.querySelector(".sidebar");
-        const target = sidebar?.querySelector(".sidebar-progress-track");
-        if (!sidebar || !target || sidebar.classList.contains("collapsed")) return null;
-
-        const sidebarStyle = window.getComputedStyle(sidebar);
-        const targetStyle = window.getComputedStyle(target);
-        if (
-            sidebarStyle.display === "none"
-            || sidebarStyle.visibility === "hidden"
-            || Number(sidebarStyle.opacity) === 0
-            || targetStyle.display === "none"
-            || targetStyle.visibility === "hidden"
-        ) return null;
-
+    function isVisible(target) {
+        if (!target) return false;
+        for (let node = target; node instanceof Element; node = node.parentElement) {
+            const style = window.getComputedStyle(node);
+            if (style.display === "none" || style.visibility === "hidden" || Number(style.opacity) === 0) return false;
+        }
         const rect = target.getBoundingClientRect();
-        const hasValidRect = Number.isFinite(rect.left)
-            && Number.isFinite(rect.top)
-            && rect.width > 0
-            && rect.height > 0
-            && rect.right > 0
-            && rect.bottom > 0
-            && rect.left < window.innerWidth
-            && rect.top < window.innerHeight;
-        return hasValidRect ? target : null;
+        return rect.width > 0 && rect.height > 0 && rect.right > 0 && rect.bottom > 0
+            && rect.left < window.innerWidth && rect.top < window.innerHeight;
+    }
+
+    function getSidebarProgressTarget() {
+        const sidebar = document.querySelector(".sidebar");
+        const mobile = window.matchMedia?.("(max-width: 1024px)").matches;
+        if (!mobile || sidebar?.classList.contains("open")) {
+            for (const selector of [".sidebar-progress-track", ".sidebar-level-indicator"]) {
+                const target = sidebar?.querySelector(selector);
+                if (isVisible(target)) return target;
+            }
+        }
+        if (!mobile) return null;
+        if (!mobileIndicator) {
+            mobileIndicator = document.createElement("div");
+            mobileIndicator.className = "xp-mobile-indicator";
+            mobileIndicator.setAttribute("aria-hidden", "true");
+            mobileIndicator.innerHTML = '<strong data-progression-xp></strong><span class="sidebar-progress-track"><span data-progression-fill></span></span>';
+            document.body.appendChild(mobileIndicator);
+            updateMobileIndicator(activeBatch.previousProgression || activeBatch.progression);
+        }
+        return mobileIndicator.querySelector(".sidebar-progress-track");
+    }
+
+    function updateMobileIndicator(progression, levelXp = getLevelXp(progression)) {
+        if (!mobileIndicator) return;
+        const maximum = getLevelXpMax(progression);
+        mobileIndicator.querySelector("[data-progression-xp]").textContent = maximum
+            ? `${Math.round(levelXp)} / ${maximum} XP` : `${progression.xp} XP total`;
+        mobileIndicator.querySelector("[data-progression-fill]").style.width = `${clampProgress(progression.levelProgress)}%`;
     }
 
     function pulseSidebarProgress(target) {
-        const surface = target?.closest(".sidebar-profile-progression");
+        const surface = target?.closest(".sidebar-profile-progression, .xp-mobile-indicator");
         if (!surface?.isConnected || prefersReducedMotion()) return;
 
-        if (xpPulseTimer) window.clearTimeout(xpPulseTimer);
         surface.classList.remove("is-xp-receiving");
         void surface.offsetWidth;
         surface.classList.add("is-xp-receiving");
-        xpPulseTimer = window.setTimeout(() => {
+        schedule(() => {
             surface.classList.remove("is-xp-receiving");
-            xpPulseTimer = null;
         }, XP_RECEIVED_PULSE_MS);
+    }
+
+    function receiveXp(target) {
+        if (!activeBatch) return;
+        const { previousProgression: previous, progression } = activeBatch;
+        const from = previous?.currentLevel?.level === progression.currentLevel.level ? getLevelXp(previous) : getLevelXp(progression);
+        const surface = updateSurface(progression, { levelXp: from });
+        updateMobileIndicator(progression, from);
+        pulseSidebarProgress(target);
+        animateXpValue(surface, progression, from, getLevelXp(progression), 520, ++transitionToken);
     }
 
     function transferXpToSidebar(element) {
         if (!element?.isConnected || element !== activeXpReward || prefersReducedMotion()) return;
 
         const target = getSidebarProgressTarget();
-        if (!target) return;
+        if (!target) { receiveXp(null); return; }
 
         const originRect = element.getBoundingClientRect();
         const targetRect = target.getBoundingClientRect();
         const fillRect = target.querySelector("[data-progression-fill]")?.getBoundingClientRect();
         const originX = originRect.left + Math.min(originRect.width * .28, 92);
         const originY = originRect.top + Math.min(originRect.height * .34, 54);
-        const destinationX = fillRect?.width > 0
+        const destinationX = target.matches(".sidebar-level-indicator") ? targetRect.left + targetRect.width / 2 : fillRect?.width > 0
             ? Math.min(fillRect.right, targetRect.right - 2)
             : targetRect.left + 3;
         const destinationY = targetRect.top + targetRect.height / 2;
@@ -149,6 +184,7 @@
         if (typeof particle.animate !== "function") {
             particle.remove();
             activeXpParticle = null;
+            receiveXp(target);
             return;
         }
 
@@ -166,26 +202,24 @@
         });
         activeXpAnimation = animation;
 
-        animation.addEventListener("finish", () => {
-            if (xpParticleTimer) window.clearTimeout(xpParticleTimer);
-            xpParticleTimer = null;
+        let received = false;
+        const arrive = () => {
+            if (received || activeXpReward !== element) return;
+            received = true;
             particle.remove();
             if (activeXpParticle === particle) activeXpParticle = null;
             if (activeXpAnimation === animation) activeXpAnimation = null;
-            pulseSidebarProgress(target);
-        }, { once: true });
+            receiveXp(target);
+        };
+        animation.addEventListener("finish", arrive, { once: true });
         animation.addEventListener("cancel", () => {
             particle.remove();
             if (activeXpParticle === particle) activeXpParticle = null;
             if (activeXpAnimation === animation) activeXpAnimation = null;
         }, { once: true });
-        xpParticleTimer = window.setTimeout(() => {
-            xpParticleTimer = null;
-            if (activeXpAnimation === animation) activeXpAnimation = null;
+        schedule(() => {
+            arrive();
             animation.cancel();
-            particle.remove();
-            if (activeXpParticle === particle) activeXpParticle = null;
-            pulseSidebarProgress(target);
         }, XP_TRANSFER_DURATION_MS);
     }
 
@@ -199,10 +233,7 @@
         return region;
     }
 
-    function showNextXpReward() {
-        if (activeXpReward || !xpRewardQueue.length) return;
-
-        const reward = xpRewardQueue.shift();
+    function paintXpReward(reward) {
         const progression = reward.progression;
         const levelXp = Math.round(getLevelXp(progression));
         const levelXpMax = getLevelXpMax(progression);
@@ -223,17 +254,13 @@
         const accessibleMessage = progression.nextLevel
             ? `${reward.label}. Você ganhou ${reward.gainedXp} XP. ${levelXp} de ${levelXpMax} XP. Faltam ${remainingXp} XP para o nível ${progression.nextLevel.name}.`
             : `${reward.label}. Você ganhou ${reward.gainedXp} XP. ${progression.xp} XP no total. Nível máximo alcançado.`;
-        const region = ensureXpRewardRegion();
-        const element = document.createElement("div");
+        const element = activeXpReward;
         element.className = `xp-reward${reward.phaseCompleted ? " xp-reward--phase" : ""}`;
         const rewardAccent = getRewardAccent(reward.accent);
         if (rewardAccent) element.style.setProperty("--reward-accent", rewardAccent);
-        element.setAttribute("role", "status");
-        element.setAttribute("aria-live", "polite");
-        element.setAttribute("aria-atomic", "true");
-        element.setAttribute("aria-label", accessibleMessage);
+        reward.accessibleMessage = accessibleMessage;
         element.innerHTML = `
-            <div class="xp-reward-heading">
+            <div class="xp-reward-heading" aria-hidden="true">
                 <span class="xp-reward-symbol" aria-hidden="true">✦</span>
                 <span class="xp-reward-copy">
                     <strong class="xp-reward-amount">+${reward.gainedXp} <span>XP</span></strong>
@@ -246,29 +273,46 @@
                 <span class="xp-reward-destination">${escapeHtml(destination)}</span>
             </div>
         `;
-        region.appendChild(element);
-        activeXpReward = element;
-
         const fill = element.querySelector("[data-xp-reward-fill]");
         if (fill) {
             void fill.offsetWidth;
             fill.style.width = `${progress}%`;
         }
 
-        xpTransferTimer = window.setTimeout(() => {
-            xpTransferTimer = null;
-            transferXpToSidebar(element);
-        }, XP_TRANSFER_DELAY_MS);
+    }
 
-        xpRewardTimer = window.setTimeout(() => {
+    function showNextXpReward() {
+        if (activeBatch || !pendingBatch) return;
+        activeBatch = pendingBatch;
+        pendingBatch = null;
+        activeBatch.startedAt = performance.now();
+        const region = ensureXpRewardRegion();
+        const element = document.createElement("div");
+        element.setAttribute("role", "status");
+        element.setAttribute("aria-live", "polite");
+        element.setAttribute("aria-atomic", "true");
+        activeXpReward = element;
+        region.appendChild(element);
+        paintXpReward(activeBatch);
+        // Freeze the short burst before announcing it: one accessible message per batch.
+        schedule(() => {
+            const announcement = document.createElement("span");
+            announcement.className = "xp-reward-announcement";
+            announcement.textContent = activeBatch.accessibleMessage;
+            element.appendChild(announcement);
+        }, XP_AGGREGATION_MS);
+        if (prefersReducedMotion()) updateSurface(activeBatch.progression, { instant: true });
+        else schedule(() => transferXpToSidebar(element), XP_TRANSFER_DELAY_MS);
+        schedule(() => {
+            // Reduced motion already applied the latest event, which may be newer than this batch.
+            if (!prefersReducedMotion()) updateSurface(activeBatch.progression);
             element.remove();
             activeXpReward = null;
-            xpRewardTimer = null;
-            if (xpRewardQueue.length) {
-                window.setTimeout(showNextXpReward, XP_REWARD_QUEUE_GAP_MS);
-            } else {
-                region.remove();
-            }
+            activeBatch = null;
+            mobileIndicator?.remove();
+            mobileIndicator = null;
+            if (pendingBatch) showNextXpReward();
+            else region.remove();
         }, XP_REWARD_DURATION_MS);
     }
 
@@ -276,27 +320,35 @@
         const gainedXp = Number(detail.gainedXp) || 0;
         if (!progression?.currentLevel || gainedXp <= 0) return;
 
-        xpRewardQueue.push({
+        const reward = {
             previousProgression,
             progression,
             gainedXp,
             label: detail.phaseCompleted ? "Fase concluída" : "Etapa concluída",
             phaseCompleted: detail.phaseCompleted === true,
             accent: detail.phaseAccent
-        });
+        };
+        const collecting = activeBatch && performance.now() - activeBatch.startedAt < XP_AGGREGATION_MS;
+        const batch = collecting ? activeBatch : pendingBatch;
+        if (batch) {
+            batch.progression = progression;
+            batch.gainedXp += gainedXp;
+            batch.phaseCompleted ||= reward.phaseCompleted;
+            if (reward.phaseCompleted) { batch.label = reward.label; batch.accent = reward.accent; }
+        } else pendingBatch = reward;
+        if (collecting) paintXpReward(activeBatch);
+        if (prefersReducedMotion()) updateSurface(progression, { instant: true });
         showNextXpReward();
     }
 
     function clearXpRewards() {
-        xpRewardQueue.length = 0;
-        if (xpRewardTimer) window.clearTimeout(xpRewardTimer);
-        if (xpTransferTimer) window.clearTimeout(xpTransferTimer);
-        if (xpParticleTimer) window.clearTimeout(xpParticleTimer);
-        if (xpPulseTimer) window.clearTimeout(xpPulseTimer);
-        xpRewardTimer = null;
-        xpTransferTimer = null;
-        xpParticleTimer = null;
-        xpPulseTimer = null;
+        activeBatch = null;
+        pendingBatch = null;
+        transitionToken += 1;
+        feedbackTimers.forEach(timer => window.clearTimeout(timer));
+        feedbackTimers.clear();
+        feedbackFrames.forEach(frame => window.cancelAnimationFrame(frame));
+        feedbackFrames.clear();
         activeXpAnimation?.cancel();
         activeXpAnimation = null;
         activeXpParticle?.remove();
@@ -306,6 +358,11 @@
         activeXpReward?.remove();
         activeXpReward = null;
         document.querySelector("body > .xp-reward-region")?.remove();
+        mobileIndicator?.remove();
+        mobileIndicator = null;
+        document.querySelector(".level-up-celebration")?.remove();
+        document.querySelector(".sidebar-profile-progression.is-xp-updating")?.classList.remove("is-xp-updating");
+        updateSurface(currentProgression, { instant: true });
     }
 
     function updateSurface(progression, options = {}) {
@@ -326,6 +383,12 @@
             : `${progression.xp} XP total`;
         const track = surface.querySelector(".sidebar-progress-track");
         track.setAttribute("aria-valuenow", String(Math.round(displayedProgress)));
+        track.setAttribute("aria-valuetext", progression.nextLevel
+            ? `${progression.currentLevel.name}, nível ${progression.currentLevel.level}. ${Math.round(displayedLevelXp)} de ${levelXpMax} XP neste nível.`
+            : `${progression.currentLevel.name}, nível ${progression.currentLevel.level}. ${progression.xp} XP no total.`);
+        const indicator = surface.querySelector("[data-progression-indicator]");
+        indicator.setAttribute("aria-valuenow", track.getAttribute("aria-valuenow"));
+        indicator.setAttribute("aria-valuetext", track.getAttribute("aria-valuetext"));
         const fill = surface.querySelector("[data-progression-fill]");
         if (options.instant) fill.style.transition = "none";
         fill.style.width = `${Math.max(0, Math.min(100, displayedProgress))}%`;
@@ -336,15 +399,12 @@
         surface.querySelector("[data-progression-next]").textContent = progression.nextLevel
             ? `${Math.max(0, progression.nextLevel.minXp - progression.xp)} XP para ${progression.nextLevel.name}`
             : "Nível máximo alcançado";
-        surface.setAttribute("aria-label", progression.nextLevel
-            ? `${progression.currentLevel.name}, nível ${progression.currentLevel.level}. ${Math.round(displayedLevelXp)} de ${levelXpMax} XP neste nível.`
-            : `${progression.currentLevel.name}, nível ${progression.currentLevel.level}. ${progression.xp} XP no total.`);
         return surface;
     }
 
-    function animateXpValue(surface, progression, from, to, duration, token) {
+    function animateXpValue(surface, progression, from, to, duration, token, targetProgress = progression.levelProgress) {
         if (!surface || prefersReducedMotion() || from === to) {
-            updateSurface(progression, { levelXp: to });
+            updateSurface(progression, { levelXp: to, levelProgress: targetProgress });
             return;
         }
         const startedAt = performance.now();
@@ -356,9 +416,11 @@
             const label = surface.querySelector("[data-progression-xp]");
             const maximum = getLevelXpMax(progression);
             if (label) label.textContent = maximum ? `${value} / ${maximum} XP` : `${progression.xp} XP total`;
-            if (ratio < 1) window.requestAnimationFrame(tick);
+            updateMobileIndicator(progression, value);
+            if (ratio < 1) requestFrame(tick);
+            else updateSurface(progression, { levelXp: to, levelProgress: targetProgress });
         };
-        window.requestAnimationFrame(tick);
+        requestFrame(tick);
     }
 
     function showLevelUp(progression, detail = {}) {
@@ -392,10 +454,10 @@
         `;
         document.body.appendChild(celebration);
         window.lucide?.createIcons?.();
-        window.setTimeout(() => celebration.remove(), prefersReducedMotion() ? 2200 : 2850);
+        schedule(() => celebration.remove(), prefersReducedMotion() ? 2200 : 2850);
     }
 
-    function animateTransition(previous, progression, detail = {}) {
+    function animateLevelUp(previous, progression, detail = {}) {
         if (!progression?.currentLevel) return;
         const token = ++transitionToken;
         const surface = ensureSurface();
@@ -409,32 +471,20 @@
         }
 
         surface.classList.add("is-xp-updating");
-        window.setTimeout(() => surface.classList.remove("is-xp-updating"), 900);
-        const levelChanged = previous.currentLevel.level < progression.currentLevel.level;
-        if (!levelChanged) {
-            updateSurface(previous, { instant: true });
-            window.requestAnimationFrame(() => {
-                if (token !== transitionToken) return;
-                updateSurface(progression, { levelXp: getLevelXp(previous) });
-                animateXpValue(surface, progression, getLevelXp(previous), getLevelXp(progression), 520, token);
-            });
-            currentProgression = progression;
-            return;
-        }
-
+        schedule(() => surface.classList.remove("is-xp-updating"), 900);
         const previousMaximum = getLevelXpMax(previous) || getLevelXp(previous);
         updateSurface(previous, { instant: true });
-        window.requestAnimationFrame(() => {
+        requestFrame(() => {
             if (token !== transitionToken) return;
             updateSurface(previous, { levelProgress: 100 });
-            animateXpValue(surface, previous, getLevelXp(previous), previousMaximum, 560, token);
+            animateXpValue(surface, previous, getLevelXp(previous), previousMaximum, 560, token, 100);
         });
 
-        window.setTimeout(() => {
+        schedule(() => {
             if (token !== transitionToken) return;
             showLevelUp(progression, detail);
             updateSurface(progression, { levelXp: 0, levelProgress: 0, instant: true });
-            window.setTimeout(() => {
+            schedule(() => {
                 if (token !== transitionToken) return;
                 updateSurface(progression, { levelXp: 0 });
                 animateXpValue(surface, progression, 0, getLevelXp(progression), 460, token);
@@ -452,7 +502,7 @@
             currentProgression = progression;
             return;
         }
-        transitionToken += 1;
+        clearXpRewards();
         updateSurface(progression, { instant: currentProgression === null });
         currentProgression = progression;
     }
@@ -477,11 +527,20 @@
         );
         if (levelChanged) {
             clearXpRewards();
-        } else {
+            animateLevelUp(previous, progression, event.detail || {});
+        } else if (Number(event.detail?.gainedXp) > 0) {
+            currentProgression = progression;
             enqueueXpReward(previous, progression, event.detail || {});
+        } else {
+            clearXpRewards();
+            updateSurface(progression, { instant: true });
         }
-        animateTransition(previous, progression, event.detail || {});
+        currentProgression = progression;
     });
+
+    for (const event of ["resize", "pagehide", "popstate", "hashchange", "unicheck:checklist-route-changed"]) {
+        window.addEventListener(event, clearXpRewards);
+    }
 
     window.UniCheckProgressionProfile = {
         renderFromChecklists,

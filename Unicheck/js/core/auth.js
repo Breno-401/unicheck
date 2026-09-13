@@ -202,7 +202,6 @@
             extra
         };
 
-        console.info("[UniCheckAuth] Estado de autenticacao", snapshot);
         return { session, user, snapshot };
     }
 
@@ -278,7 +277,7 @@
             if (error) throw error;
         } catch (error) {
             signOutError = error;
-            console.error("[UniCheckAuth] Falha ao chamar signOut()", error);
+            console.error("[UniCheckAuth] Falha ao chamar signOut()");
         }
 
         clearProfile();
@@ -313,7 +312,7 @@
         } catch (error) {
             // Uma falha de rede/storage nao prova que o usuario saiu. O caller
             // recebe o erro e a pagina nao entra em um redirect falso.
-            console.error("[UniCheckAuth] Falha ao restaurar sessao", error);
+            console.error("[UniCheckAuth] Falha ao restaurar sessao");
             throw error;
         }
 
@@ -344,12 +343,6 @@
             }
 
             if (session?.user && typeof CustomEvent === 'function') window.dispatchEvent?.(new CustomEvent('unicheck:session-changed', { detail: { userId: session.user.id } }));
-
-            console.info("[UniCheckAuth] auth state change", {
-                event,
-                userId: session?.user?.id || null,
-                email: session?.user?.email || null
-            });
 
             if (typeof callback === "function") {
                 callback(event, session);
