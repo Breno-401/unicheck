@@ -12,11 +12,11 @@ Este registro documenta a separação entre documentação oficial versionada, m
 
 O contexto gerado por navegador e por ferramentas de apoio permanece no computador, fora do conteúdo oficial do projeto:
 
-- `private-context/browser/`: junction local `node_modules` para o runtime compartilhado de Playwright; a árvore externa não é conteúdo do repositório;
+- `private-context/browser/`: pasta comum que contém o contexto do runtime Playwright; o junction exato é `private-context/browser/node_modules`, apontando para as dependências compartilhadas;
 - `private-context/browser-qa/`: capturas e JSON de QA (24 arquivos);
 - `private-context/checklist-browser/`: capturas e resultados de checklist (114 arquivos);
 - `tmp/`: extrações, renderizações, patches, logs e harnesses transitórios (39 arquivos);
-- `.superpowers/sdd/`: briefs e relatórios internos de execução (32 arquivos).
+- `.superpowers/sdd/`: briefs e relatórios internos de execução (contagem omitida, pois é um snapshot volátil do pacote de auditoria).
 
 Os diretórios `docs/local/`, `docs/context/` e `.local-context/` são convenções reservadas para futuras fontes locais; não existem no checkout auditado. IDEs, agentes e configurações locais seguem as convenções já existentes para `.idea/`, `.codex/` e `.agents/`.
 
@@ -55,7 +55,7 @@ Não há globais `*.pdf` ou `*.docx`: documentos oficiais nesses formatos contin
 - não houve remoção apenas do índice (`git rm --cached`) nesta rodada;
 - nenhum material local foi apagado: os diretórios locais existentes continuam presentes, e os arquivos históricos não existem como arquivos do checkout atual.
 
-`git check-ignore -v` confirmou as regras para `private-context/`, `tmp/`, `.superpowers/`, `/docs/checklist-academico-pesquisa.pdf`, `*.local.pdf` e `*.local.docx`. As três pastas de convenção ainda inexistentes (`docs/local/`, `docs/context/` e `.local-context/`) não retornam correspondência até que sejam criadas.
+`git check-ignore -v` confirmou as regras para caminhos existentes como `private-context/`, `tmp/`, `.superpowers/`, `/docs/checklist-academico-pesquisa.pdf`, `*.local.pdf` e `*.local.docx`. Sem `--no-index`, `git check-ignore` não avalia caminhos inexistentes; probes hipotéticos com `git check-ignore -v --no-index -- docs/local/probe.md docs/context/probe.md .local-context/probe.md` confirmam que as três convenções já são classificadas pelas regras correspondentes.
 
 ## PDFs somente no histórico
 
