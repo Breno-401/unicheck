@@ -371,6 +371,10 @@
             : basePath;
 
         window.history.pushState({ checklistId: checklistId || null }, "", nextUrl);
+        // Public internal-navigation event, after pushState: detail.checklistId is the phase id or null for the list.
+        window.dispatchEvent(new CustomEvent("unicheck:checklist-route-changed", {
+            detail: { checklistId: checklistId || null }
+        }));
     }
 
     function createCardActionLabel(checklist) {

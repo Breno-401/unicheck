@@ -402,9 +402,9 @@
         return surface;
     }
 
-    function animateXpValue(surface, progression, from, to, duration, token) {
+    function animateXpValue(surface, progression, from, to, duration, token, targetProgress = progression.levelProgress) {
         if (!surface || prefersReducedMotion() || from === to) {
-            updateSurface(progression, { levelXp: to });
+            updateSurface(progression, { levelXp: to, levelProgress: targetProgress });
             return;
         }
         const startedAt = performance.now();
@@ -418,7 +418,7 @@
             if (label) label.textContent = maximum ? `${value} / ${maximum} XP` : `${progression.xp} XP total`;
             updateMobileIndicator(progression, value);
             if (ratio < 1) requestFrame(tick);
-            else updateSurface(progression);
+            else updateSurface(progression, { levelXp: to, levelProgress: targetProgress });
         };
         requestFrame(tick);
     }
@@ -477,7 +477,7 @@
         requestFrame(() => {
             if (token !== transitionToken) return;
             updateSurface(previous, { levelProgress: 100 });
-            animateXpValue(surface, previous, getLevelXp(previous), previousMaximum, 560, token);
+            animateXpValue(surface, previous, getLevelXp(previous), previousMaximum, 560, token, 100);
         });
 
         schedule(() => {
@@ -538,7 +538,7 @@
         currentProgression = progression;
     });
 
-    for (const event of ["resize", "pagehide", "popstate", "hashchange"]) {
+    for (const event of ["resize", "pagehide", "popstate", "hashchange", "unicheck:checklist-route-changed"]) {
         window.addEventListener(event, clearXpRewards);
     }
 

@@ -222,6 +222,43 @@ let base;
             assert.equal(await xp(page), '50 / 100 XP', 'controller remains usable after cleanup');
         });
     }
+    await scenario('real back-to-list navigation cancels active and pending XP feedback', async page => {
+        const phaseUrl = page.url();
+        assert.match(new URL(phaseUrl).hash, /^#checklist=/);
+        await emit(page);
+        await advance(page, 350);
+        await emit(page, 3, 4);
+        await page.locator('[data-action="back-to-list"]').focus();
+        await page.keyboard.press('Enter');
+        assert.equal(new URL(page.url()).hash, '', 'real handler changed the route');
+        assert.deepEqual(await page.evaluate(() => ({
+            artifacts: document.querySelectorAll('.xp-reward, .xp-energy-particle, .xp-mobile-indicator, .is-xp-receiving').length,
+            xp: document.querySelector('.sidebar [data-progression-xp]').textContent
+        })), { artifacts: 0, xp: '40 / 100 XP' }, 'navigation settles the latest XP and removes active feedback');
+        await advance(page, 4000);
+        assert.equal(await page.locator('.xp-reward, .xp-energy-particle').count(), 0, 'pending feedback cannot return after navigation');
+        assert.equal(await xp(page), '40 / 100 XP');
+        await page.goBack();
+        assert.equal(page.url(), phaseUrl, 'browser back still restores the phase route');
+        await page.locator('[data-action="back-to-list"]').focus();
+        await page.keyboard.press('Enter');
+        assert.equal(new URL(page.url()).hash, '', 'keyboard activation still navigates to the list');
+    });
+    await scenario('level-up keeps the completed level at 100 XP until the level switch', async page => {
+        await emit(page, 9, 10);
+        await advance(page, 540);
+        assert.equal(await xp(page), '100 / 100 XP');
+        assert.equal(await page.locator('.sidebar-progress-track').getAttribute('aria-valuenow'), '100');
+        await advance(page, 90);
+        assert.deepEqual(await page.evaluate(() => ({
+            xp: document.querySelector('.sidebar [data-progression-xp]').textContent,
+            progress: document.querySelector('.sidebar-progress-track').getAttribute('aria-valuenow')
+        })), { xp: '100 / 100 XP', progress: '100' }, 'finishing the first count-up must not restore the 90 XP snapshot');
+        await advance(page, 770);
+        assert.equal(await xp(page), '0 / 120 XP');
+        assert.match(await page.locator('[data-progression-level]').textContent(), /Nível 2/);
+        assert.equal(await page.locator('.sidebar-progress-track').getAttribute('aria-valuenow'), '0');
+    });
     await scenario('feedback preserves focus/layout and progressbar provides accessible description', async page => {
         const button = page.locator('[data-action="select-task"]').first();
         await button.focus();
