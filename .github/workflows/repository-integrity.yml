@@ -24,5 +24,8 @@ jobs:
         with:
           node-version: "20"
 
+      - name: Run Node tests
+        run: node --test tests/*.test.cjs
+
       - name: Check local references
         run: node scripts/check-local-references.mjs
