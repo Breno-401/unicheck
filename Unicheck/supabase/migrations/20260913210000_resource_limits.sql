@@ -81,6 +81,7 @@ $constraints$;
 -- hash collision only serializes unrelated users. The separate DELETE command
 -- sees commits made while waiting under READ COMMITTED (PostgREST default).
 -- Fixed-snapshot isolation is rejected explicitly instead of risking >100 rows.
+-- Unsupported isolation is not a transient conflict: retry requires changing it.
 -- New inserts prune only that user, newest created_at then UUID first. A first
 -- insert for a legacy over-limit user also prunes their old surplus. There is
 -- no cleanup at installation and no timer. Deletions commit/roll back with INSERT.
@@ -92,8 +93,8 @@ set search_path = ''
 as $retention$
 begin
     if pg_catalog.current_setting('transaction_isolation') not in ('read committed', 'read uncommitted') then
-        raise exception 'Activity retention requires READ COMMITTED isolation'
-            using errcode = '40001';
+        raise exception 'Activity retention does not support REPEATABLE READ or SERIALIZABLE; use READ COMMITTED'
+            using errcode = '0A000';
     end if;
 
     perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended('user_activity:' || new.user_id::text, 0));
@@ -121,8 +122,8 @@ set search_path = ''
 as $retention$
 begin
     if pg_catalog.current_setting('transaction_isolation') not in ('read committed', 'read uncommitted') then
-        raise exception 'Notification retention requires READ COMMITTED isolation'
-            using errcode = '40001';
+        raise exception 'Notification retention does not support REPEATABLE READ or SERIALIZABLE; use READ COMMITTED'
+            using errcode = '0A000';
     end if;
 
     perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended('user_notifications:' || new.user_id::text, 0));

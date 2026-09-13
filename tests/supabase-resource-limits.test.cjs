@@ -30,14 +30,16 @@ test('avatar exige nome canônico em cada operação e ambos lados de UPDATE', (
     assert.doesNotMatch(sql, /storage\.foldername|drop policy|grant\s|storage\.buckets/i);
 });
 
-test('checks protegem writes sem validar legado e consultam catálogo com tabela exata', () => {
-    const sql = migration();
+function assertCheckContracts(sql) {
+    const blocks = [...sql.matchAll(/if not exists \([\s\S]*?end if;/gi)].map(match => match[0]);
     for (const [table, constraint, expression] of [
         ['user_activity', 'user_activity_context_limit_v1', 'context is null or pg_catalog.char_length(context) <= 1000'],
         ['user_activity', 'user_activity_metadata_limit_v1', 'pg_catalog.octet_length(metadata::text) <= 16384'],
         ['user_notifications', 'user_notifications_destination_limit_v1', 'destination is null or pg_catalog.char_length(destination) <= 500']
     ]) {
-        const block = sql.match(new RegExp(`if not exists \\([\\s\\S]*?conname = '${constraint}'[\\s\\S]*?end if;`, 'i'))?.[0];
+        const matches = blocks.filter(block => block.includes(`conname = '${constraint}'`));
+        assert.equal(matches.length, 1, `${constraint}: um único bloco IF`);
+        const [block] = matches;
         assert.ok(block, constraint);
         assert.ok(block.includes(`conrelid = 'public.${table}'::pg_catalog.regclass`));
         assert.ok(block.includes(`add constraint ${constraint}`));
@@ -45,6 +47,23 @@ test('checks protegem writes sem validar legado e consultam catálogo com tabela
         assert.match(block, /from pg_catalog\.pg_constraint/i);
     }
     assert.doesNotMatch(sql, /add constraint if not exists|validate constraint/i);
+}
+
+test('checks protegem writes sem validar legado e consultam catálogo com tabela exata', () => {
+    assertCheckContracts(migration());
+});
+
+test('contrato rejeita conrelid errado em cada bloco mesmo com tabela correta no bloco anterior', () => {
+    const sql = migration();
+    for (const constraint of ['user_activity_context_limit_v1', 'user_activity_metadata_limit_v1',
+        'user_notifications_destination_limit_v1']) {
+        const mutant = sql.replace(
+            new RegExp(`conrelid = 'public\\.\\w+'::pg_catalog\\.regclass(\\s+and conname = '${constraint}')`),
+            "conrelid = 'public.users_profile'::pg_catalog.regclass$1"
+        );
+        assert.notEqual(mutant, sql, `${constraint}: mutação deve atingir o bloco`);
+        assert.throws(() => assertCheckContracts(mutant), { code: 'ERR_ASSERTION' }, constraint);
+    }
 });
 
 test('retenção é interna, serializada por usuário, posterior ao INSERT e determinística', () => {
@@ -56,7 +75,9 @@ test('retenção é interna, serializada por usuário, posterior ao INSERT e det
         assert.equal(name, `retain_${table}_100_v1`);
         assert.match(header, /returns trigger\s+language plpgsql\s+security definer\s+set search_path = ''/i);
         assert.match(body, /pg_catalog\.current_setting\('transaction_isolation'\)/);
-        assert.match(body, /errcode = '40001'/);
+        assert.match(body, /errcode = '0A000'/);
+        assert.doesNotMatch(body, /40001/);
+        assert.match(body, /retention does not support REPEATABLE READ or SERIALIZABLE; use READ COMMITTED/);
         assert.match(body, new RegExp(`pg_catalog\\.pg_advisory_xact_lock\\(pg_catalog\\.hashtextextended\\('${table}:' \\|\\| new\\.user_id::text, 0\\)\\)`));
         assert.ok(body.indexOf('pg_advisory_xact_lock') < body.indexOf('delete from'));
         assert.match(body, new RegExp(`delete from public\\.${table} as expired`));
