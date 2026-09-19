@@ -7,6 +7,65 @@
 [build.processing.html]
   pretty_urls = true
 
+[[redirects]]
+  from = "/landing/index.html"
+  to = "/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/landing/"
+  to = "/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/index.html"
+  to = "/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/"
+  to = "/landing/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/css/main.css"
+  to = "/landing/css/main.css"
+  status = 200
+
+[[redirects]]
+  from = "/js/script.js"
+  to = "/landing/js/script.js"
+  status = 200
+
+[[redirects]]
+  from = "/assets/images/logomernor.png"
+  to = "/landing/assets/images/logomernor.png"
+  status = 200
+
+[[redirects]]
+  from = "/assets/images/Checklist_portada.jpg"
+  to = "/landing/assets/images/Checklist_portada.jpg"
+  status = 200
+
+[[redirects]]
+  from = "/assets/images/logo.foto.png"
+  to = "/landing/assets/images/logo.foto.png"
+  status = 200
+
+[[redirects]]
+  from = "/login-cadastro.html"
+  to = "/landing/login-cadastro.html"
+  status = 301
+
+[[redirects]]
+  from = "/cursos.html"
+  to = "/landing/cursos.html"
+  status = 301
+
 [[headers]]
   for = "/*"
   [headers.values]
