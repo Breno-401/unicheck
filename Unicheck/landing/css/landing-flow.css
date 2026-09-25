@@ -201,7 +201,7 @@
     position: absolute;
     z-index: 1;
     top: 33%;
-    left: 22%;
+    left: 21.75%;
     display: grid;
     width: 24%;
     height: 38%;
@@ -247,7 +247,7 @@
 
 .journey-flow__unicheck {
     top: 72%;
-    left: 45.3%;
+    left: 45.333333333333336%;
     width: 16%;
     min-height: 102px;
     border-color: color-mix(in srgb, var(--flow-accent), var(--flow-border) 28%);
@@ -477,6 +477,7 @@
         align-content: center;
         grid-template-columns: repeat(2, 5px);
         gap: 4px;
+        justify-content: center;
     }
 
     .journey-flow__mobile-node--split i {
