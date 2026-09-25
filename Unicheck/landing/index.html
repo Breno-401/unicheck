@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#071a1e">
+    <meta name="theme-color" content="#f7faf9">
     <title>UniCheck | Sua jornada acadêmica organizada</title>
     <meta name="description" content="Organize sua jornada acadêmica com checklists, informações, benefícios e ferramentas reunidos em um só lugar.">
     <link rel="canonical" href="https://unicheckhub.com.br/">
@@ -18,7 +18,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="js/landing-theme.js"></script>
     <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/landing-flow.css">
 </head>
 <body>
     <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
@@ -26,12 +28,9 @@
     <header class="site-header" data-header>
         <div class="container header-inner">
             <a href="#inicio" class="brand" aria-label="UniCheck — página inicial">
-                <img src="assets/images/logomernor.png" alt="UniCheck" width="498" height="211">
+                <img src="assets/images/logomernor.png" data-theme-logo="light" alt="" width="498" height="211">
+                <img src="assets/images/logo.foto.png" data-theme-logo="dark" alt="" width="486" height="172">
             </a>
-
-            <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-navigation" aria-label="Abrir menu de navegação">
-                <span></span><span></span><span></span>
-            </button>
 
             <div class="navigation" id="site-navigation">
                 <nav aria-label="Navegação principal">
@@ -47,6 +46,19 @@
                 <a class="button button-small button-outline" href="login-cadastro.html">Entrar</a>
                 <a class="button button-small" href="login-cadastro.html">Criar conta</a>
             </div>
+
+            <button class="theme-toggle" type="button" data-theme-toggle aria-label="Ativar tema escuro" aria-pressed="false" title="Ativar tema escuro">
+                <svg class="theme-toggle__moon" aria-hidden="true" viewBox="0 0 24 24" fill="none">
+                    <path d="M20.2 15.2A8.4 8.4 0 0 1 8.8 3.8 8.5 8.5 0 1 0 20.2 15.2Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <svg class="theme-toggle__sun" aria-hidden="true" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="3.8" stroke="currentColor" stroke-width="1.7"/>
+                    <path d="M12 2.5v2.1m0 14.8v2.1M4.7 4.7l1.5 1.5m11.6 11.6 1.5 1.5M2.5 12h2.1m14.8 0h2.1M4.7 19.3l1.5-1.5M17.8 6.2l1.5-1.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                </svg>
+            </button>
+            <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-navigation" aria-label="Abrir menu de navegação">
+                <span></span><span></span><span></span>
+            </button>
         </div>
     </header>
 
@@ -137,23 +149,119 @@
             </div>
         </section>
 
-        <section class="section spotlight" id="sobre">
-            <div class="container spotlight-grid">
-                <div class="spotlight-media">
-                    <img src="assets/images/Checklist_portada.jpg" alt="Prévia do Checklist Acadêmico do UniCheck" width="1068" height="580" loading="lazy">
-                    <div class="spotlight-stat"><strong>7 fases</strong><span>para guiar sua adaptação</span></div>
+        <section class="section journey-flow" id="sobre" data-journey-flow aria-labelledby="journey-flow-title">
+            <div class="container">
+                <div class="journey-flow__heading">
+                    <span class="eyebrow">Jornada acadêmica organizada</span>
+                    <h2 id="journey-flow-title">Da informação espalhada a uma jornada clara.</h2>
+                    <p>Portais, e-mails e comunicados já existem. O UniCheck conecta essas peças ao contexto e mostra ao aluno o que fazer em seguida.</p>
                 </div>
-                <div class="spotlight-copy">
-                    <span class="eyebrow">Checklist Acadêmico</span>
-                    <h2>Comece sem se perder.</h2>
-                    <p>Dos documentos iniciais aos sistemas da universidade, o UniCheck transforma uma lista confusa de obrigações em etapas claras e possíveis.</p>
-                    <ul>
-                        <li><span>✓</span><div><strong>Prioridades visíveis</strong><p>Saiba o que precisa da sua atenção agora.</p></div></li>
-                        <li><span>✓</span><div><strong>Progresso que acompanha você</strong><p>Continue de onde parou em qualquer dispositivo.</p></div></li>
-                        <li><span>✓</span><div><strong>Orientação em cada fase</strong><p>Entenda o contexto antes de realizar cada tarefa.</p></div></li>
-                    </ul>
-                    <a class="text-link" href="login-cadastro.html">Conhecer o checklist <span aria-hidden="true">→</span></a>
+
+                <p class="sr-only">A universidade envia informações por diferentes canais. O UniCheck se conecta a esse fluxo como uma camada de organização, centraliza orientações e próximos passos e entrega ao aluno uma jornada mais clara.</p>
+
+                <div class="journey-flow__desktop" aria-hidden="true">
+                    <svg class="journey-flow__routes" viewBox="0 0 1200 460" preserveAspectRatio="none" focusable="false">
+                        <defs>
+                            <marker id="journey-flow-arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto" markerUnits="strokeWidth">
+                                <path d="M1 1 7 4 1 7" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                            </marker>
+                        </defs>
+                        <path class="journey-flow__route journey-flow__route--incoming" d="M188 232.4H220M220 175.8V302.6M220 175.8H261M220 175.8H400M220 302.6H261M220 302.6H400"/>
+                        <path class="journey-flow__route journey-flow__route--fragmented" d="M350 175.8H565Q590 175.8 590 180M490 175.8H570Q590 175.8 590 180M350 302.6H565Q590 302.6 590 280M490 302.6H570Q590 302.6 590 280"/>
+                        <path class="journey-flow__route journey-flow__route--merge" d="M590 180V280H830"/>
+                        <path class="journey-flow__route journey-flow__route--entry" d="M640 365V280"/>
+                        <path class="journey-flow__route journey-flow__route--organized" d="M830 155V305M830 155H855M830 230H855M830 305H855"/>
+                        <path class="journey-flow__route journey-flow__route--delivery" d="M1012 155H1055V230H1082M1012 230H1082M1012 305H1055V230" marker-end="url(#journey-flow-arrow)"/>
+                        <circle class="journey-flow__junction journey-flow__junction--source" cx="220" cy="232.4" r="5"/>
+                        <circle class="journey-flow__junction journey-flow__junction--merge" cx="590" cy="230" r="5"/>
+                        <circle class="journey-flow__junction journey-flow__junction--entry" cx="640" cy="280" r="5"/>
+                        <circle class="journey-flow__junction journey-flow__junction--delivery" cx="1055" cy="230" r="5"/>
+                        <g class="journey-flow__packet-tracks" aria-hidden="true">
+                            <path data-flow-track="origin" d="M188 232.4H220V175.8H261"/>
+                            <path data-flow-track="portal" d="M261 175.8H400H565Q590 175.8 590 180V230"/>
+                            <path data-flow-track="ava" d="M410 175.8H549H565Q590 175.8 590 180V230"/>
+                            <path data-flow-track="email" d="M261 302.6H400H565Q590 302.6 590 280V230"/>
+                            <path data-flow-track="announcements" d="M410 302.6H549H570Q590 302.6 590 280V230"/>
+                            <path data-flow-track="central" d="M590 230V280H640V331.2"/>
+                            <path data-flow-track="organized" d="M640 331.2V280H830V230H855"/>
+                            <path data-flow-track="student" d="M1028 230H1082"/>
+                        </g>
+                        <g class="journey-flow__packet" data-flow-packet="tail" aria-hidden="true">
+                            <circle class="journey-flow__packet-core" r="3.2"/>
+                        </g>
+                        <g class="journey-flow__packet" data-flow-packet="head" aria-hidden="true">
+                            <circle class="journey-flow__packet-halo" r="8"/>
+                            <circle class="journey-flow__packet-core" r="4.2"/>
+                        </g>
+                    </svg>
+
+                    <div class="journey-flow__node journey-flow__university">
+                        <span class="journey-flow__node-icon journey-flow__node-icon--university"><svg viewBox="0 0 24 24" fill="none"><path d="m3 9 9-5 9 5M5.5 10v8m4.25-8v8m4.5-8v8m4.25-8v8M3 20h18M2.5 9h19" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                        <span class="journey-flow__node-caption">Origem</span>
+                        <strong>Universidade</strong>
+                    </div>
+
+                    <div class="journey-flow__channels">
+                        <span class="journey-flow__group-label">Informações fragmentadas</span>
+                        <span class="journey-flow__channel">Portal acadêmico</span>
+                        <span class="journey-flow__channel">AVA</span>
+                        <span class="journey-flow__channel">E-mail</span>
+                        <span class="journey-flow__channel">Comunicados</span>
+                    </div>
+
+                    <div class="journey-flow__node journey-flow__unicheck">
+                        <span class="journey-flow__brand-mark">
+                            <img class="journey-flow__brand-image" src="assets/images/logomernor.png" data-theme-logo="light" alt="UniCheck" width="498" height="211">
+                            <img class="journey-flow__brand-image" src="assets/images/logo.foto.png" data-theme-logo="dark" alt="UniCheck" width="486" height="172">
+                        </span>
+                        <span class="journey-flow__node-caption">Camada de organização</span>
+                        <strong>UniCheck</strong>
+                        <span class="journey-flow__node-detail">Organiza · centraliza · contextualiza</span>
+                    </div>
+
+                    <div class="journey-flow__outcomes">
+                        <span class="journey-flow__group-label">Jornada organizada</span>
+                        <span class="journey-flow__outcome"><i></i>Checklist</span>
+                        <span class="journey-flow__outcome"><i></i>Orientação</span>
+                        <span class="journey-flow__outcome"><i></i>Próximos passos</span>
+                    </div>
+
+                    <div class="journey-flow__node journey-flow__student">
+                        <span class="journey-flow__student-avatar"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.1" stroke="currentColor" stroke-width="1.6"/><path d="M5.5 20c.5-3.4 2.8-5.3 6.5-5.3s6 1.9 6.5 5.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+                        <span class="journey-flow__node-caption">Destino</span>
+                        <strong>Aluno</strong>
+                    </div>
                 </div>
+
+                <div class="journey-flow__mobile" aria-hidden="true">
+                    <div class="journey-flow__mobile-step journey-flow__mobile-university">
+                        <span class="journey-flow__mobile-node"><svg viewBox="0 0 24 24" fill="none"><path d="m3 9 9-5 9 5M5.5 10v8m4.25-8v8m4.5-8v8m4.25-8v8M3 20h18M2.5 9h19" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                        <span class="journey-flow__mobile-copy"><small>Origem</small><strong>Universidade</strong></span>
+                    </div>
+                    <div class="journey-flow__mobile-step journey-flow__mobile-channels">
+                        <span class="journey-flow__mobile-node journey-flow__mobile-node--split"><i></i><i></i><i></i><i></i></span>
+                        <span class="journey-flow__mobile-copy"><small>Informações espalhadas</small><strong>Vários canais, pouco contexto</strong></span>
+                        <span class="journey-flow__mobile-pills"><i>Portal</i><i>AVA</i><i>E-mail</i><i>Comunicados</i></span>
+                    </div>
+                    <div class="journey-flow__mobile-step journey-flow__mobile-unicheck">
+                        <span class="journey-flow__mobile-node journey-flow__mobile-node--brand">
+                            <img class="journey-flow__brand-image" src="assets/images/logomernor.png" data-theme-logo="light" alt="" width="498" height="211">
+                            <img class="journey-flow__brand-image" src="assets/images/logo.foto.png" data-theme-logo="dark" alt="" width="486" height="172">
+                        </span>
+                        <span class="journey-flow__mobile-copy"><small>Camada de organização</small><strong>UniCheck</strong><span>Organiza, centraliza e contextualiza</span></span>
+                    </div>
+                    <div class="journey-flow__mobile-step journey-flow__mobile-outcomes">
+                        <span class="journey-flow__mobile-node journey-flow__mobile-node--ordered"><i></i></span>
+                        <span class="journey-flow__mobile-copy"><small>Informação em uma jornada</small><strong>Clareza sobre o que vem agora</strong></span>
+                        <span class="journey-flow__mobile-pills"><i>Checklist</i><i>Orientação</i><i>Próximos passos</i></span>
+                    </div>
+                    <div class="journey-flow__mobile-step journey-flow__mobile-student">
+                        <span class="journey-flow__mobile-node"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.1" stroke="currentColor" stroke-width="1.6"/><path d="M5.5 20c.5-3.4 2.8-5.3 6.5-5.3s6 1.9 6.5 5.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+                        <span class="journey-flow__mobile-copy"><small>Destino</small><strong>Aluno</strong></span>
+                    </div>
+                </div>
+
+                <a class="journey-flow__cta" href="login-cadastro.html">Encontre seus próximos passos <span aria-hidden="true">→</span></a>
             </div>
         </section>
 
@@ -187,5 +295,6 @@
         <div class="container footer-bottom"><p>© <span id="current-year"></span> UniCheck. Todos os direitos reservados.</p><a href="#inicio">Voltar ao topo ↑</a></div>
     </footer>
     <script src="js/script.js"></script>
+    <script src="js/landing-flow-motion.js" defer></script>
 </body>
 </html>
