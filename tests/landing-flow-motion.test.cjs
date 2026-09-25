@@ -126,7 +126,14 @@ test('fluxo usa a marca oficial e percorre rotas reais com movimento acessível'
     const css = read('Unicheck/landing/css/landing-flow.css');
     const motion = read('Unicheck/landing/js/landing-flow-motion.js');
 
-    assert.match(html, /class="journey-flow__brand-image"[^>]+src="\/assets\/brand\/favicon\.svg"/);
+    assert.equal((html.match(/class="journey-flow__brand-image" src="assets\/images\/logomernor\.png" data-theme-logo="light"/g) || []).length, 2);
+    assert.equal((html.match(/class="journey-flow__brand-image" src="assets\/images\/logo\.foto\.png" data-theme-logo="dark"/g) || []).length, 2);
+    assert.doesNotMatch(html, /journey-flow__brand-image[^>]+src="\/assets\/brand\/favicon\.svg"/);
+    assert.match(css, /\.journey-flow__brand-image\[data-theme-logo="dark"\]\s*\{\s*display:\s*none/s);
+    assert.match(css, /:root\[data-theme="dark"\][^{]*\.journey-flow__brand-image\[data-theme-logo="light"\][^{]*\{\s*display:\s*none/s);
+    assert.match(css, /:root\[data-theme="dark"\][^{]*\.journey-flow__brand-image\[data-theme-logo="dark"\][^{]*\{\s*display:\s*block/s);
+    assert.match(css, /\.journey-flow__mobile-node--brand\s*\{[^}]*overflow:\s*hidden/s);
+    assert.match(css, /\.journey-flow__mobile-node--brand \.journey-flow__brand-image\s*\{[^}]*width:\s*104px/s);
     assert.match(html, /data-flow-track="origin"/);
     assert.match(html, /data-flow-track="portal"/);
     assert.match(html, /data-flow-track="ava"/);

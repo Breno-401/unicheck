@@ -280,17 +280,29 @@
 
 .journey-flow__brand-mark {
     display: grid;
-    width: 32px;
-    height: 32px;
+    width: 112px;
+    height: 42px;
     place-items: center;
     margin-bottom: 4px;
 }
 
 .journey-flow__brand-image {
     display: block;
-    width: 30px;
-    height: 30px;
+    width: 112px;
+    height: 42px;
     object-fit: contain;
+}
+
+.journey-flow__brand-image[data-theme-logo="dark"] {
+    display: none;
+}
+
+:root[data-theme="dark"] .journey-flow__brand-image[data-theme-logo="light"] {
+    display: none;
+}
+
+:root[data-theme="dark"] .journey-flow__brand-image[data-theme-logo="dark"] {
+    display: block;
 }
 
 .journey-flow__unicheck strong {
@@ -523,11 +535,25 @@
         border-color: var(--flow-accent);
         border-radius: 14px;
         background: var(--flow-surface);
+        overflow: hidden;
     }
 
     .journey-flow__mobile-node--brand .journey-flow__brand-image {
-        width: 26px;
-        height: 26px;
+        position: absolute;
+        width: 104px;
+        height: auto;
+        max-width: none;
+    }
+
+    /* Crop each navbar lockup to its emblem and center its visible bounds in the node. */
+    .journey-flow__mobile-node--brand .journey-flow__brand-image[data-theme-logo="light"] {
+        top: -.2px;
+        left: 1.87px;
+    }
+
+    .journey-flow__mobile-node--brand .journey-flow__brand-image[data-theme-logo="dark"] {
+        top: 1.63px;
+        left: -1.91px;
     }
 
     .journey-flow__mobile-node--ordered {
