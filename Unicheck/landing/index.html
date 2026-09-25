@@ -176,6 +176,23 @@
                         <circle class="journey-flow__junction journey-flow__junction--merge" cx="590" cy="230" r="5"/>
                         <circle class="journey-flow__junction journey-flow__junction--entry" cx="640" cy="280" r="5"/>
                         <circle class="journey-flow__junction journey-flow__junction--delivery" cx="1055" cy="230" r="5"/>
+                        <g class="journey-flow__packet-tracks" aria-hidden="true">
+                            <path data-flow-track="origin" d="M188 232.4H220V175.8H261"/>
+                            <path data-flow-track="portal" d="M261 175.8H400H565Q590 175.8 590 180V230"/>
+                            <path data-flow-track="ava" d="M410 175.8H549H565Q590 175.8 590 180V230"/>
+                            <path data-flow-track="email" d="M261 302.6H400H565Q590 302.6 590 280V230"/>
+                            <path data-flow-track="announcements" d="M410 302.6H549H570Q590 302.6 590 280V230"/>
+                            <path data-flow-track="central" d="M590 230V280H640V331.2"/>
+                            <path data-flow-track="organized" d="M640 331.2V280H830V230H855"/>
+                            <path data-flow-track="student" d="M1028 230H1082"/>
+                        </g>
+                        <g class="journey-flow__packet" data-flow-packet="tail" aria-hidden="true">
+                            <circle class="journey-flow__packet-core" r="3.2"/>
+                        </g>
+                        <g class="journey-flow__packet" data-flow-packet="head" aria-hidden="true">
+                            <circle class="journey-flow__packet-halo" r="8"/>
+                            <circle class="journey-flow__packet-core" r="4.2"/>
+                        </g>
                     </svg>
 
                     <div class="journey-flow__node journey-flow__university">
@@ -193,7 +210,7 @@
                     </div>
 
                     <div class="journey-flow__node journey-flow__unicheck">
-                        <span class="journey-flow__brand-mark">U</span>
+                        <span class="journey-flow__brand-mark"><img class="journey-flow__brand-image" src="/assets/brand/favicon.svg" alt="" width="30" height="30"></span>
                         <span class="journey-flow__node-caption">Camada de organização</span>
                         <strong>UniCheck</strong>
                         <span class="journey-flow__node-detail">Organiza · centraliza · contextualiza</span>
@@ -224,7 +241,7 @@
                         <span class="journey-flow__mobile-pills"><i>Portal</i><i>AVA</i><i>E-mail</i><i>Comunicados</i></span>
                     </div>
                     <div class="journey-flow__mobile-step journey-flow__mobile-unicheck">
-                        <span class="journey-flow__mobile-node journey-flow__mobile-node--brand">U</span>
+                        <span class="journey-flow__mobile-node journey-flow__mobile-node--brand"><img class="journey-flow__brand-image" src="/assets/brand/favicon.svg" alt="" width="26" height="26"></span>
                         <span class="journey-flow__mobile-copy"><small>Camada de organização</small><strong>UniCheck</strong><span>Organiza, centraliza e contextualiza</span></span>
                     </div>
                     <div class="journey-flow__mobile-step journey-flow__mobile-outcomes">
@@ -272,5 +289,6 @@
         <div class="container footer-bottom"><p>© <span id="current-year"></span> UniCheck. Todos os direitos reservados.</p><a href="#inicio">Voltar ao topo ↑</a></div>
     </footer>
     <script src="js/script.js"></script>
+    <script src="js/landing-flow-motion.js" defer></script>
 </body>
 </html>
