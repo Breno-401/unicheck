@@ -37,6 +37,22 @@
   status = 200
 
 [[redirects]]
+from = "/css/landing-flow.css"
+to = "/landing/css/landing-flow.css"
+status = 200
+
+[[redirects]]
+from = "/js/landing-theme.js"
+to = "/landing/js/landing-theme.js"
+status = 200
+
+[[redirects]]
+from = "/js/landing-flow-motion.js"
+to = "/landing/js/landing-flow-motion.js"
+status = 200
+
+
+[[redirects]]
   from = "/js/script.js"
   to = "/landing/js/script.js"
   status = 200
