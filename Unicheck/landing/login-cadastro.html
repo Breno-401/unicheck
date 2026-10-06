@@ -99,13 +99,20 @@
                             <div class="strength-wrap"><div class="strength-track"><div id="strength" class="strength" aria-hidden="true"></div></div><p id="strengthText" class="strength-text">Força da senha: fraca</p></div>
                             <p class="field-error" id="senhaCadastroError" aria-live="polite"></p>
                         </div>
+                        <div class="privacy-acknowledgment field-group">
+                            <label class="privacy-acknowledgment__label" for="privacyPolicyAcknowledgment">
+                                <input class="privacy-acknowledgment__control" id="privacyPolicyAcknowledgment" type="checkbox" required aria-describedby="privacyPolicyAcknowledgmentError" data-policy-version="2026-10-05">
+                                <span>Li e estou ciente da <a href="politica-de-privacidade.html" target="_blank" rel="noopener noreferrer">Política de Privacidade</a> e de como meus dados pessoais são tratados.</span>
+                            </label>
+                            <p class="field-error" id="privacyPolicyAcknowledgmentError" aria-live="polite"></p>
+                        </div>
                         <button id="registerSubmit" class="submit-button" type="submit">Criar minha conta <span aria-hidden="true">→</span></button>
                     </form>
-                    <p class="terms-note">Ao criar sua conta, você concorda em usar o UniCheck de forma responsável.</p>
+                    <p class="terms-note">A criação da conta depende da confirmação desta ciência.</p>
                     <p class="mobile-switch">Já possui uma conta? <button type="button" data-switch-panel="loginPanel">Entrar</button></p>
                 </section>
             </div>
-            <p class="auth-footer">© <span id="currentYear"></span> UniCheck. Sua jornada, mais clara.</p>
+            <p class="auth-footer">© <span id="currentYear"></span> UniCheck. Sua jornada, mais clara.<br><a href="politica-de-privacidade.html">Privacidade</a> · <a href="politica-de-cookies.html">Cookies</a></p>
         </section>
     </main>
 

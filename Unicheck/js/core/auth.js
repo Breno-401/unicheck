@@ -218,7 +218,7 @@
         return null;
     }
 
-    async function register({ fullName, email, password, birthDate }) {
+    async function register({ fullName, email, password, birthDate, privacyPolicyVersion, privacyPolicyAcceptedAt }) {
         const client = getClient();
         const validation = getValidation();
         const nameResult = validation.validateFullName(fullName);
@@ -230,13 +230,21 @@
             if (!result.valid) throw createPublicError(result.error);
         }
 
+        const policyVersion = typeof privacyPolicyVersion === "string" ? privacyPolicyVersion.trim() : "";
+        const acceptedAt = typeof privacyPolicyAcceptedAt === "string" ? privacyPolicyAcceptedAt.trim() : "";
+        if (!policyVersion || !acceptedAt || Number.isNaN(Date.parse(acceptedAt))) {
+            throw createPublicError("Confirme a leitura da Política de Privacidade para criar sua conta.");
+        }
+
         const { data, error } = await client.auth.signUp({
             email: emailResult.value,
             password: passwordResult.value,
             options: {
                 data: {
                     full_name: nameResult.value,
-                    birth_date: birthDateResult.value
+                    birth_date: birthDateResult.value,
+                    privacy_policy_version: policyVersion,
+                    privacy_policy_accepted_at: acceptedAt
                 }
             }
         });

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f7faf9">
+    <title>Política de Cookies | UniCheck</title>
+    <meta name="description" content="Entenda como o UniCheck usa cookies e armazenamento do navegador para manter a sessão, as preferências e o progresso.">
+    <link rel="icon" type="image/svg+xml" href="/assets/brand/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="js/landing-theme.js"></script>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/privacy.css">
+</head>
+<body>
+    <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+    <header class="site-header policy-header">
+        <div class="policy-header__inner">
+            <a href="index.html" class="brand" aria-label="UniCheck — página inicial">
+                <img src="assets/images/logomernor.png" data-theme-logo="light" alt="UniCheck" width="498" height="211">
+                <img src="assets/images/logo.foto.png" data-theme-logo="dark" alt="UniCheck" width="486" height="172">
+            </a>
+            <nav class="policy-nav" aria-label="Políticas do UniCheck">
+                <a href="politica-de-privacidade.html">Privacidade</a>
+                <a href="politica-de-cookies.html" aria-current="page">Cookies</a>
+                <a href="index.html">Início</a>
+            </nav>
+        </div>
+    </header>
+
+    <main id="conteudo" class="container policy-main">
+        <header class="policy-hero">
+            <h1>Política de Cookies</h1>
+            <p class="policy-meta">Versão 2026-10-05 · Atualizada em 5 de outubro de 2026</p>
+            <p>Esta política descreve cookies e tecnologias semelhantes usados pelo UniCheck. Ela complementa a <a href="politica-de-privacidade.html">Política de Privacidade</a> e considera a orientação da ANPD sobre cookies e proteção de dados pessoais.</p>
+        </header>
+
+        <div class="policy-layout">
+            <nav class="policy-toc" aria-label="Nesta política">
+                <h2>Nesta política</h2>
+                <ul>
+                    <li><a href="#diferenca">Cookies e armazenamento local</a></li>
+                    <li><a href="#uso">O que a plataforma usa</a></li>
+                    <li><a href="#terceiros">Serviços externos</a></li>
+                    <li><a href="#escolhas">Suas escolhas</a></li>
+                    <li><a href="#mudancas">Mudanças no uso de cookies</a></li>
+                </ul>
+            </nav>
+
+            <article class="policy-content">
+                <div class="policy-summary">
+                    <p><strong>Em resumo:</strong> o código atual do UniCheck não configura cookies próprios de publicidade ou análise. Ele usa armazenamento local e de sessão do navegador para manter a sessão, preferências e cópias de dados da plataforma. Recursos externos podem receber dados técnicos quando carregados.</p>
+                </div>
+
+                <section id="diferenca">
+                    <h2>Cookies e armazenamento local são diferentes</h2>
+                    <p>Cookies são pequenos dados que um site grava e envia novamente em solicitações ao servidor. O <code>localStorage</code> e o <code>sessionStorage</code> também guardam informações no navegador, mas são mecanismos diferentes de cookies. O UniCheck usa essas áreas do navegador para algumas funções descritas abaixo.</p>
+                    <p>A interface do UniCheck não chama a API de cookies do navegador nem integra ferramentas próprias de publicidade ou analytics. Recursos de terceiros podem usar identificadores próprios em seus domínios, conforme as configurações e políticas desses provedores.</p>
+                </section>
+
+                <section id="uso">
+                    <h2>O que a plataforma usa</h2>
+                    <ul>
+                        <li><strong>Sessão e autenticação:</strong> o Supabase Auth mantém a sessão persistente no armazenamento do navegador para permitir que você continue conectado e use a conta.</li>
+                        <li><strong>Preferências:</strong> a preferência de tema claro ou escuro e a disposição da navegação podem ficar salvas no dispositivo.</li>
+                        <li><strong>Cache e sincronização:</strong> perfil, progresso de checklists, favoritos e partes da atividade e das notificações podem ser mantidos localmente para carregar a interface e sincronizar alterações com a conta.</li>
+                        <li><strong>Confirmação do aviso:</strong> ao fechar o aviso de privacidade exibido na página inicial, o navegador guarda essa escolha para não mostrá-lo novamente nesse dispositivo. Esse registro é uma preferência local e não representa consentimento para cookies opcionais.</li>
+                        <li><strong>Dados temporários da aba:</strong> algumas marcações usadas durante uma navegação podem permanecer em <code>sessionStorage</code> até a aba ou janela ser fechada.</li>
+                    </ul>
+                    <p>Esses recursos atendem funções solicitadas ou necessárias à operação do UniCheck. O armazenamento local pode persistir até você sair da conta, limpar os dados do site ou remover a preferência no navegador, conforme o item.</p>
+                </section>
+
+                <section id="terceiros">
+                    <h2>Serviços externos</h2>
+                    <p>O site carrega fontes do Google Fonts e, na tela de autenticação, a biblioteca do Supabase a partir do jsDelivr. A autenticação e os dados da conta também são processados pelo Supabase, e os arquivos do site são hospedados pela Netlify. Ao solicitar esses serviços, seu navegador pode enviar dados técnicos como endereço IP, navegador e horário da solicitação para que o conteúdo seja entregue e protegido.</p>
+                    <p>Os serviços externos podem aplicar suas próprias tecnologias e regras de retenção. O UniCheck não controla identificadores definidos diretamente por esses provedores. Consulte também a <a href="politica-de-privacidade.html">Política de Privacidade</a> para entender o compartilhamento relacionado aos dados da conta.</p>
+                </section>
+
+                <section id="escolhas">
+                    <h2>Suas escolhas</h2>
+                    <p>O aviso da página inicial apresenta informações e links para as políticas. Fechá-lo apenas registra uma preferência para ocultar o aviso naquele navegador; ele não bloqueia a navegação e não autoriza o uso de cookies não necessários.</p>
+                    <p>Você pode sair da conta para encerrar a sessão e pode limpar cookies e dados de sites nas configurações do navegador. A limpeza pode desconectar sua conta, redefinir preferências e remover cópias locais ainda não sincronizadas.</p>
+                    <p>No momento, não identificamos categorias de cookies não necessários configuradas pelo código do UniCheck. Se forem adicionados cookies de análise, publicidade ou outra finalidade opcional, eles deverão permanecer desativados até que você faça uma escolha específica. Você poderá rever essa escolha a qualquer momento pelo aviso ou pelas configurações de privacidade do site.</p>
+                </section>
+
+                <section id="mudancas">
+                    <h2>Mudanças no uso de cookies</h2>
+                    <p>Podemos atualizar esta política se a plataforma passar a usar outras tecnologias de armazenamento. A versão e a data de atualização aparecem no início da página. As informações e opções do aviso serão atualizadas junto com qualquer mudança que exija uma escolha do titular.</p>
+                    <p>Para dúvidas ou pedidos relacionados a dados pessoais, escreva para <a href="mailto:unicheck@outlook.com?subject=Cookies%20e%20privacidade">unicheck@outlook.com</a>.</p>
+                    <p class="policy-reference">Referência: <a href="https://www.gov.br/anpd/pt-br/centrais-de-conteudo/materiais-educativos-e-publicacoes/guia-orientativo-cookies-e-protecao-de-dados-pessoais.pdf" target="_blank" rel="noopener noreferrer">Guia Orientativo da ANPD — Cookies e Proteção de Dados Pessoais</a>.</p>
+                </section>
+            </article>
+        </div>
+    </main>
+
+    <footer class="site-footer policy-page-footer">
+        <div class="container">
+            <p>© <span id="current-year"></span> UniCheck</p>
+            <div><a href="politica-de-privacidade.html">Política de Privacidade</a> · <a href="index.html">Página inicial</a> · <a href="mailto:unicheck@outlook.com">Contato de privacidade</a></div>
+        </div>
+    </footer>
+    <script src="js/script.js"></script>
+</body>
+</html>

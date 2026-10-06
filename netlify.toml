@@ -82,6 +82,26 @@ status = 200
   to = "/landing/cursos.html"
   status = 301
 
+[[redirects]]
+  from = "/politica-de-privacidade.html"
+  to = "/landing/politica-de-privacidade.html"
+  status = 301
+
+[[redirects]]
+  from = "/politica-de-cookies.html"
+  to = "/landing/politica-de-cookies.html"
+  status = 301
+
+[[redirects]]
+  from = "/css/privacy.css"
+  to = "/landing/css/privacy.css"
+  status = 200
+
+[[redirects]]
+  from = "/js/privacy-notice.js"
+  to = "/landing/js/privacy-notice.js"
+  status = 200
+
 [[headers]]
   for = "/*"
   [headers.values]

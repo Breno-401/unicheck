@@ -106,14 +106,16 @@ document.addEventListener("DOMContentLoaded", () => {
         const emailInput = document.getElementById("emailCadastro");
         const nascimentoInput = document.getElementById("nascimentoCadastro");
         const senhaInput = document.getElementById("senhaCadastro");
+        const privacyAcknowledgmentInput = document.getElementById("privacyPolicyAcknowledgment");
 
         if (!(nomeInput instanceof HTMLInputElement)) return false;
         if (!(emailInput instanceof HTMLInputElement)) return false;
         if (!(nascimentoInput instanceof HTMLInputElement)) return false;
         if (!(senhaInput instanceof HTMLInputElement)) return false;
+        if (!(privacyAcknowledgmentInput instanceof HTMLInputElement)) return false;
 
         let firstInvalid = null;
-        [nomeInput, emailInput, nascimentoInput, senhaInput].forEach(clearFieldError);
+        [nomeInput, emailInput, nascimentoInput, senhaInput, privacyAcknowledgmentInput].forEach(clearFieldError);
 
         const results = [
             [nomeInput, validation.validateFullName(nomeInput.value)],
@@ -130,6 +132,11 @@ document.addEventListener("DOMContentLoaded", () => {
             setFieldError(input, result.error);
             firstInvalid ||= input;
         });
+
+        if (!privacyAcknowledgmentInput.checked) {
+            setFieldError(privacyAcknowledgmentInput, "Marque a caixa para confirmar a leitura da Política de Privacidade.");
+            firstInvalid ||= privacyAcknowledgmentInput;
+        }
 
         firstInvalid?.focus();
         return !firstInvalid;
@@ -265,6 +272,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (registerForm) {
+        const privacyAcknowledgmentInput = document.getElementById("privacyPolicyAcknowledgment");
+        privacyAcknowledgmentInput?.addEventListener("change", () => {
+            if (privacyAcknowledgmentInput.checked) clearFieldError(privacyAcknowledgmentInput);
+        });
+
         registerForm.addEventListener("submit", async event => {
             event.preventDefault();
             if (registerPending) return;
@@ -281,12 +293,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 const emailInput = document.getElementById("emailCadastro");
                 const nascimentoInput = document.getElementById("nascimentoCadastro");
                 const senhaInput = document.getElementById("senhaCadastro");
+                const privacyAcknowledgmentInput = document.getElementById("privacyPolicyAcknowledgment");
 
                 const result = await auth.register({
                     fullName: nomeInput.value,
                     email: emailInput.value,
                     birthDate: nascimentoInput.value,
-                    password: senhaInput.value
+                    password: senhaInput.value,
+                    privacyPolicyVersion: privacyAcknowledgmentInput.dataset.policyVersion,
+                    privacyPolicyAcceptedAt: new Date().toISOString()
                 });
 
                 if (result.session) {
