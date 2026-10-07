@@ -221,7 +221,8 @@ p { color: var(--muted); }
     html { scroll-padding-top: 76px; }
     .menu-toggle { display: block; }
     .navigation { position: absolute; top: calc(100% + 1px); right: 16px; left: 16px; display: grid; max-height: 0; overflow: hidden; padding: 0 18px; border: 1px solid transparent; border-radius: 0 0 18px 18px; background: var(--surface); opacity: 0; visibility: hidden; box-shadow: var(--shadow-small); transition: max-height .25s ease, padding .25s ease, opacity .2s ease, visibility .2s ease; }
-    .navigation.is-open { max-height: 550px; padding-block: 16px 20px; border-color: var(--line); opacity: 1; visibility: visible; }
+    .navigation.is-open { max-height: calc(100dvh - 76px); overflow-y: auto; padding-block: 16px 20px; border-color: var(--line); opacity: 1; visibility: visible; }
+    .navigation > .theme-toggle { width: 44px; height: 44px; }
     .nav-links { display: grid; gap: 0; margin: 0 0 12px; }
     .nav-links a { min-height: 48px; border-bottom: 1px solid var(--line); }
     .nav-links a[aria-current="page"]::after { top: 50%; right: 2px; bottom: auto; left: auto; width: 7px; height: 7px; border-radius: 50%; transform: translateY(-50%); }

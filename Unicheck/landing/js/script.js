@@ -13,6 +13,16 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     if (toggle && navigation) {
+        const themeToggle = document.querySelector('[data-theme-toggle]');
+        const mobileMenu = window.matchMedia('(max-width: 899px)');
+        const positionThemeToggle = () => {
+            if (!themeToggle) return;
+            if (mobileMenu.matches) navigation.append(themeToggle);
+            else toggle.before(themeToggle);
+        };
+        positionThemeToggle();
+        mobileMenu.addEventListener('change', positionThemeToggle);
+
         toggle.addEventListener('click', () => {
             const open = toggle.getAttribute('aria-expanded') !== 'true';
             toggle.setAttribute('aria-expanded', String(open));
