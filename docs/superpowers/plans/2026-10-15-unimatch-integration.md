@@ -51,4 +51,4 @@ Arquivos previstos: `Unicheck/unimatch/index.html`, `Unicheck/unimatch/css/unima
 - [x] Revisar desktop claro/escuro e os tamanhos anotados acima; `prefers-reduced-motion` tem regra CSS mas não foi emulado no navegador.
 - [x] Registrar a cobertura nominal e a ausência de paridade com o portal original em `docs/development/unimatch-scope.md`.
 - [x] Revisar working tree/histórico, fazer commits organizados e confirmar branch isolada sem PR/merge/deploy.
-- [ ] Enviar `feature/unimatch-integration` ao remoto se a rede permitir.
+- [x] Enviar `feature/unimatch-integration` ao remoto.
