@@ -118,7 +118,9 @@ test("serviço de Auth normaliza cadastro mesmo quando chamado fora do formulár
         fullName: "  Breno    Clemente  ",
         email: "  BRENO@EXAMPLE.COM ",
         birthDate: "2000-01-01",
-        password: "Senha123"
+        password: "Senha123",
+        privacyPolicyVersion: "2026-10-15",
+        privacyPolicyAcceptedAt: "2026-10-15T00:00:00.000Z"
     });
     assert.equal(calls.length, 1);
     assert.equal(calls[0].email, "breno@example.com");
