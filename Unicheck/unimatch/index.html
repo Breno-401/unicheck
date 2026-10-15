@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f7faf9">
+    <title>UniMatch | Explore equivalências curriculares</title>
+    <meta name="description" content="Explore possíveis correspondências curriculares entre disciplinas que você já cursou e matrizes públicas do UniSales.">
+    <link rel="canonical" href="https://unicheckhub.com.br/unimatch">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="pt_BR">
+    <meta property="og:title" content="UniMatch | Explore equivalências curriculares">
+    <meta property="og:description" content="Descubra possíveis conexões entre sua trajetória acadêmica e matrizes curriculares públicas do UniSales.">
+    <meta property="og:url" content="https://unicheckhub.com.br/unimatch">
+    <link rel="icon" type="image/svg+xml" href="/assets/brand/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="/landing/js/landing-theme.js"></script>
+    <link rel="stylesheet" href="/landing/css/main.css">
+    <link rel="stylesheet" href="/unimatch/css/unimatch.css">
+</head>
+<body class="unimatch-page">
+    <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+    <header class="site-header" data-header>
+        <div class="container header-inner">
+            <a href="/#inicio" class="brand" aria-label="UniCheck — página inicial">
+                <img src="/landing/assets/images/logomernor.png" data-theme-logo="light" alt="" width="498" height="211">
+                <img src="/landing/assets/images/logo.foto.png" data-theme-logo="dark" alt="" width="486" height="172">
+            </a>
+
+            <div class="navigation" id="site-navigation">
+                <nav aria-label="Navegação principal">
+                    <ul class="nav-links">
+                        <li><a href="/#inicio">Início</a></li>
+                        <li><a href="/cursos.html">Cursos</a></li>
+                        <li><a href="/#recursos">Recursos</a></li>
+                        <li><a href="/unimatch" aria-current="page">UniMatch</a></li>
+                        <li><a href="/#como-funciona">Como funciona</a></li>
+                        <li><a href="/#sobre">Sobre</a></li>
+                        <li><a href="/#faq">FAQ</a></li>
+                    </ul>
+                </nav>
+                <a class="button button-small button-outline" href="/login-cadastro.html">Entrar</a>
+                <a class="button button-small" href="/login-cadastro.html">Criar conta</a>
+                <div class="navigation-theme"><span class="navigation-theme__label">Tema</span></div>
+            </div>
+
+            <button class="theme-toggle" type="button" data-theme-toggle aria-label="Ativar tema escuro" aria-pressed="false" title="Ativar tema escuro">
+                <svg class="theme-toggle__moon" aria-hidden="true" viewBox="0 0 24 24" fill="none">
+                    <path d="M20.2 15.2A8.4 8.4 0 0 1 8.8 3.8 8.5 8.5 0 1 0 20.2 15.2Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <svg class="theme-toggle__sun" aria-hidden="true" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="3.8" stroke="currentColor" stroke-width="1.7"/>
+                    <path d="M12 2.5v2.1m0 14.8v2.1M4.7 4.7l1.5 1.5m11.6 11.6 1.5 1.5M2.5 12h2.1m14.8 0h2.1M4.7 19.3l1.5-1.5M17.8 6.2l1.5-1.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                </svg>
+                <span class="theme-toggle__label theme-toggle__label--light" aria-hidden="true">Claro</span>
+                <span class="theme-toggle__label theme-toggle__label--dark" aria-hidden="true">Escuro</span>
+            </button>
+            <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-navigation" aria-label="Abrir menu de navegação">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </header>
+
+    <main id="conteudo">
+        <section class="unimatch-hero" aria-labelledby="unimatch-title">
+            <div class="container unimatch-hero__inner">
+                <div class="unimatch-hero__copy">
+                    <p class="unimatch-hero__trail"><a href="/">UniCheck</a><span aria-hidden="true">/</span><span>UniMatch</span></p>
+                    <h1 id="unimatch-title">Descubra o que pode acompanhar você.</h1>
+                    <p class="unimatch-hero__description">Explore possíveis conexões entre disciplinas que você já cursou e matrizes públicas do UniSales.</p>
+                    <a class="button" href="#unimatch-consulta">Começar uma consulta <span aria-hidden="true">↓</span></a>
+                </div>
+                <div class="unimatch-hero__note" aria-label="Como o UniMatch trabalha">
+                    <span class="unimatch-hero__note-mark" aria-hidden="true"></span>
+                    <p>Uma leitura inicial da sua trajetória, com os sinais usados na comparação sempre explicados.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="unimatch-workspace section" id="unimatch-consulta" aria-labelledby="unimatch-form-title">
+            <div class="container unimatch-workspace__grid">
+                <div class="unimatch-workspace__intro">
+                    <h2 id="unimatch-form-title">Compare sua trajetória com uma matriz.</h2>
+                    <p>Compare as disciplinas do seu histórico com os nomes oficiais publicados pelo UniSales. Uma ementa de origem amplia os termos da busca; as matrizes consultadas não publicam ementas nem carga horária individual.</p>
+                    <div class="unimatch-source-note" id="unimatch-catalog-status" role="status" aria-live="polite">Carregando matrizes públicas…</div>
+                </div>
+
+                <div class="unimatch-form-panel">
+                    <form id="unimatch-form" novalidate>
+                        <div class="unimatch-field">
+                            <label for="unimatch-curriculum">Curso de destino</label>
+                            <select id="unimatch-curriculum" name="curriculumId" required disabled aria-describedby="unimatch-curriculum-help">
+                                <option value="">Carregando matrizes públicas…</option>
+                            </select>
+                            <p class="unimatch-field__help" id="unimatch-curriculum-help">A lista identifica o ano e a modalidade quando a matriz oficial os informa.</p>
+                        </div>
+
+                        <div class="unimatch-form-heading">
+                            <div>
+                                <h3>Disciplinas já cursadas</h3>
+                                <p>Adicione até 10 disciplinas por consulta.</p>
+                            </div>
+                            <button class="button button-outline button-small" type="button" id="unimatch-add-discipline">Adicionar disciplina <span aria-hidden="true">+</span></button>
+                        </div>
+
+                        <p class="sr-only" id="unimatch-discipline-status" aria-live="polite"></p>
+                        <div class="unimatch-discipline-list" id="unimatch-disciplines">
+                            <fieldset class="unimatch-discipline" data-discipline-row>
+                                <legend>Disciplina 1</legend>
+                                <div class="unimatch-discipline__topline">
+                                    <span class="unimatch-discipline__number" aria-hidden="true">01</span>
+                                    <button class="unimatch-remove" type="button" data-remove-discipline hidden>Remover</button>
+                                </div>
+                                <div class="unimatch-field">
+                                    <label for="discipline-name-1">Nome da disciplina</label>
+                            <input id="discipline-name-1" name="discipline-name" type="text" minlength="2" maxlength="160" autocomplete="off" required>
+                                </div>
+                                <div class="unimatch-field">
+                                    <label for="discipline-description-1">Ementa ou conteúdos estudados <span>Opcional</span></label>
+                                    <textarea id="discipline-description-1" name="discipline-description" rows="3" maxlength="2000" placeholder="Ex.: modelagem relacional, consultas SQL, normalização de dados."></textarea>
+                                </div>
+                                <div class="unimatch-field unimatch-field--hours">
+                                    <label for="discipline-workload-1">Carga horária <span>Opcional</span></label>
+                                    <div class="unimatch-hours-input"><input id="discipline-workload-1" name="discipline-workload" type="number" min="0.5" max="2000" step="0.5" inputmode="decimal" aria-describedby="discipline-workload-help-1"><span>horas</span></div>
+                                    <p class="unimatch-field__help" id="discipline-workload-help-1">A matriz de destino não informa a carga individual; o critério oficial de carga horária não poderá ser verificado nesta consulta.</p>
+                                </div>
+                            </fieldset>
+                        </div>
+
+                        <p class="unimatch-form-error" id="unimatch-form-error" role="alert" hidden></p>
+                        <div class="unimatch-form-actions">
+                            <button class="button" id="unimatch-submit" type="submit" disabled>Encontrar possíveis conexões <span aria-hidden="true">→</span></button>
+                            <p>Consulta pública. O histórico informado não é salvo na sua conta.</p>
+                        </div>
+                    </form>
+
+                    <section class="unimatch-results" id="unimatch-results" aria-label="Resultados da análise" aria-live="polite" aria-busy="false" tabindex="-1">
+                        <div class="unimatch-results__empty" id="unimatch-results-empty">
+                            <span class="unimatch-results__symbol" aria-hidden="true">
+                                <svg viewBox="0 0 40 40" fill="none" focusable="false">
+                                    <path d="M8 12h8m8 16h8M12 8v8m16 8v8M16 12l8 8m0-8-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                                    <circle cx="8" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/>
+                                    <circle cx="32" cy="28" r="3" stroke="currentColor" stroke-width="1.6"/>
+                                </svg>
+                            </span>
+                            <h3 id="unimatch-results-title">Sua análise começa aqui.</h3>
+                            <p>As sugestões aparecerão com os termos relacionados e a fonte curricular consultada.</p>
+                        </div>
+                        <div id="unimatch-results-list"></div>
+                    </section>
+                </div>
+            </div>
+
+            <div class="container">
+                <p class="unimatch-disclaimer">As sugestões são indicativas e não substituem a análise e aprovação oficial da instituição de ensino. As matrizes públicas consultadas informam nomes de componentes, mas não suas ementas ou cargas horárias individuais.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-grid">
+            <div class="footer-brand">
+                <a href="/#inicio" class="brand"><img src="/landing/assets/images/logo.foto.png" alt="UniCheck" width="486" height="172"></a>
+                <p>Clareza e organização para uma jornada acadêmica mais leve.</p>
+            </div>
+            <div><h2>Plataforma</h2><ul><li><a href="/#recursos">Recursos</a></li><li><a href="/unimatch">UniMatch</a></li><li><a href="/#como-funciona">Como funciona</a></li></ul></div>
+            <div><h2>Suporte</h2><ul><li><a href="/#faq">Perguntas frequentes</a></li><li><a href="mailto:unicheck@outlook.com">Fale conosco</a></li><li><a href="/politica-de-privacidade.html">Política de Privacidade</a></li></ul></div>
+            <div><h2>Acesso</h2><ul><li><a href="/login-cadastro.html">Entrar</a></li><li><a href="/login-cadastro.html">Criar conta</a></li></ul></div>
+        </div>
+        <div class="container footer-bottom"><p>© <span id="current-year"></span> UniCheck. Todos os direitos reservados.</p><a href="#conteudo">Voltar ao topo ↑</a></div>
+    </footer>
+
+    <noscript><p class="unimatch-noscript">Ative o JavaScript para consultar as matrizes e ver as sugestões do UniMatch.</p></noscript>
+    <script src="/landing/js/script.js"></script>
+    <script src="/unimatch/js/unimatch.js" defer></script>
+</body>
+</html>
