@@ -21,6 +21,7 @@
     <script src="js/landing-theme.js"></script>
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/landing-flow.css">
+    <link rel="stylesheet" href="css/unimatch-intro.css">
     <link rel="stylesheet" href="css/privacy.css">
 </head>
 <body>
@@ -39,6 +40,7 @@
                         <li><a href="#inicio">Início</a></li>
                         <li><a href="cursos.html">Cursos</a></li>
                         <li><a href="#recursos">Recursos</a></li>
+                        <li><a href="/unimatch">UniMatch</a></li>
                         <li><a href="#como-funciona">Como funciona</a></li>
                         <li><a href="#sobre">Sobre</a></li>
                         <li><a href="#faq">FAQ</a></li>
@@ -137,6 +139,60 @@
                     <article class="feature-card"><div class="feature-icon">⌘</div><h3>Plataformas</h3><p>Acesse ferramentas de estudo, produtividade e carreira selecionadas para sua rotina.</p><a href="login-cadastro.html">Explorar recurso <span aria-hidden="true">→</span></a></article>
                     <article class="feature-card"><div class="feature-icon">?</div><h3>Ajuda e Suporte</h3><p>Encontre respostas rápidas e orientações para aproveitar os recursos do UniCheck com clareza.</p><a href="#faq">Ver dúvidas frequentes <span aria-hidden="true">→</span></a></article>
                     <article class="feature-card"><div class="feature-icon">◔</div><h3>Acompanhamento de progresso</h3><p>Visualize fases concluídas, próximos passos e a evolução da sua jornada em tempo real.</p><a href="login-cadastro.html">Explorar recurso <span aria-hidden="true">→</span></a></article>
+                </div>
+            </div>
+        </section>
+
+        <section class="section unimatch-intro" id="unimatch-intro" aria-labelledby="unimatch-intro-title">
+            <div class="container unimatch-intro__grid">
+                <div class="unimatch-intro__copy">
+                    <p class="eyebrow">Conheça o UniMatch</p>
+                    <h2 id="unimatch-intro-title">Sua trajetória não precisa começar do zero.</h2>
+                    <p>Explore equivalências curriculares e descubra possibilidades para sua jornada acadêmica.</p>
+                    <a class="button" href="/unimatch">Explorar UniMatch <span aria-hidden="true">→</span></a>
+                </div>
+
+                <div class="unimatch-map" role="img" aria-label="Representação conceitual de disciplinas da sua trajetória conectadas a componentes de uma matriz UniSales">
+                    <div class="unimatch-map__course">
+                        <span class="unimatch-map__label">Curso de origem</span>
+                        <div class="unimatch-map__node">
+                            <span class="unimatch-map__node-mark" aria-hidden="true"></span>
+                            <span>Disciplinas da sua trajetória</span>
+                        </div>
+                        <div class="unimatch-map__node">
+                            <span class="unimatch-map__node-mark" aria-hidden="true"></span>
+                            <span>Conteúdos já estudados</span>
+                        </div>
+                    </div>
+
+                    <div class="unimatch-map__bridge" aria-hidden="true">
+                        <svg viewBox="0 0 180 120" fill="none" focusable="false">
+                            <path class="unimatch-map__line unimatch-map__line--one" d="M2 20C54 20 56 60 89 60S127 20 178 20"/>
+                            <path class="unimatch-map__line unimatch-map__line--two" d="M2 60H178"/>
+                            <path class="unimatch-map__line unimatch-map__line--three" d="M2 100C54 100 56 60 89 60S127 100 178 100"/>
+                            <circle cx="90" cy="60" r="7" class="unimatch-map__hub"/>
+                            <circle cx="2" cy="20" r="3" class="unimatch-map__endpoint"/>
+                            <circle cx="178" cy="20" r="3" class="unimatch-map__endpoint"/>
+                            <circle cx="2" cy="60" r="3" class="unimatch-map__endpoint"/>
+                            <circle cx="178" cy="60" r="3" class="unimatch-map__endpoint"/>
+                            <circle cx="2" cy="100" r="3" class="unimatch-map__endpoint"/>
+                            <circle cx="178" cy="100" r="3" class="unimatch-map__endpoint"/>
+                        </svg>
+                        <strong>UniMatch</strong>
+                    </div>
+
+                    <div class="unimatch-map__course unimatch-map__course--destination">
+                        <span class="unimatch-map__label">Curso de destino</span>
+                        <div class="unimatch-map__node">
+                            <span class="unimatch-map__node-mark" aria-hidden="true"></span>
+                            <span>Matriz curricular UniSales</span>
+                        </div>
+                        <div class="unimatch-map__node">
+                            <span class="unimatch-map__node-mark" aria-hidden="true"></span>
+                            <span>Componentes curriculares</span>
+                        </div>
+                    </div>
+                    <p class="unimatch-map__caption">Conexões conceituais, sem resultados pré-definidos.</p>
                 </div>
             </div>
         </section>
